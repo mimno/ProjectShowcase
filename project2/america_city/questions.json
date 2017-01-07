@@ -1,0 +1,32 @@
+[
+{
+	"question": "What kind of weather do you like?",
+	"choices": ["&#x1F31E; Warm and sunny","&#x26C5; Moderate","&#x26C4; Cold and snowy"],
+	"values": [1.0,0.5, -0.5],
+	"variable": "weather"
+},
+{
+	"question": "How career-focused are you?",
+	"choices": ["&#x1F3E2;&#x1F3E2;&#x1F3E2; Extremely &mdash; I work 24/7!!!","&#x1F3E2; Very","&#x1F3E1; Not really","&#x1F3E1;&#x1F3E1;&#x1F3E1; Not at all &mdash; what is work?"],
+	"values": [1.0,0.5,-0.5,-1.0],
+	"variable": "career"
+},
+{
+	"question": "What is your typical Friday night?", 
+	"choices" : ["&#x1F46F; Going clubbing", "&#x1F37A; Bar-hopping", "&#x1F46B; Hanging at your regular bar with a few friends", "&#x1F634; Staying in &mdash; Netflix, sleep, etc."],
+	"values": [1.0,0.5,-0.5,-1.0],
+	"variable": "nightlife"
+},
+{
+	"question": "How do you like to get around?",
+	"choices": ["&#x1F698; Car", "&#x1F6B4; Bike", "&#x1F6B6; Walking", "&#x1F686; Train"],
+	"values": [-1.0, -0.5, 0.5, 1.0],
+	"variable": "transit"
+},
+{	"question": "Describe your politics:", 
+	"choices" : ["&#x1F434;&#x1F434;&#x1F434; Very liberal", "&#x1F434; Moderately liberal" , "&#x1F418; Moderately conservative", "&#x1F418;&#x1F418;&#x1F418; Very conservative"],   
+	"values": [0.0, 0.33, 0.66, 1.0],
+	"variable": "politics"
+}]
+
+

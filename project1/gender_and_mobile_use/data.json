@@ -1,0 +1,78 @@
+{
+	"men":
+		{
+			"time_spent":
+				{
+					"thirty"	: ".19",
+					"one_hr"	: ".17",
+					"two_hr"	: ".26",
+					"three_hr"	: ".13",
+					"four_hr"	: ".11",
+					"plus_hr"	: ".11"
+				}, 
+
+			"preferred_apps":
+				{
+					"social_media"	: ".32",
+					"weather"		: ".36",
+					"games"			: ".33",
+					"news"			: ".32",
+					"music"			: ".27",
+					"entertainment"	: ".23",
+					"shopping"		: ".12",
+					"sports"		: ".36",
+					"books"			: ".14",
+					"navigation"	: ".20"
+				}
+		},
+	"women":
+		{
+			"time_spent":
+				{
+					"half_hr"	: ".08",
+					"one_hr"	: ".13",
+					"two_hr"	: ".34",
+					"three_hr"	: ".18",
+					"four_hr"	: ".15",
+					"plus_hr"	: ".07"
+				},
+
+			"preferred_apps":
+				{
+					"social_media"	: ".5",
+					"weather"		: ".4",
+					"games"			: ".38",
+					"news"			: ".24",
+					"music"			: ".26",
+					"entertainment"	: ".26",
+					"shopping"		: ".29",
+					"sports"		: ".08",
+					"books"			: ".23",
+					"navigation"	: ".17"
+				}
+		}, 
+	"device_timeline":
+		{
+			"cell_phone":
+				{
+					"2011"	: ".84", 
+					"2012"	: ".88", 
+					"2013"	: ".91", 
+					"2014"	: ".90"
+				}, 
+			"smartphone":
+				{
+					"2011"	: ".35", 
+					"2012"	: ".45", 
+					"2013"	: ".55", 
+					"2014"	: ".58"
+				}, 
+			"tablet":
+				{
+					"2011"	: ".10", 
+					"2012"	: ".29", 
+					"2013"	: ".35", 
+					"2014"	: ".42"
+				}
+		}
+}

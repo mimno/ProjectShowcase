@@ -1,0 +1,842 @@
+<html>
+  <html>
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <!-- <link rel="stylesheet" href="slider.css"> -->
+    <!-- Load the d3 library. -->
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <style>
+      #map { width: 100%; height:75%; background: black;}
+
+      .axis {
+        font: 10px Raleway;
+      }
+
+      #labels{
+        font: 10px Raleway;
+      }
+
+      .text-center{
+        font: 35px Raleway;
+        opacity: 0.8;
+      }
+      .text-mid{
+        font: 20px Raleway;
+        opacity: 0.8;
+        text-align: center;
+      }
+
+      .axis .domain {
+        fill: none;
+        stroke: #000;
+        stroke-opacity: .3;
+        stroke-width: 10px;
+        stroke-linecap: round;
+      }
+
+      @font-face{
+        font-family: weather;
+        src: url('font/weather_icon.otf') format("opentype");
+      }
+    </style>
+  </head>
+<body>
+  <h1 class="text-center">Visualizing Traffic and Accidents in NYC, as Affected by Weather and Potholes </h1>
+  <h2 class="text-mid">January 13-17, 2013 </h2>
+
+  <h2 class="text-mid">  Rain Storm occurred on January 16, 2013 </h2>
+
+    <div class="row map">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <div id='map'></div>
+      </div>
+      <div class="col-md-2"></div>
+    </div>
+    <div class="row sliders">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <div id='slider'> </div>
+      </div>
+      <div class="col-md-2"></div>
+    </div>
+    </div>
+
+   <script>
+
+    var map = new L.Map('map');
+
+    /*Zoom to NYC*/
+    map.panTo([40.7627, -73.9059])
+      .setZoom(12);
+
+    /* Set up Base Map*/ 
+    L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', 
+      {attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+      .addTo(map);
+
+    map._initPathRoot()
+
+    var svg = d3.select("#map").select("svg");
+    var slider_svg = d3.select("#slider").append("svg")
+      .attr("height","15%").attr("width","100%");
+
+    var complaint_points = svg.append("g");
+    var accident_points = svg.append("g");
+    var paths = svg.append("g");
+    var feat_complaint = [];
+    var feat_trips;
+
+    var svg_width = parseInt(svg.style("width").replace("px",""))*0.8;
+    var svg_height = parseInt(svg.style("height").replace("px",""));
+
+    var slider_svg_width = parseInt(slider_svg.style("width").replace("px",""))
+    var slider_svg_height = parseInt(slider_svg.style("height").replace("px",""))
+
+    var currently_showing = "complaints";
+    var complaints_on = true;
+    var accidents_on = true;
+    var opening_animation = true;
+    var tip_t_time = 300;
+    var tipped_dot;
+
+    var weather_data = {"13":{"mean_temp":47,"event":"Fog","cloud":8},
+      "14":{"mean_temp":47,"event":"Rain","cloud":7},
+      "15":{"mean_temp":37,"event":"Rain","cloud":8},
+      "16":{"mean_temp":35,"event":"Rain","cloud":7},
+      "17":{"mean_temp":39,"event":"","cloud":3},
+      "18":{"mean_temp":30,"event":"","cloud":3}};
+
+    var weather_dict = {"Fog":"Z","Rain":"M","Sunny":"1"};
+
+    var lineFunction = d3.svg.line()
+          .x(function(d) { return map.latLngToLayerPoint(d).x; })
+          .y(function(d) { return map.latLngToLayerPoint(d).y; })
+          .interpolate("linear");
+
+    var injury_scale = d3.scale.linear()
+      .domain([0,7])
+      .range([10,30]);
+
+    //brush setup
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    var start_date = new Date(2013,0,13,0,0,0,0);
+    var initial_extent = new Date(2013,0,14,0,0,0,0);
+    var end_date = new Date(2013,0,18,0,0,0,0);
+    var demo_date1 = new Date(2013,0,15,11,0,0);
+    var demo_date2 = new Date(2013,0,15,13,0,0);
+    var demo_date3 = new Date(2013,0,15,0,0,0);
+    var demo_date4 = new Date(2013,0,16,0,0,0);
+
+    
+    var xscale = d3.time.scale()
+      .domain([start_date,end_date])
+      .range([slider_svg_width*.35,slider_svg_width*.9])
+      .nice(d3.time.day)
+      .clamp(true)
+
+    var brush = d3.svg.brush()
+      .x(xscale)
+      .extent([demo_date1,demo_date2])
+      .on("brushstart",brushstart)
+      .on("brush",brushed)
+
+    slider_svg.append("g")
+      .attr("class","axis")
+      .attr("transform", "translate("+0+","+(slider_svg_height*0.70)+")")
+      .call(d3.svg.axis()
+          .scale(xscale)
+          .orient("bottom")
+          .tickSize(0)
+          .tickPadding(12)
+          .ticks(d3.time.day)
+          .tickFormat(d3.time.format("%a, %b %e %Y")))
+
+
+    var slider = slider_svg.append("g")
+      .attr("class","brush")
+      .call(brush)
+      .selectAll("rect")
+      .attr("transform","translate(0,"+
+          (slider_svg_height*0.7-7.5)+")")
+      .attr("height",15)
+      .style("fill","#fff")
+      .attr("rx",5)
+      .attr("ry",5) 
+      .style("stroke","#000")
+      .style("stroke-opacity",0.5)
+      .style("stroke-width","1.25px")
+
+    //brush labels, weather, and time labels
+    var weather_label = slider_svg.append("text")
+      .attr("text-anchor","middle")
+      .attr("transform","translate(0,"+(slider_svg_height*0.70-40)+")")
+      .attr("font-size","50px")
+      .attr("font-family","weather")
+      .attr("fill","black")
+      .attr("opacity",0.6)
+      .text(function(d) {return ""})
+      .attr("x",
+        (xscale(brush.extent()[0])
+        +xscale(brush.extent()[1]))/2); 
+
+    var weather_label2 = slider_svg.append("text")
+      .attr("text-anchor","middle")
+      .attr("transform","translate(0,"+(slider_svg_height*0.70-20)+")")
+      .attr("font-size","15px")
+      .attr("font-family","Raleway")
+      .attr("fill","black")
+      .style("font-weight","bold")
+      .attr("opacity",0.6)
+      .text(function(d) {return "";})
+      .attr("x",
+        (xscale(brush.extent()[0])
+        +xscale(brush.extent()[1]))/2);
+    
+    var time_label_front = slider_svg.append("text")
+      .attr("id","labels")
+      .attr("text-anchor","end")
+      .attr("transform","translate(0,"+(
+        slider_svg_height*0.70-7)+")")
+      .text(function(d){
+        return brush.extent()[0].toLocaleTimeString();})
+      .attr("x",xscale(brush.extent()[0]))
+
+    var time_label_back = slider_svg.append("text")
+      .attr("id","labels")
+      .attr("text-anchor","start")
+      .attr("transform","translate(0,"+(
+        slider_svg_height*0.70-7)+")")
+      .text(function(d){
+        return brush.extent()[1].toLocaleTimeString();})
+      .attr("x",xscale(brush.extent()[1]))
+
+    //opacity scalling no longer in use
+    var opacity_scale = d3.scale.linear()
+      .domain([0,172800000])
+      .range([0.8,0])
+      .clamp(true);
+
+    //brushstart
+    function brushstart(){
+      slider_svg.classed("selecting",true);
+    }
+    //when brush is moved
+    function brushed() {
+      var v1 = brush.extent()[0];
+      var v2 = brush.extent()[1];
+      var midpoint = (xscale(v1)+xscale(v2))/2;
+      var midpoint_date = xscale.invert(midpoint).getDate();
+      update_points(v1,v2);
+      update_paths(v1,v2);
+      weather_label
+        .attr("x",midpoint)
+        .text(function(){
+          var ev = weather_data[midpoint_date+""].event;
+          var cl = weather_data[midpoint_date+""].cloud;
+          if (ev == "" && cl < 5)
+            return weather_dict["Sunny"];
+          else
+            return weather_dict[ev];
+        });
+      weather_label2
+        .attr("x",midpoint)
+        .text(function(){
+          var temp = weather_data[midpoint_date+""].mean_temp;
+          return temp+" \u2109";
+        });
+      time_label_front.text(function(d){
+        return v1.toLocaleTimeString();})
+        .attr("x",xscale(v1));
+      time_label_back.text(function(d){
+        return v2.toLocaleTimeString();})
+        .attr("x",xscale(v2))
+      if(!opening_animation){
+        tip_text.transition().attr("opacity",0).duration(tip_t_time);
+        tip_box.transition().attr("opacity",0).duration(tip_t_time);
+        if(tipped_dot){
+          d3.select(tipped_dot).attr("stroke","none");
+          tipped_dot = null;
+        }
+      }
+    };
+    //to update complaint nodes
+    function update_points(v1,v2){
+      var dur = 800;
+      feat_complaint.transition()
+        .attr("r",function(d){
+          var dat = parse_date_time(d.created);
+          if (v2-dat>0 && dat-v1>0){
+            return 10;
+          }
+          else
+            return 0;
+        })
+        .duration(dur);
+      feat_accident.transition()
+        .attr("r",function(d){
+          var dat = parse_date_time(d.date_time); 
+          if(v2-dat>0 && dat-v1>0){
+            return injury_scale(d.injuries+d.deaths);
+          }
+          else
+            return 0;
+        })
+        .duration(dur);
+    };
+
+    function update_paths(v1,v2){
+      var dur = 800;
+      feat_trips.transition()
+        .attr("stroke-width",function(d){
+          var dat = new Date(Date.parse(d.time));
+          dat.setYear(2013);
+          if(v2-dat>0 && dat-v1>0)
+            return 1.5;
+          else
+            return 0;
+        })
+    }
+    //for parsing 311 call times of format "1/1/2013 10:20"
+    function parse_date_time(s){
+      var dat = new Date(Date.parse(s.split(" ")[0]));
+      var time = s.split(" ")[1];
+      var hour = parseInt(time.split(":")[0])*3600000;
+      var min =  parseInt(time.split(":")[1])*60000;
+      var minusfive =  -5*3600000;
+      dat.setMilliseconds(dat.getMilliseconds() + hour + min + minusfive);
+      return dat;
+
+    }
+
+    //tooltips
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    var tip_display = "";
+    var tip_height = 38;
+    var tip_width = 130;
+    var tip_buffer = 10;
+    var map_center =  map.latLngToLayerPoint(map.getCenter());
+    var tip_box = svg.append("rect")
+      .attr("width",tip_width+tip_buffer)
+      .attr("height",tip_height+tip_buffer)
+      .attr("opacity",0)
+      .attr("fill","#ffffff")
+      .attr("rx",3)
+      .attr("ry",3)
+      .attr("transform","translate("+
+        (map_center.x-(tip_width+tip_buffer)/2)+","+
+        (map_center.y-(tip_height+tip_buffer)/2)+")")
+      .on("click",function(){
+        if (d3.select(this).attr("opacity")>0){
+          if(tipped_dot){
+            d3.select(tipped_dot).attr("stroke","none");
+            tipped_dot = null;
+          }
+          tip_box.transition().attr("opacity",0).duration(tip_t_time);
+          tip_text.transition().attr("opacity",0).duration(tip_t_time)
+            .each("end",function(){
+              tip_box.attr("transform","translate(0,0)");
+              tip_text.attr("transform","translate(0,0)");
+            });
+        }
+      });
+    var tip_text = svg.append("foreignObject")
+      .attr("width",tip_width)
+      .attr("height",tip_height)
+      .attr("opacity",0)
+      .attr("transform","translate("+
+        (map_center.x-tip_width/2)+","+
+        (map_center.y-tip_height/2)+")")
+      .on("click",function(){
+        if(d3.select(this).attr("opacity")>0){
+          if(tipped_dot){
+              d3.select(tipped_dot).attr("stroke","none");
+              tipped_dot = null;
+          }
+          tip_box.transition().attr("opacity",0).duration(tip_t_time);
+          tip_text.transition().attr("opacity",0).duration(tip_t_time)
+            .each("end",function(){
+              tip_box.attr("transform","translate(0,0)");
+              tip_text.attr("transform","translate(0,0)");
+            });
+        }
+      });
+    htmlDoms = tip_text.append("xhtml:div").append("p").attr("id","labels");
+    htmlDoms.html("Nobody really wants me here. Click me or a circle and I'll go away.")
+
+
+    //for accident information
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    var feat_accident;
+
+    d3.csv("cartodb_accidents.csv", function(d) {
+      return {
+        injuries: +d.INJURED,
+        deaths: +d.KILLED,
+        latitude: +d.LATITUDE, //convert to number
+        longitude: +d.LONGITUDE, //convert to number
+        cause1: d.FACTOR_VEHICLE1,
+        cause2: d.FACTOR_VEHICLE2,
+        date_time: d.DATES+" "+d.TIME
+    };
+    },
+    function(error, rows1) {
+      rows1.forEach(function(d){
+        d.LatLng = new L.LatLng(d.latitude,d.longitude)
+      })
+
+      var max_severity = d3.max(rows1,function(d){
+        return d.injuries+d.deaths;});
+      var severityScale = d3.scale.pow(2)
+        .domain([0,max_severity+2])
+        .range([0,1]);
+
+      feat_accident = accident_points.selectAll("circle")
+        .data(rows1)
+        .enter()
+        .append("circle")
+        .attr("fill",function(d){
+          if (d.deaths == 0){
+            return d3.interpolateLab("orange","red")(
+              severityScale(d.deaths+d.injuries));
+          }
+          else
+            return "red";
+        })
+        .attr("stroke","none")
+        .attr("r",0)
+        .attr("opacity",0.0)
+        .attr("stroke-width","3px")
+        .on("click",function(d){
+          if(accidents_on){
+          if(tip_display == d.date_time){
+            if(tipped_dot){
+              d3.select(tipped_dot).attr("stroke","none");
+              tipped_dot = null;
+            }
+            tip_box.transition().attr("opacity",0).duration(tip_t_time);
+            tip_text.transition().attr("opacity",0).duration(tip_t_time)
+              .each("end",function(){
+                tip_box.attr("transform","translate(0,0)");
+                tip_text.attr("transform","translate(0,0)");});
+            tip_display = ""
+          }
+          else{
+            var dat = parse_date_time(d.date_time).toUTCString().replace(" GMT","");
+            var loc = map.latLngToLayerPoint(d.LatLng);
+            if(tipped_dot){
+              d3.select(tipped_dot).attr("stroke","none");
+            }
+            tipped_dot = this;
+            d3.select(tipped_dot).attr("stroke","black");
+            tip_box.transition().attr("opacity",0).duration(tip_t_time)
+              .each("end",function(){
+                htmlDoms.html("Traffic Accident: </br>"
+                  +dat+"</br>Injuries: "+d.injuries+", Deaths:"+d.deaths);
+                tip_box.attr("transform",
+                  "translate("+loc.x+","+loc.y+")");
+                tip_text.attr("transform",
+                  "translate("+(loc.x+4)+","+(loc.y+4)+")");
+                tip_box.transition().attr("opacity",0.7).duration(tip_t_time);
+              });
+            tip_text.transition().attr("opacity",0).duration(tip_t_time)
+              .each("end",function(){
+                tip_text.transition().attr("opacity",1).duration(tip_t_time);
+              })
+            tip_display = d.date_time;
+          }
+          }
+        });
+
+      //for complaint information
+      //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      d3.csv("pothole_complaints_jan.csv",function(d){
+       return {key: d["Unique Key"],
+              created: d["Created Date"],
+              closed: d["Closed Date"],
+              agency: d["Agency"],
+              complain: d["Complaint Type"],
+              desc: d["Descriptor"],
+              latitude: +d["Latitude"],
+              longitude: +d["Longitude"]};
+      },
+      function(error, rows){
+        rows.forEach(function(d){
+          d.LatLng = new L.LatLng(d.latitude,d.longitude)
+        })
+
+        feat_complaint = complaint_points.selectAll("circle")
+          .data(rows)
+          .enter()
+          .append("circle")
+          .attr("fill","blue")
+          .attr("stroke","none")
+          .attr("r",0)
+          .attr("opacity",0.5)
+          .attr("stroke-width","3px")
+          .on("click",function(d){
+            if(complaints_on){
+            if(tip_display == d.key){
+              if(tipped_dot){
+                  d3.select(tipped_dot).attr("stroke","none");
+                  tipped_dot = null;
+              }
+              tip_box.transition().attr("opacity",0).duration(tip_t_time);
+              tip_text.transition().attr("opacity",0).duration(tip_t_time)
+                .each("end",function(){
+                  tip_box.attr("transform","translate(0,0)");
+                  tip_text.attr("transform","translate(0,0)");  
+                });
+              tip_display = ""
+            }
+            else{
+              var dat = parse_date_time(d.created).toUTCString().replace(" GMT","");
+              var loc = map.latLngToLayerPoint(d.LatLng);
+              if(tipped_dot){
+                d3.select(tipped_dot).attr("stroke","none");
+              }
+              tipped_dot = this;
+              d3.select(tipped_dot).attr("stroke","black");
+              tip_box.transition().attr("opacity",0).duration(tip_t_time)
+                .each("end",function(){
+                  htmlDoms.html("Street Condition Complaint: </br>"
+                    +dat+"</br>"+d.desc);
+                  tip_box.attr("transform",
+                    "translate("+loc.x+","+loc.y+")");
+                  tip_text.attr("transform",
+                    "translate("+(loc.x+4)+","+(loc.y+4)+")");
+                  tip_box.transition().attr("opacity",0.7).duration(tip_t_time);
+                });
+              tip_text.transition().attr("opacity",0).duration(tip_t_time)
+                .each("end",function(){
+                  tip_text.transition().attr("opacity",1).duration(tip_t_time);
+                })
+              tip_display = d.key;
+            }
+            }
+          });
+
+        //for trip path info
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        d3.json("taxi_trips.json",function(error,rows){
+          rows.forEach(function(d){
+            d.pathLeaflet = d.path.map(function(p){
+              return new L.LatLng(p[0],p[1]);
+            });
+          });
+          var min_speed = d3.min(rows,function(d){
+            return d.speed;});
+          var max_speed = d3.max(rows,function(d){
+            return d.speed;});
+          var speed_scale = d3.scale.linear()
+            .domain([min_speed,max_speed])
+            .range([0,1]);
+
+          feat_trips = paths.selectAll("path")
+            .data(rows)
+            .enter()
+            .append("path")
+            .attr("d",function(d){
+              return lineFunction(d.pathLeaflet);
+            })
+            .attr("stroke-width",1.5)
+            .attr("stroke-opacity",0.5)
+            .attr("fill","none")
+            .attr("stroke",function(d){
+              return d3.interpolateLab("red","green")
+                (speed_scale(d.speed));
+            });
+
+          map.on("viewreset", map_update);
+          map_update();
+
+          //setup animation
+          slider.call(brush.event);
+          brush.extent([demo_date3,demo_date4]);
+          brush(d3.select(".brush").transition().duration(1500));
+          brush.event(d3.select(".brush").transition().duration(1500)
+            .each("end",function(){
+              brush.extent([start_date,initial_extent]);
+              brush(d3.select(".brush").transition().duration(1500));
+              brush.event(d3.select(".brush").transition().duration(1500))
+            }));
+          setTimeout(function(){
+            turn_accidents_only();
+            tip_text.transition().attr("opacity",1).duration(1000).delay(1000);
+            tip_box.transition().attr("opacity",0.7).duration(1000).delay(1000);
+            opening_animation=false;}
+            ,4000);
+        });
+      });
+
+      //updates map on resize
+      function map_update(){
+        feat_complaint.attr("transform", 
+        function(d) { 
+          return "translate("+ 
+            map.latLngToLayerPoint(d.LatLng).x +","+ 
+            map.latLngToLayerPoint(d.LatLng).y +")";
+        })
+        feat_accident.attr("transform", 
+        function(d) { 
+          return "translate("+ 
+            map.latLngToLayerPoint(d.LatLng).x +","+ 
+            map.latLngToLayerPoint(d.LatLng).y +")";
+        })
+        feat_trips.attr("d",function(d){
+          return lineFunction(d.pathLeaflet);
+        })
+
+        if(tipped_dot){
+          d3.select(tipped_dot).attr("stroke","none");
+          tipped_dot = null;
+        }
+        tip_text.attr("opacity",0);
+        tip_box.attr("opacity",0);
+      };
+    });
+
+
+    //complaint accident toggling 
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    var toggle = slider_svg.append("g");
+    contain_h = 80;
+    contain_w = 80;
+    var contain = toggle.append("rect")
+      .attr("width",contain_w)
+      .attr("height", contain_h)
+      .attr("rx",2)
+      .attr("ry",2)
+      .attr("fill","#B3B3B3")
+      .attr("y",slider_svg_height*0.5 -contain_h*0.5)
+      .attr("x",slider_svg_width*0.15);
+
+    var comp_switch = toggle.append("rect")
+      .attr("width",contain_w/2-5)
+      .attr("height",contain_h/2-5)
+      .attr("rx",2)
+      .attr("ry",2)
+      .attr("fill","#ffffff")
+      .attr("opacity",1)
+      .attr("y",slider_svg_height*0.5-contain_h*0.5+2.5)
+      .attr("x",slider_svg_width*0.15+2.5)
+      .on("click",turn_complaints_only);
+
+    var acc_switch = toggle.append("rect")
+      .attr("width",contain_w/2-5)
+      .attr("height",contain_h/2-5)
+      .attr("rx",2)
+      .attr("ry",2)
+      .attr("fill","#ffffff")
+      .attr("opacity",0.5)
+      .attr("y",slider_svg_height*0.5+2.5)
+      .attr("x",slider_svg_width*0.15+2.5)
+      .on("click",turn_accidents_only);
+
+    var both_switch = toggle.append("rect")
+      .attr("width",contain_w/2-5)
+      .attr("height",contain_h-5)
+      .attr("rx",2)
+      .attr("ry",2)
+      .attr("fill","#ffffff")
+      .attr("opacity",0.5)
+      .attr("y",slider_svg_height*0.5-contain_h/2+2.5)
+      .attr("x",slider_svg_width*0.15+contain_w/2+2.5)
+      .on("click",turn_both_on);
+
+    var complaint_pip = toggle.append("circle")
+      .attr("cy",slider_svg_height*0.5-contain_h*0.25)
+      .attr("cx",slider_svg_width*0.15+contain_w*0.25)
+      .attr("fill","blue")
+      .attr("r",5)
+      .attr("opacity",0.8)
+      .on("click",turn_complaints_only);
+
+    var nonfatal_pip = toggle.append("circle")
+      .attr("cy",slider_svg_height*0.5+contain_h*(1/6))
+      .attr("cx",slider_svg_width*0.15+contain_w*0.25)
+      .attr("fill","orange")
+      .attr("r",5)
+      .attr("opacity",0)
+      .on("click",turn_accidents_only);
+
+    var fatal_pip = toggle.append("circle")
+      .attr("cy",slider_svg_height*0.5+contain_h*(2/6))
+      .attr("cx",slider_svg_width*0.15+contain_w*0.25)
+      .attr("fill","red")
+      .attr("r",5)
+      .attr("opacity",0)
+      .on("click",turn_accidents_only);
+
+     var complaint_pip2 = toggle.append("circle")
+      .attr("cy",slider_svg_height*0.5-contain_h*0.25)
+      .attr("cx",slider_svg_width*0.15+contain_w*0.75)
+      .attr("fill","blue")
+      .attr("r",5)
+      .attr("opacity",0)
+      .on("click",turn_complaints_only);
+
+    var nonfatal_pip2 = toggle.append("circle")
+      .attr("cy",slider_svg_height*0.5+contain_h*(1/6))
+      .attr("cx",slider_svg_width*0.15+contain_w*0.75)
+      .attr("fill","orange")
+      .attr("r",5)
+      .attr("opacity",0)
+      .on("click",turn_accidents_only);
+
+    var fatal_pip2 = toggle.append("circle")
+      .attr("cy",slider_svg_height*0.5+contain_h*(2/6))
+      .attr("cx",slider_svg_width*0.15+contain_w*0.75)
+      .attr("fill","red")
+      .attr("r",5)
+      .attr("opacity",0)
+      .on("click",turn_accidents_only); 
+
+    var complaint_text = toggle.append("text")
+      .text("Street Condition Complaint")
+      .attr("id","labels")
+      .attr("y",slider_svg_height*0.5-contain_h*0.25)
+      .attr("x",slider_svg_width*0.15-10)
+      .attr("text-anchor","end")
+      .attr("dominant-baseline","central")
+      .attr("opacity",0.8);
+
+    var nonfatal_text = toggle.append("text")
+      .text("Nonfatal Traffic Accident")
+      .attr("id","labels")
+      .attr("y",slider_svg_height*0.5+contain_h*(1/6))
+      .attr("x",slider_svg_width*0.15-10)
+      .attr("text-anchor","end")
+      .attr("dominant-baseline","central")
+      .attr("opacity",0);
+
+    var fatal_text = toggle.append("text")
+      .text("Fatal Traffic Accident")
+      .attr("id","labels")
+      .attr("y",slider_svg_height*0.5+contain_h*(2/6))
+      .attr("x",slider_svg_width*0.15-10)
+      .attr("text-anchor","end")
+      .attr("dominant-baseline","central")
+      .attr("opacity",0);
+
+    //toggle transition function
+
+    function turn_complaints_only(){
+      if(!opening_animation){
+        if(tipped_dot){
+          d3.select(tipped_dot).attr("stroke","none");
+          tipped_dot = null;
+        }
+        tip_text.transition().attr("opacity",0).duration(tip_t_time);
+        tip_box.transition().attr("opacity",0).duration(tip_t_time);
+      }
+      feat_accident.transition().attr("opacity",0).duration(800);
+      feat_complaint.transition().attr("opacity",0.5).duration(800);
+      comp_switch.transition().attr("opacity",1).duration(800);
+      acc_switch.transition().attr("opacity",0.5).duration(800);
+      both_switch.transition().attr("opacity",0.5).duration(800);
+      complaint_pip.transition().attr("opacity",0.8).duration(300).delay(300);
+      nonfatal_pip.transition().attr("opacity",0).duration(300).delay(300);
+      fatal_pip.transition().attr("opacity",0).duration(300).delay(300);
+      complaint_pip2.transition().attr("opacity",0).duration(300).delay(300);
+      nonfatal_pip2.transition().attr("opacity",0).duration(300).delay(300);
+      fatal_pip2.transition().attr("opacity",0).duration(300).delay(300);
+      complaint_text.transition().attr("opacity",0.8).duration(300).delay(300);
+      nonfatal_text.transition().attr("opacity",0).duration(300).delay(300);
+      fatal_text.transition().attr("opacity",0).duration(300).delay(300);
+      complaints_on = true;
+      accidents_on = false;
+    }
+
+    function turn_accidents_only(){
+      if(!opening_animation){
+        if(tipped_dot){
+          d3.select(tipped_dot).attr("stroke","none");
+          tipped_dot = null;
+        }
+        tip_text.transition().attr("opacity",0).duration(tip_t_time);
+        tip_box.transition().attr("opacity",0).duration(tip_t_time);
+      }
+      feat_complaint.transition().attr("opacity",0).duration(800);
+      feat_accident.transition().attr("opacity",0.5).duration(800);
+      comp_switch.transition().attr("opacity",0.5).duration(800);
+      acc_switch.transition().attr("opacity",1).duration(800);
+      both_switch.transition().attr("opacity",0.5).duration(800);
+      complaint_pip.transition().attr("opacity",0).duration(300).delay(300);
+      nonfatal_pip.transition().attr("opacity",0.8).duration(300).delay(300);
+      fatal_pip.transition().attr("opacity",0.8).duration(300).delay(300);
+      complaint_pip2.transition().attr("opacity",0).duration(300).delay(300);
+      nonfatal_pip2.transition().attr("opacity",0).duration(300).delay(300);
+      fatal_pip2.transition().attr("opacity",0).duration(300).delay(300);
+      complaint_text.transition().attr("opacity",0).duration(300).delay(300);
+      nonfatal_text.transition().attr("opacity",0.8).duration(300).delay(300);
+      fatal_text.transition().attr("opacity",0.8).duration(300).delay(300);
+      complaints_on = false;
+      accidents_on = true;
+    }
+
+    function turn_both_on(){
+      if(!opening_animation){
+        if(tipped_dot){
+          d3.select(tipped_dot).attr("stroke","none");
+          tipped_dot = null;
+        }
+        tip_text.transition().attr("opacity",0).duration(tip_t_time);
+        tip_box.transition().attr("opacity",0).duration(tip_t_time);
+      }
+      feat_complaint.transition().attr("opacity",0.5).duration(800);
+      feat_accident.transition().attr("opacity",0.5).duration(800);
+      comp_switch.transition().attr("opacity",0.5).duration(800);
+      acc_switch.transition().attr("opacity",0.5).duration(800);
+      both_switch.transition().attr("opacity",1).duration(800);
+      complaint_pip.transition().attr("opacity",0).duration(300).delay(300);
+      nonfatal_pip.transition().attr("opacity",0).duration(300).delay(300);
+      fatal_pip.transition().attr("opacity",0).duration(300).delay(300);
+      complaint_pip2.transition().attr("opacity",0.8).duration(300).delay(300);
+      nonfatal_pip2.transition().attr("opacity",0.8).duration(300).delay(300);
+      fatal_pip2.transition().attr("opacity",0.8).duration(300).delay(300);
+      complaint_text.transition().attr("opacity",0.8).duration(300).delay(300);
+      nonfatal_text.transition().attr("opacity",0.8).duration(300).delay(300);
+      fatal_text.transition().attr("opacity",0.8).duration(300).delay(300);
+      complaints_on = true;
+      accidents_on = true;
+    }
+
+    // function toggle_click(){
+    // if(!opening_animation){
+    //   tip_text.transition().attr("opacity",0).duration(tip_t_time);
+    //   tip_box.transition().attr("opacity",0).duration(tip_t_time);
+    // }
+    // if(currently_showing == "complaints"){
+    //   feat_complaint.transition().attr("opacity",0).duration(800);
+    //   feat_accident.transition().attr("opacity",0.5).duration(800);
+    //   tog.transition().attr("y",slider_svg_height*0.5+2.5).duration(800);
+    //   complaint_pip.transition().attr("opacity",0).duration(300).delay(300);
+    //   complaint_text.transition().attr("opacity",0).duration(300).delay(300);
+    //   nonfatal_pip.transition().attr("opacity",0.8).duration(300).delay(300);
+    //   fatal_pip.transition().attr("opacity",0.8).duration(300).delay(300);
+    //   nonfatal_text.transition().attr("opacity",0.8).duration(300).delay(300);
+    //   fatal_text.transition().attr("opacity",0.8).duration(300).delay(300);
+    //   currently_showing = "accidents";
+    // }
+    // else{
+    //   feat_complaint.transition().attr("opacity",0.5).duration(800);
+    //   feat_accident.transition().attr("opacity",0).duration(800);
+    //   tog.transition().attr("y",slider_svg_height*0.5-contain_h*0.5+2.5).duration(800);
+    //   complaint_pip.transition().attr("opacity",0.8).duration(300).delay(300);
+    //   complaint_text.transition().attr("opacity",0.8).duration(300).delay(300);
+    //   nonfatal_pip.transition().attr("opacity",0).duration(300).delay(300);
+    //   fatal_pip.transition().attr("opacity",0).duration(300).delay(300);
+    //   nonfatal_text.transition().attr("opacity",0).duration(300).delay(300);
+    //   fatal_text.transition().attr("opacity",0).duration(300).delay(300);
+    //   currently_showing = "complaints"
+    // }
+    // };
+
+   </script>
+</body>
+</html>

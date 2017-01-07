@@ -1,0 +1,613 @@
+<html>
+<head>
+	<meta name="author" content="Noah Grossman">
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<!-- Load the d3 library. -->
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<style>
+		/* put a border around the svg element so we can see the coordinate system better. */
+		body { font-family: "Open Sans"; } div { margin: 30px; }
+		svg { border: solid black 1px; }
+		.lived {
+			fill: green;
+		}
+		.died {
+			fill: red;
+		}
+		.hide {
+			visibility: hidden;
+		}
+		g.lines {
+			font-size: 8px;
+		}
+	</style>
+</head>
+<body>
+
+	<!-- The SVG element will go in here -->
+	<div id="canvas"></div>
+
+	<script>
+		// Tweak these parameters and the entire svg canvas will scale accordingly
+		var width = 1350,
+		    height = 700;
+			
+		var svg = d3.select("#canvas").append("svg")
+		    .attr("width", width)
+		    .attr("height", height);
+		var g = svg.append("g")
+			.attr("class", "circles");
+		var lines = svg.append("g")
+			.attr("class", "lines");
+		var labels = svg.append("g")
+			.attr("class", "labels");
+		var legend = svg.append("g")
+			.attr("class", "legend");
+
+		var lineY,
+			lineX;
+
+		var passengers;
+
+		var females = [],
+			males = [];
+
+		var addedMales = false,
+			addedFemales = false,
+			addedStats = false;
+
+		// Age cutoffs for separating groups
+		var ageCutoffs = [12.5, 18.5, 50.5];
+
+		var line1Height = 0;
+			line2Height = 0;
+
+		var maxP1Fare = 0;
+			maxP2Fare = 0;
+			maxP3Fare = 0;
+			totalFare = 0;
+			maxAge = 0;
+
+		var survivalRates;
+
+		// Graph padding from svg element
+		// Tweak these parameters and the entire visualization will scale accordingly
+		var padding = { "bottom":70, "top":100, "left": 70, "right":50, "line":10 };
+
+		var dataBounds = { "width": width-padding.left-padding.right, "height": height-padding.top-padding.bottom };
+
+		var xScale;
+		var yScale;
+
+		d3.json("titanic.json", function(error, dat) {
+			passengers = dat;
+			// Record max values for fare and age
+			passengers.forEach(function(d) {
+				if (d.Pclass == 1) {
+					if (d.Fare > maxP1Fare) {
+						maxP1Fare = d.Fare;
+					}
+				} else if (d.Pclass == 2) {
+					if (d.Fare > maxP2Fare) {
+						maxP2Fare = d.Fare;
+					}
+				} else {
+					if (d.Fare > maxP3Fare) {
+						maxP3Fare = d.Fare;
+					}
+				}
+				if (d.Age > maxAge) {
+					maxAge = d.Age;
+				}
+				if (d.Sex == "male") {
+					males.push(d);
+				} else {
+					females.push(d);
+				}
+			});
+			totalFare = maxP1Fare + maxP2Fare + maxP3Fare;
+			// Height of dashed line separating classes 1 and 2 (top line)
+			line1Height = dataBounds.height*(maxP2Fare+ maxP3Fare)/totalFare + padding.bottom;
+			// Height of dashed line separating classes 2 and 3 (lower line)
+			line2Height = dataBounds.height*(maxP3Fare)/totalFare + padding.bottom;
+
+			xScale = d3.scale.linear()
+				.domain([0,maxAge]).range([padding.left, padding.left + dataBounds.width]);
+			yScale = function(fare, pClass) {
+				var scale1 = d3.scale.linear()
+					.domain([0,maxP1Fare]).range([padding.line,(maxP1Fare/totalFare)*dataBounds.height - padding.line]);
+				var scale2 = d3.scale.linear()
+					.domain([0,maxP2Fare]).range([padding.line,(maxP2Fare/totalFare)*dataBounds.height - padding.line]);
+				var scale3 = d3.scale.linear()
+					.domain([0,maxP3Fare]).range([padding.line,(maxP3Fare/totalFare)*dataBounds.height - padding.line]);
+				switch (pClass) {
+					case 1:
+						fare = scale1(fare);
+						fare += line1Height
+						break;
+					case 2:
+						fare = scale2(fare);
+						fare += line2Height;
+						break;
+					case 3:
+						fare = scale3(fare);
+						fare += padding.bottom;
+						break;
+				}
+				return height-(fare);
+			}
+
+			addLines();
+			addLabels();
+			addLegend();
+			addFemales();
+			addMales();
+
+			if (addedMales && addedFemales && !addedStats) {
+				addStats();
+			}
+		});
+
+		
+
+		var addFemales = function() {
+			var circles = g.selectAll("circle")
+				.data(females).enter().append("circle")
+				.attr("cx", function(d,i) {
+					return xScale(d.Age);
+				})
+				.attr("cy", function(d,i) {
+					return yScale(d.Fare, d.Pclass);
+				})
+				.attr("r", 5)
+				.style("opacity", 0.3)
+				.attr("class", function(d,i) {
+					return addClass(d.Survived, d.Age, d.Pclass);
+				});
+			addedFemales = true;
+			if (addedMales) {
+				addStats();
+			}
+		}
+
+		var addMales = function() {
+			var squares = g.selectAll("rect")
+				.data(males).enter().append("rect")
+				.attr("x", 
+					function(d,i) {
+						return xScale(d.Age)-4;		//subtract 4 to center the square
+				})
+				.attr("y", function(d,i) {
+					return yScale(d.Fare, d.Pclass)-4;	//subtract 4 to center the square
+				})
+				.attr("width", 8)
+				.attr("height", 8)
+				.style("opacity", 0.3)
+				.attr("class", function(d,i) {
+					return addClass(d.Survived, d.Age, d.Pclass);
+				}
+			);
+			addedMales = true;
+			if (addedFemales) {
+				addStats();
+			}
+		}
+
+		var addClass = function(survived, age, pc) {
+			var className = "";
+			switch (survived) {
+				case '0':
+					className += "died ";
+					break;
+				case '1':
+					className += "lived ";
+					break;
+			}
+			if (age <= 12.5) {
+				className += "child ";
+			} else if (age <= 18.5) {
+				className += "teen ";
+			} else if (age <= 50.5) {
+				className += "adult ";
+			} else {
+				className += "senior ";
+			}
+			switch (pc) {
+				case 1:
+					className += "class1";
+					break;
+				case 2:
+					className += "class2";
+					break;
+				case 3:
+					className += "class3";
+					break;
+			}
+			return className;
+		}
+
+		var addStats = function() {
+			if (!addedStats) {
+				survivalRates = {
+					"children":
+						{ "one": document.querySelectorAll('.child.class1.lived').length /
+							 	 document.querySelectorAll('.child.class1').length,
+						  "two": document.querySelectorAll('.child.class2.lived').length / 
+							 	 document.querySelectorAll('.child.class2').length,
+						  "three": document.querySelectorAll('.child.class3.lived').length / 
+								   document.querySelectorAll('.child.class3').length
+						},
+					"teens":
+						{ "one": document.querySelectorAll('.teen.class1.lived').length /
+							 	 document.querySelectorAll('.teen.class1').length,
+						  "two": document.querySelectorAll('.teen.class2.lived').length / 
+							 	 document.querySelectorAll('.teen.class2').length,
+						  "three": document.querySelectorAll('.teen.class3.lived').length / 
+							 	   document.querySelectorAll('.teen.class3').length
+						},
+					"adults":
+						{ "one": document.querySelectorAll('.adult.class1.lived').length /
+							 	 document.querySelectorAll('.adult.class1').length,
+						  "two": document.querySelectorAll('.adult.class2.lived').length / 
+							 	 document.querySelectorAll('.adult.class2').length,
+						  "three": document.querySelectorAll('.adult.class3.lived').length / 
+							 	   document.querySelectorAll('.adult.class3').length
+						},
+					"seniors":
+						{ "one": document.querySelectorAll('.senior.class1.lived').length /
+								  document.querySelectorAll('.senior.class1').length,
+						  "two": document.querySelectorAll('.senior.class2.lived').length / 
+							 	 document.querySelectorAll('.senior.class2').length,
+						  "three": document.querySelectorAll('.senior.class3.lived').length / 
+							 	   document.querySelectorAll('.senior.class3').length
+						}
+				};
+				var newFare;
+				var percentSurvival;
+				var ageGroups = ["Children", "Teenagers", "Adults", "Seniors"];
+				var pc;
+				var ages = lineX;
+				ages.unshift(xScale(0));
+				ages.push(xScale(maxAge));
+				var classHeights = [];
+				for (var k=0; k<=4; k++) {
+					switch (k) {
+						case 1:
+							newFare = maxP1Fare;
+							break;
+						case 2:
+							newFare = maxP2Fare;
+							break;
+						case 3:
+							newFare = maxP3Fare;
+							break;
+						case 4:
+							newFare = 0;
+							break;
+					}
+					classHeights[k] = yScale(newFare, k);
+				}
+				classHeights[4] = yScale(newFare, 3)
+
+				for (var i=1; i<=4; i++) {
+					labels.append("text")
+						.attr("x", (ages[i]+ages[i-1])/2-35)
+						.attr("y", yScale(290,1))
+						.attr("font-size", 16)
+						.attr("alignment-baseline", "middle")
+						.text(ageGroups[i-1]);
+				}
+				console.log(ageGroups);
+
+				for (var i=1; i<ages.length; i++) {
+					for (var j=1; j<classHeights.length-1; j++) {
+						pc = j;
+						// i is age, j is class
+						switch (i) {
+							case 1:
+								switch (j) {
+									case 1:
+										percentSurvival = survivalRates.children.one;
+										break;
+									case 2:
+										percentSurvival = survivalRates.children.two;
+										break;
+									case 3:
+										percentSurvival = survivalRates.children.three;
+										break;
+								}
+								break;
+							case 2:
+								switch (j) {
+									case 1:
+										percentSurvival = survivalRates.teens.one;
+										break;
+									case 2:
+										percentSurvival = survivalRates.teens.two;
+										break;
+									case 3:
+										percentSurvival = survivalRates.teens.three;
+										break;
+								}
+								break;
+							case 3:
+								switch (j) {
+									case 1:
+										percentSurvival = survivalRates.adults.one;
+										break;
+									case 2:
+										percentSurvival = survivalRates.adults.two;
+										break;
+									case 3:
+										percentSurvival = survivalRates.adults.three;
+										break;
+								}
+								break;
+							case 4:
+								switch (j) {
+									case 1:
+										percentSurvival = survivalRates.seniors.one;
+										break;
+									case 2:
+										percentSurvival = survivalRates.seniors.two;
+										break;
+									case 3:
+										percentSurvival = survivalRates.seniors.three;
+										break;
+								}
+								break;
+						}
+						labels.append("text")
+							.attr("x", (ages[i]+ages[i-1])/2-12)
+							.attr("y", (classHeights[j]+classHeights[j+1])/2)
+							.attr("font-size", 16)
+							.attr("alignment-baseline", "middle")
+							.attr("font-weight", "bold")
+							.style("opacity", 0.7)
+							.text(percentSurvival.toFixed(2));
+					}
+				}
+				addedStats = true;
+			}
+		}
+
+		var addLines = function() {
+			var xInc = dataBounds.width / maxAge;
+			// Add x-axis
+			lines.append("line")
+				.attr("x1", padding.left)
+				.attr("x2", padding.left + dataBounds.width + 5)
+				.attr("y1", height - (padding.bottom))
+				.attr("y2", height - (padding.bottom))
+				.attr("stroke-width", 1)
+		        .attr("stroke", "black");
+		    // Add x-axis ticks & labels
+			for (var i=1; i<=maxAge; i++) {
+				var xx = padding.left + xInc*i;
+				var yy = height - (padding.bottom)
+				var l = lines.append("line")
+					.attr("x1", xx)
+					.attr("x2", xx)
+					.attr("y1", yy - 4)
+					.attr("y2", yy + 4)
+					.attr("stroke-width", 1)
+			        .attr("stroke", "black");
+				// Add text label to every 5 ticks
+				if (i%5 == 0) {
+					l.attr("y1", yy - 5)
+						.attr("y2", yy + 5)
+						.attr("stroke-width", 2);
+				    lines.append("text")
+				 		.attr("x", xx-5)
+				 		.attr("y", yy + 16)
+				 		.attr("font-size", 12)
+						.text(i);
+				}
+			}
+
+			// Add y-axis
+		    lines.append("line")
+				.attr("x1", padding.left)
+				.attr("x2", padding.left)
+				.attr("y1", height - (padding.bottom))
+				.attr("y2", height - (padding.bottom + dataBounds.height + 5))
+				.attr("stroke-width", 1)
+		        .attr("stroke", "black");
+
+			
+		    // Add y-axis labels
+		    for (var pc=1; pc <=3; pc++) {
+		    	var fare;
+		    	switch (pc) {
+		    		case 1:
+		    			fare = maxP1Fare;
+		    			break;
+		    		case 2:
+		    			fare = maxP2Fare;
+		    			break;
+		    		case 3:
+		    			fare = maxP3Fare;
+		    			break;
+		    	}
+			    for (var i=0; i<=roundUpTen(fare); i+=10) {
+			    	var xx = padding.left;
+			    		yy = yScale(i, pc);
+			    	lines.append("line")
+						.attr("x1", xx-4)
+						.attr("x2", xx+4)
+						.attr("y1", yy)
+						.attr("y2", yy)
+						.attr("stroke-width", 1)
+				        .attr("stroke", "black");
+					lines.append("text")
+						.attr("x", xx-14)
+						.attr("y", yy)
+						.attr("alignment-baseline", "middle")
+				        .attr("font-size", 10)
+				        .attr("text-anchor", "middle")
+				        .text(i);
+			    }
+			}
+
+			// Add horizontal lines separating classes
+			lineY = [height-line1Height, height-line2Height];
+			for (var i=0; i<lineY.length; i++) {
+				lines.append("line")
+					.attr("x1", padding.left)
+					.attr("x2", padding.left + dataBounds.width + 5)
+					.attr("y1", lineY[i])
+					.attr("y2", lineY[i])
+					.attr("stroke-dasharray", "10,15")
+					.attr("stroke-width", 1)
+			        .attr("stroke", "black");
+			};
+			
+			lineX = [xScale(ageCutoffs[0]), xScale(ageCutoffs[1]), xScale(ageCutoffs[2])];
+			for (var i=0; i<lineX.length; i++) {
+				lines.append("line")
+					.attr("x1", lineX[i])
+					.attr("x2", lineX[i])
+					.attr("y1", height - (padding.bottom))
+					.attr("y2", height - (padding.bottom + dataBounds.height + 5))
+					.attr("stroke-dasharray", "10,15")
+					.attr("stroke-width", 1)
+			        .attr("stroke", "black");
+			};
+		}
+
+		var addLabels = function () {
+			// Label graph
+			labels.append("text")
+				.attr("x", width/2)
+				.attr("y", padding.top/2)
+				.attr("font-size", 30)
+				.attr("alignment-baseline", "middle")
+				.attr("text-anchor", "middle")
+				.attr("font-weight", "bold")
+				.text("Titanic Survival Demographics");
+
+			// Label x-axis
+			labels.append("text")						
+				.attr("x", width/2)
+				.attr("y", height-padding.bottom/2+10)
+				.attr("font-size", 20)
+				.attr("text-anchor", "middle")		
+		        .text("Age of Passengers");
+			// Label y-axis	
+			labels.append("text")
+				.attr("x", -height/2)
+				.attr("y", padding.left/2 - 5)
+				.attr("font-size", 20)
+				.attr("text-anchor", "middle")
+				.attr("transform", "rotate(270)")
+				.text("Fares Paid ($)");
+
+			// Label p-classes
+			labels.append("text")
+				.attr("x", width-140)
+				.attr("y", height-110)
+				.attr("font-size", 16)
+				.attr("alignment-baseline", "middle")
+				.attr("font-weight", "bold")
+				.text("Third Class");
+			labels.append("text")
+				.attr("x", width-140)
+				.attr("y", height-190)
+				.attr("font-size", 16)
+				.attr("alignment-baseline", "middle")
+				.attr("font-weight", "bold")
+				.text("Second Class");
+			labels.append("text")
+				.attr("x", width-140)
+				.attr("y", height-431)
+				.attr("font-size", 16)
+				.attr("alignment-baseline", "middle")
+				.attr("font-weight", "bold")
+				.text("First Class");
+
+			// Label survivor rates by age/class category
+		}
+
+		var addLegend = function() {
+			// Add legend	
+			legend.append("rect")
+				.attr("x", width-150)
+				.attr("y", padding.top)
+				.attr("height", 120 )
+				.attr("width", 110)
+				.attr("stroke-width", 1)
+				.attr("stroke", "black")
+				.attr("fill", "none");
+			legend.append("text")
+				.attr("x", width-120)
+				.attr("y", padding.top+20)
+				.attr("font-size", 15)
+				.attr("font-weight", "bold")
+				.text("Legend");
+
+			legend.append("rect")
+				.attr("width", 8)
+				.attr("height", 8)
+				.attr("x", width-140)
+				.attr("y", padding.top+40)
+				.attr("fill", "green")
+				.attr("opacity", 0.3);
+			legend.append("text")
+				.attr("x", width-128)
+				.attr("y", padding.top+45)
+				.attr("font-size", 11)
+				.attr("alignment-baseline", "middle")
+				.text("Male-Survived");
+
+			legend.append("rect")
+				.attr("width", 8)
+				.attr("height", 8)
+				.attr("x", width-140)
+				.attr("y", padding.top+60)
+				.attr("fill", "red")
+				.attr("opacity", 0.3);
+			legend.append("text")
+				.attr("x", width-128)
+				.attr("y", padding.top+65)
+				.attr("font-size", 11)
+				.attr("alignment-baseline", "middle")
+				.text("Male-Died");
+					
+			legend.append("circle")
+				.attr("cx", width-136)
+				.attr("cy", padding.top+85)
+				.attr("r", 5)
+				.attr("opacity", 0.3)
+				.attr('fill', "green");
+			legend.append("text")
+				.attr("x", width-128)
+				.attr("y", padding.top+85)
+				.attr("font-size", 11)
+				.attr("alignment-baseline", "middle")
+				.text("Female-Survived");
+
+			legend.append("circle")
+				.attr("cx", width-136)
+				.attr("cy", padding.top+105)
+				.attr("r", 5)
+				.attr("opacity", 0.3)
+				.attr('fill', "red");
+			legend.append("text")
+				.attr("x", width-128)
+				.attr("y", padding.top+105)
+				.attr("font-size", 11)
+				.attr("alignment-baseline", "middle")
+				.text("Female-Died");
+		}
+
+		var roundUpTen = function(num) {
+			if (num %10 != 0) {
+				return num+10;
+			}
+			return num;
+		}
+
+	</script>
+
+</body>
+</html>

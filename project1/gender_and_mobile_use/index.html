@@ -1,0 +1,584 @@
+<html>
+	<head>
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+		<!-- Load the d3 library. -->
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="http://d3js.org/topojson.v1.min.js"></script>
+		<style>
+			body { 
+				font-family: "Open Sans", sans-serif; 
+			} 
+			div { 
+				margin: 30px; 
+			}
+			h3{
+				text-align:center;
+				margin-top:20px;
+			}
+			svg { 
+				border: solid rgb(55,55,55) 2px; 
+			}
+			#svgDevicesDiv{
+				width:648px;
+				margin:auto;
+				margin-bottom:30px;
+			}
+			#svgDevices{
+				border:none;
+			}
+			.explanation{
+				width:650px;
+				margin:auto;
+				margin-bottom:30px;
+				font-size:13px;
+			}
+			.bodyLabel{
+				fill:black;
+				font-size:12px;
+			}
+			.bodyLabelNumber{
+				fill:black;
+				font-size:12px;
+				font-weight:bold;
+			}
+			.legendYear{
+				font-weight:bold;
+			}
+		</style>
+	</head>
+	<body>
+
+		<h3>Gender and Mobile Use</h3>
+
+		<div class="explanation">
+			The timeline below displays the trend in growth or decline in device ownership among Americans over the course of four years, from 2011 to 2014. A darker gradient represents a larger proportion of Americans who own that device; the timeline as a whole aims to contrast the consistently predominant popularity of cell phones over other devices.
+		</div>
+		<!-- The SVG element will go in here -->
+		<div id="dataVisual">
+			<div id="svgDevicesDiv"></div>
+			<div class="explanation">
+				The visual below aims to break down and contrast the various behaviors among mobile users of different genders. The bars on either side of the device compare male and female preferences for various categories of apps. The center figure represents the relative amount of time spent daily by either gender on mobile devices.
+			</div>
+		</div>	
+		<script>
+			
+		/*first visual represents device ownership*/
+		var svgDevices = d3.select("#svgDevicesDiv").append("svg")
+			.attr("id","svgDevices")
+			.attr("width","648")
+			.attr("height","180");
+
+		var deviceBarsGroup = svgDevices.append("g")
+			.attr("transform","translate(0,50)");
+
+		var deviceBarsLegend = svgDevices.append("g")
+			.attr("transform","translate(1,40)");
+
+		var legendBorder = deviceBarsLegend.append("rect")
+			.attr("width","645")
+			.attr("height","30")
+			.attr("x",0)
+			.attr("y",-30)
+			.attr("fill","none")
+			.attr("stroke","black")
+			.attr("stroke-width",1);
+
+		/*second visual represents device & gender*/
+		var svgGender = d3.select("#dataVisual").append("svg")
+			.attr("width", "1280")
+			.attr("height", "600");
+		
+		var phoneGroup = svgGender.append("g")
+			.attr("width", "1000")
+			.attr("height", "400")
+			.style("fill", "red")
+			.attr("transform", "translate(490,60)");
+
+		var genderBarsGroup = svgGender.append("g")
+			.attr("transform","translate(0,30)");
+		
+		var centerPhone = phoneGroup.append("rect")
+			.attr("width", "300")
+			.attr("height", "500")
+			.style("fill", "#404040")
+			.attr("rx", "20")
+			.attr("ry", "20");
+
+		var phoneScreen = phoneGroup.append("rect")
+			.attr("width", "250")
+			.attr("height", "410")
+			.style("fill", "#E5E4E2")
+			.attr("transform", "translate(25, 25)");
+
+		var phoneButton = phoneGroup.append("circle")
+			.attr("cx", "147")
+			.attr("cy", "465")
+			.attr("r", "15")
+			.style("fill", "#888");
+
+		/*body design*/
+		var bodyOutline = phoneGroup.append("clipPath")
+			.attr("id","bodyOutline");
+
+		var head = bodyOutline.append("circle")
+			.attr("cx", "145")
+			.attr("cy", "80")
+			.attr("r", "40");
+
+		var neck = bodyOutline.append("rect")
+			.attr("width", "30")
+			.attr("height", "20")
+			.attr("transform", "translate(130, 115)");
+
+		var chest = bodyOutline.append("rect")
+			.attr("width", "125")
+			.attr("height",	"50")
+			.attr("transform", "translate(85, 135)");
+
+		var leftArm = bodyOutline.append("rect")
+			.attr("width", "25")
+			.attr("height", "150")
+			.attr("transform", "translate(70, 135)")
+			.attr("rx", "20")
+			.attr("ry", "15");
+
+		var rightArm = bodyOutline.append("rect")
+			.attr("width", "25")
+			.attr("height", "150")
+			.attr("transform", "translate(200, 135)")
+			.attr("rx", "20")
+			.attr("ry", "15");
+
+		var torso = bodyOutline.append("rect")
+			.attr("width", "95")
+			.attr("height", "120")
+			.attr("transform", "translate(100, 180)");
+
+		var leftLeg = bodyOutline.append("rect")
+			.attr("width", "35")
+			.attr("height", "140")
+			.attr("transform", "translate(100,280)")
+			.attr("rx", "20")
+			.attr("ry", "15");
+
+		var rightLeg = bodyOutline.append("rect")
+			.attr("width", "35")
+			.attr("height", "140")
+			.attr("transform", "translate(160,280)")
+			.attr("rx", "20")
+			.attr("ry", "15");
+
+		var bodyFill = phoneGroup.append("rect")
+			.attr("width","155")
+			.attr("height","380")
+			.attr("x","70")
+			.attr("y","40")
+			.style("fill","rgb(171, 171, 171)")
+			.attr("clip-path","url(#bodyOutline)");
+
+		/*sides of second visual, pink & blue strips*/
+		var boyEnd = svgGender.append("rect")
+			.attr("width", "20")
+			.attr("height", "600")
+			.attr("y","0")
+			.style("fill", "#13A1CB");
+		
+		var girlEnd = svgGender.append("rect")
+			.attr("width", "20")
+			.attr("height", "600")
+			.attr("y","0")
+			.attr("transform", "translate(1260,0)")
+			.style("fill", "#EB77A6").style("opacity");
+
+		/*enter data*/
+		d3.json("data.json", function(error, data){
+			if(error) return console.warn(error);
+
+			/*top graph on device ownership*/
+			var devices = data.device_timeline;
+			device_increment=0;
+			device_increment_x=0;
+			device_increment_y=0;
+			var deviceColors = d3.scale.linear()
+				.domain([0.1,0.9]).range(["#C8A2C8", "#4E387E"]);
+			for(var device in devices){
+				for(var year in devices[device]){
+					deviceBarsGroup.append("rect")
+						.attr("width","162")
+						.attr("height","30")
+						.style("fill", function(){
+							return deviceColors(devices[device][year]);
+							/* d3 scaling output:
+								color will be darker the greater the proportion*/
+						})
+						.attr("y", device_increment_y)
+						.attr("x", device_increment_x);
+					device_increment_x += 162;
+					/* 162 = the width of each year section */
+				}
+				device_increment_y += 30;
+				/* 30 = the height of each bar */
+				device_increment_x = 0;
+				device_increment++;
+			}
+
+			/* legend for the top graph */
+			var gradientLegend = svgGender.append("svg:defs")
+				.append("svg:linearGradient")
+				.attr("id","gradientLegend")
+				.attr("x1","0%")
+				.attr("y1","100%")
+				.attr("x2","100%")
+				.attr("y2","100%");
+			gradientLegend.append("svg:stop")
+				.attr("offset","0%")
+				.attr("stop-color","#C8A2C8")
+				.attr("stop-opacity",1);
+			gradientLegend.append("svg:stop")
+				.attr("offset","100%")
+				.attr("stop-color","#4E387E")
+				.attr("stop-opacity",1);
+
+			deviceBarsLegend.append("text")
+				.text("% device ownership among all Americans")
+				.attr("x","85")
+				.attr("y","-8")
+				.style("font-size","11px");
+			deviceBarsLegend.append("rect")
+				.attr("width","75")
+				.attr("height","20")
+				.attr("x","5")
+				.attr("y","-25")
+				.attr("fill","url(#gradientLegend)");
+			deviceBarsLegend.append("text")
+				.text("0")
+				.attr("x","10")
+				.attr("y","-8")
+				.style("font-size","10px")
+				.style("fill","white");
+			deviceBarsLegend.append("text")
+				.text("100")
+				.attr("x","60")
+				.attr("y","-8")
+				.style("font-size","10px")
+				.style("fill","white");
+			deviceBarsGroup.append("line")
+				.attr("x1", "0")
+				.attr("y1", "91")
+				.attr("x2", "650")
+				.attr("y2", "91")
+				.style("stroke","black")
+				.style("stroke-width","2");
+			deviceBarsGroup.append("line")
+				.attr("x1", "162")
+				.attr("y1", "88")
+				.attr("x2", "162")
+				.attr("y2", "94")
+				.style("stroke","black")
+				.style("stroke-width","2");
+			deviceBarsGroup.append("line")
+				.attr("x1", "324")
+				.attr("y1", "88")
+				.attr("x2", "324")
+				.attr("y2", "94")
+				.style("stroke","black")
+				.style("stroke-width","2");
+			deviceBarsGroup.append("line")
+				.attr("x1", "486")
+				.attr("y1", "88")
+				.attr("x2", "486")
+				.attr("y2", "94")
+				.style("stroke","black")
+				.style("stroke-width","2");
+			deviceBarsGroup.append("text")
+				.text("2011")
+				.attr("class","legendYear")
+				.attr("x","15")
+				.attr("y","105")
+				.attr("text-anchor","middle")
+				.style("font-size","11px");
+			deviceBarsGroup.append("text")
+				.text("2012")
+				.attr("class","legendYear")
+				.attr("x","162")
+				.attr("y","105")
+				.attr("text-anchor","middle")
+				.style("font-size","11px");
+			deviceBarsGroup.append("text")
+				.text("2013")
+				.attr("class","legendYear")
+				.attr("x","324")
+				.attr("y","105")
+				.attr("text-anchor","middle")
+				.style("font-size","11px");
+			deviceBarsGroup.append("text")
+				.text("2014")
+				.attr("class","legendYear")
+				.attr("x","486")
+				.attr("y","105")
+				.attr("text-anchor","middle")
+				.style("font-size","11px");
+			deviceBarsGroup.append("text")
+				.text("2015")
+				.attr("class","legendYear")
+				.attr("x","633")
+				.attr("y","105")
+				.attr("text-anchor","middle")
+				.style("font-size","11px")
+			deviceBarsGroup.append("text")
+				.text("cell phone")
+				.attr("x", "10")
+				.attr("y", "20")
+				.attr("font-size", "13")
+				.style("fill", "#E5E4E2")
+			deviceBarsGroup.append("text")
+				.text("smartphone")
+				.attr("x", "10")
+				.attr("y", "50")
+				.attr("font-size", "13")
+				.style("fill", "#E5E4E2")
+			deviceBarsGroup.append("text")
+				.text("tablet")
+				.attr("x", "10")
+				.attr("y", "80")
+				.attr("font-size", "13")
+				.style("fill", "#E5E4E2")
+
+
+			/* add data for the second visual */
+			var men = data.men;
+			var women = data.women;
+
+			/* represent time spent on phone daily - MEN */
+			var men_begin_shading = 422;
+			var men_shade_counter = 0;
+			/* manually assign color shades - looks better for this section */
+			var menShades = ["#0B617A", "#0D718E", "#0F81A2", "#13A1CB", "#5ABDDB", "#A1D9EA"];
+			for(var time in men["time_spent"]){
+				var height = 380*men["time_spent"][time];
+				phoneGroup.append("rect")
+					.attr("width","78")
+					.attr("height",height)
+					.attr("x","70")
+					.attr("y",function(){
+						return men_begin_shading-height;
+					})
+					.style("fill",function(){
+						return menShades[men_shade_counter];
+					})
+					.style("stroke", "white").style("stroke-width","1")
+					.attr("clip-path","url(#bodyOutline)");
+				men_shade_counter++;
+				men_begin_shading -= height;
+			}
+
+			/* represent time spent on phone daily - WOMEN */
+			var women_begin_shading = 422;
+			var women_shade_counter = 0;
+			var womenShades = ["#8D4764", "#BC5F85", "#D46B95", "#EB77A6", "#F1A0C1", "#F5BBD2"];
+			for(var time in women["time_spent"]){
+				var height = 380*women["time_spent"][time];
+				phoneGroup.append("rect")
+					.attr("width","80")
+					.attr("height",height)
+					.attr("x","148")
+					.attr("y",function(){
+						return women_begin_shading-height;
+					})
+					.style("fill",function(){
+						return womenShades[women_shade_counter];
+					})
+					.style("stroke", "white")
+					.attr("clip-path","url(#bodyOutline)");
+				women_shade_counter++;
+				women_begin_shading -= height;
+			}
+
+			/* label for gender & time use (figure) */
+			phoneGroup.append("text")
+				.text("hours spent on mobile daily")
+				.attr("class", "bodyLabel")
+				.attr("x","147")
+				.attr("y","37")
+				.attr("text-anchor","middle");
+			phoneGroup.append("text")
+				.text("proportion who spend this amount of time")
+				.attr("class", "bodyLabel")
+				.attr("x","-360")
+				.attr("y","46")
+				.attr("transform","rotate(270)");
+			phoneGroup.append("path")
+				.attr("d","M 67,187 L 60,187 60,285 67,285")
+				.style("fill","transparent")
+				.style("stroke","black")
+				.style("stroke-width","1");
+			phoneGroup.append("path")
+				.attr("d","M 60,236 L 53,236")
+				.style("fill","transparent")
+				.style("stroke","black")
+				.style("stroke-width","1");
+			phoneGroup.append("text")
+				.text("0")
+				.attr("class", "bodyLabel")
+				.attr("class", "bodyLabelNumber")
+				.attr("x","147")
+				.attr("y","50")
+				.attr("text-anchor","middle");
+			phoneGroup.append("text")
+				.text("0-0.5")
+				.attr("class", "bodyLabel")
+				.attr("class", "bodyLabelNumber")
+				.attr("x","147")
+				.attr("y","78")
+				.attr("text-anchor","middle");
+			phoneGroup.append("text")
+				.text("0.5-1")
+				.attr("class", "bodyLabel")
+				.attr("class", "bodyLabelNumber")
+				.attr("x","147")
+				.attr("y","120")
+				.attr("text-anchor","middle");
+			phoneGroup.append("text")
+				.text("1-2")
+				.attr("class", "bodyLabel")
+				.attr("class", "bodyLabelNumber")
+				.attr("x","147")
+				.attr("y","170")
+				.attr("text-anchor","middle");
+			phoneGroup.append("text")
+				.text("2-3")
+				.attr("class", "bodyLabel")
+				.attr("class", "bodyLabelNumber")
+				.attr("x","147")
+				.attr("y","250")
+				.attr("text-anchor","middle");
+			phoneGroup.append("text")
+				.text("3-4")
+				.attr("class", "bodyLabel")
+				.attr("class", "bodyLabelNumber")
+				.attr("x","147")
+				.attr("y","350")
+				.attr("text-anchor","middle");
+			phoneGroup.append("path")
+				.attr("d","M 157,345 L 165, 350")
+				.style("stroke","black")
+				.style("stroke-width","1");
+			phoneGroup.append("path")
+				.attr("d","M 137,345 L 129, 340")
+				.style("stroke","black")
+				.style("stroke-width","1");
+			phoneGroup.append("text")
+				.text("4+")
+				.attr("class", "bodyLabel")
+				.attr("class", "bodyLabelNumber")
+				.attr("x","147")
+				.attr("y","410")
+				.attr("text-anchor","middle");
+
+			/* women mobile app usage (phone bars) */
+			var women_preferred_app = women.preferred_apps;
+			var start_height = 70;
+			var total_width = 470;
+			for(var app in women_preferred_app){
+				var text_position;
+				genderBarsGroup.append("rect")
+					.attr("width",function(){
+						return women_preferred_app[app]*total_width;
+					})
+					.attr("height","30")
+					.attr("x",790)
+					.attr("y", function(){
+						return start_height;
+					})
+					.style("fill","#EB77A6")
+					.style("opacity",0.8);
+
+				genderBarsGroup.append("text")
+					.text(Math.floor(women_preferred_app[app]*100)+"%")
+					.attr("x", 800)
+					.attr("y", function(){
+						return start_height+20;
+					})
+					.style("font-size","15px")
+					.style("fill","#CC0033");
+
+				genderBarsGroup.append("text")
+					.text(app)
+					.attr("x",function(){
+						return 800+(women_preferred_app[app]*total_width);
+					})
+					.attr("y",function(){
+						return start_height+20;
+					})
+					.style("font-size","12px")
+					.style("fill","#CC0033");
+
+				start_height += 45;
+			}
+
+			/* men mobile app usage (phone bars) */
+			var men_preferred_app = men.preferred_apps;
+			var start_height = 70;
+			var total_width = 470;
+			for(var app in men_preferred_app){
+				genderBarsGroup.append("rect")
+					.attr("width",function(){
+						return men_preferred_app[app]*total_width;
+					})
+					.attr("height","30")
+					.attr("x",function(){
+						return 490-men_preferred_app[app]*total_width;
+					})
+					.attr("y", function(){
+						return start_height;
+					})
+					.style("fill","#13A1CB")
+					.style("opacity",0.8);
+
+				genderBarsGroup.append("text")
+					.text(Math.floor(men_preferred_app[app]*100)+"%")
+					.attr("x", 480)
+					.attr("y", function(){
+						return start_height+20;
+					})
+					.attr("text-anchor","end")
+					.style("font-size","15px")
+					.style("fill","rgb(1, 71, 140)");
+
+				genderBarsGroup.append("text")
+					.text(app)
+					.attr("x",function(){
+						return 480-(men_preferred_app[app]*total_width);
+					})
+					.attr("y",function(){
+						return start_height+20;
+					})
+					.attr("text-anchor","end")
+					.style("font-size","12px")
+					.style("fill","rgb(1, 71, 140)");
+
+				start_height += 45;
+			}
+			
+			/* phone bars helptext */
+			genderBarsGroup.append("text")
+				.text("% who use these mobile apps daily")
+				.attr("x","640")
+				.attr("y","10")
+				.attr("text-anchor","middle");
+			genderBarsGroup.append("path")
+				.attr("d","M 775,5 L 850,5 850,50")
+				.attr("stroke","black")
+				.attr("stroke-width","1")
+				.attr("fill","none");
+			genderBarsGroup.append("path")
+				.attr("d","M 500,5 L 425,5 425,50")
+				.attr("stroke","black")
+				.attr("stroke-width","1")
+				.attr("fill","none");
+		})
+		
+		</script>
+
+	</body>
+</html>

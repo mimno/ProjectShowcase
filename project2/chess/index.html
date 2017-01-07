@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <!-- Load the d3 library. -->
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <!-- <script src="https://d3js.org/topojson.v1.min.js"></script> -->
+
+    <link rel="stylesheet" href="chessboard-0.3.0/css/chessboard-0.3.0.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="chessboard-0.3.0/js/chessboard-0.3.0.js"></script>
+    <script src="chessboard-0.3.0/chess.js"></script>
+    <script src="chessboard.js"></script>
+    <script src="colorlegend2.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <title>Winning Percentages of Chess Openings</title>
+</head>
+<body>
+
+
+<div class="heading">Winning Percentages of Chess Openings</div>
+
+
+<div id="myContainer" class="container">
+
+    <div id="buttons">
+        <input type="button" id="start" value="restart"/>
+        <input type="button" id="undo" value="undo"/>
+        <input type="button" id="instruction" value="instructions"/>
+    </div>
+
+    <div id="chessboard" style="width: 400px"></div>
+    <div id="sunburst"></div>
+    <div id="colorlegend" class="colorlegendVertical"></div>
+    <div id="possiblemoves"></div>
+
+</div>
+
+<div id="instructionModal" class="modalDialog">
+    <div>
+        <input type="button" id="close" value="&times"/>
+
+        <h1>Instructions</h1>
+
+        <h2>How to Use the Visualization</h2>
+
+        <p>This project shows the winning percentages of both players according to their opening sequences with data
+            from 1000 games. </p>
+
+        <p>The sunburst layout displays the most popular move sequences made during games in our database. Each node is
+            equivalent to making a move (or multiple moves) on the chessboard. Clicking on a node
+            will generate the equivalent move on the chessboard and change the sunburst layout to display the next three
+            most popular move sequences.
+        </p>
+
+        <p>White's moves are depicted by a solid fill and black's moves is depicted by a patterned-fill. The fill color
+            indicates how successful that particular move sequence was for the white player (green = good, red = bad).
+            Finally, while hovering over a node, the first move in that sequence will be highlighted on the board in
+            blue.
+        </p>
+
+        <p>It is also possible to make legal moves directly on the chess board. The sunburst layout should update and
+            display the next three most popular sequences. The sunburst circle becomes gray when a move which is not in
+            our database is made. </p>
+
+        <p>The user may reset the chessboard and the sunburst layout by clicking "restart". The user may undo a move by
+            clicking "undo" or by clicking the center of the sunburst layout. </p>
+
+        <p>The bottom bars show the winning and tie percentages corresponding to the next possible moves that can be
+            made by the current player, given the current state of the game.</p>
+
+        <h2>FAQ</h2>
+
+        <h4>1. How do you calculate the score for a particular move sequence?</h4>
+
+        <p>
+            Score = (# White wins * 1.0 + # Ties * 0.5 + # Black wins * 0.0) / (# White wins + # Ties + # Black wins)
+        </p>
+
+        <h4>2. If a node in the sunburst is bright green does that mean black cannot win once the game has reached this
+            position?</h4>
+
+        <p>No. Even even if the color is bright green this does not mean that in an actual game of chess the
+            black player cannot win. Our visualization only accounts for the games we analyzed.
+        </p>
+
+        <h2>References</h2>
+        <ul>
+            <li>Chess games database: http://www.ficsgames.org/</li>
+            <li>Chessboard API: http://http://chessboardjs.com/</li>
+            <li>Chess library: https://github.com/jhlywa/chess.js</li>
+        </ul>
+
+    </div>
+</div>
+
+
+<!-- <form name="insertMove"> Insert a move in the box: <br>
+  Move: <input type="text" id="move" value="">
+  <input type="button" id="submitMove" name="submit" value="Submit">
+</form>
+
+
+<input type="text" id="inputMove" placeholder="input a move" />
+<input type="button" id="makeMove" value="make the move"/>
+<div>PGN: <span id="pgn"></span></div> -->
+<!--
+<input type="button" id="move1" value="move1">
+<input type="button" id="move2" value="move2"> -->
+
+
+</body>
+</html>

@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CS 3300 Project 2</title>
+  	<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+
+    <!-- Basic Page Styles
+    ================================================== -->
+	<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: "Roboto Slab"; }
+        .container { width: 1000px; margin: 3em auto; font-family: "Roboto Slab"; }
+        html { background: #dfdfdf; font-family: sans-serif; font-size: 1.05em; line-height: 1.25; }
+        .paper { width: 100%; background: #fff; border: 1px solid #cfcfcf; box-shadow: 0px 3px 4px 0px rgba(0,0,0,0.2); font-family: Montserrat; }
+        .card { padding: 1.5em 2.5em; margin: 3em auto; }
+        .sheet { padding: 5em; margin: 3em auto; }
+        p { margin-bottom: 2em; }
+        small, .muted { color: #555; }
+        header { margin-bottom: 5em; }
+        .response { display: inline-block; line-height: 1.5; border-left: 3px solid #dfdfdf; padding: .5em 0 .5em 1.5em; }
+		.main-title { color: #444; font-size: 3.5em; text-align: center; margin: .5em auto; padding: 0; font-family: "Roboto Slab"; }
+		.sub-title { color: #555; font-size: 1.35em; line-height: 1.75; text-align: center; border-top: 1px solid #dfdfdf; padding-top: 1em; }
+		.section-title { color: #444; font-size: 3.5em; text-align: center; margin: 2em auto .5em auto; padding: 0; }
+		svg { }
+		.btn {
+			font-family: Montserrat;
+			font-size: 12px;
+			padding: 5px 10px;
+			border-width: 3px;
+			border-style: solid;
+			cursor: pointer;
+
+		}
+		.btn-default {
+			background: #dfdfdf;
+			color: #777777;
+			border-color: #777777;
+			transition: all 100ms ease;
+		}
+		.btn-default:hover {
+			background: #777777;
+			color: #ffffff;
+		}
+    </style>
+
+	<script>
+		// Sets up global variables
+		// ==================================================
+		var dataLabels = { ppp: "GDP at PPP", le: "Life Expectancy", cal: "Calories Consumed" }
+		var dataColors = { ppp: "#AEC878", le: "#74C8C4", cal: "#F7B078" }
+		var dataColorsRGB = { ppp: [174, 200, 120], le: [116, 200, 196], cal: [247, 176, 120] }
+		var dataUnits = { ppp: "USD $", le: "Years", cal: "Calories" }
+		var cardPinned = false;
+		var displayTrendPrefix = "cal";
+
+		var mainData;
+		var pppMax;
+		var leMax;
+		var calMax;
+
+		function allSelect() {
+			mainData.forEach(function(row, i) {
+				row.selected = false;
+				clickCountryToggle(row, true);
+			});
+			updateVisuals();
+		}
+
+		function invertSelect() {
+			mainData.forEach(function(row, i) {
+				clickCountryToggle(row, true);
+			});
+			updateVisuals();
+		}
+
+		function displayTrend(prefix) {
+			displayTrendPrefix = prefix;
+			updateVisuals();
+		}
+
+
+
+		function colorRGBA(rgb, a) {
+			return "rgba(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ", " + a + ")";
+		}
+	</script>
+
+
+
+
+</head>
+<body>
+
+	<div class="container">
+	<header class="paper card">
+		<h1 class="main-title">
+			Countries, Calories and <br> Life Expectancy
+		</h1>
+		<p class="sub-title">
+			<b>CS 3300 Project Two</b>
+		</p>
+	</header>
+	</div>
+
+	<!-- View Countries Seperately
+	================================================== -->
+	<section>
+
+		<h2 class="section-title">View Countries Seperately</h2>
+		<div id="countries-seperate">
+			<div id="pinMiniTrends" class="paper">
+				<button onclick="pinCard('pinMiniTrends')" class="btn btn-default" id="pinMiniTrends-pinBtn">Pin Card</button>
+				<div id="map"></div>
+				<div id="miniTrendsData"></div>
+			</div>
+			<div id="miniTrends" class="paper"></div>
+		</div>
+
+		<h2 class="section-title">View Countries Together</h2>
+		<div id="countries-together">
+			<div id="pinCountrySelect" class="paper">
+				<button onclick="allSelect()" class="btn btn-default" id="allSelectBtn">Select All</button>
+				<button onclick="invertSelect()" class="btn btn-default" id="invertSelectBtn">Invert Selection</button>
+				<div id="countrySelection"></div>
+			</div>
+			<div id="selectPlots">
+				<div id="largeTrends" class="paper"></div>
+
+				<div id="displaySelect" class="paper">
+					<button onclick="displayTrend('ppp')" class="btn" id="displaySelect-ppp">PPP</button>
+					<button onclick="displayTrend('le')" class="btn" id="displaySelect-le">LE</button>
+					<button onclick="displayTrend('cal')" class="btn" id="displaySelect-cal">CAL</button>
+				</div>
+
+
+			</div>
+		</div>
+
+
+		<!-- Trends by Country
+		================================================== -->
+		<style>
+			#countries-seperate,
+			#countries-together { overflow: hidden; margin: 0 auto; padding: 25px 50px; max-width: 1500px; }
+
+			#pinMiniTrends,
+			#pinCountrySelect { float: left; width: 500px; text-align: center; padding-top: 2em; }
+
+			#miniTrends,
+			#selectPlots { float: right; width: 850px; margin-bottom: 2.5em; text-align: center; }
+
+			#pinCountrySelect { max-height: 500px; overflow-y: scroll; }
+
+			#displaySelect { margin: 0.25em auto 1.5em auto; padding: 1em; width: 50%; background: #ffffff; }
+			#displaySelect .btn { margin: 0 0.5em; }
+
+			#all-countries {float: left; width: 400px; margin-left: 50px;}
+			#all-graphs-ppp { float: right; width: 900px; margin-right: 60px;}
+			#all-graphs-le { float: right; width: 900px; margin-right: 60px;}
+			#all-graphs-cal { float: right; width: 900px; margin-right: 60px;}
+
+			.axis path { fill: none; stroke: #777777;}
+            .axis line { stroke: #777777; }
+            .axis text { fill: #555555; font-size: 12px; }
+
+
+
+		</style>
+
+		<!-- Generate Trends by Country Visuals
+		================================================== -->
+
+		<script>
+			// Sets up SVG Canvas within #map element
+			// ==================================================
+			var mapWidth = 450,
+				mapHeight = 250;
+
+			var mapProjection = d3.geo.equirectangular().scale(70).translate([mapWidth / 2, mapHeight / 2]);
+			var worldPathData = d3.geo.path().projection(mapProjection);
+
+			var map_svg = d3.select("#map").append("svg")
+				.attr("width", mapWidth)
+				.attr("height", mapHeight);
+			var worldData;
+			var countryPaths;
+			var countryData;
+
+
+
+			// Sets up SVG Canvas within #miniTrendsData element
+			// ==================================================
+			var countryDataWidth = 500,
+				countryDataHeight = 150,
+				countryDataPadding = 75;
+
+			var countryData_svg = d3.select("#miniTrendsData").append("svg")
+				.attr("width", countryDataWidth)
+				.attr("height", countryDataHeight);
+
+			var countryData_name = countryData_svg.append("text")
+				.attr("x", countryDataPadding)
+				.attr("y", 25)
+				.attr("fill", "steelblue")
+				.attr("font-size", 21);
+			var countryData_year = countryData_svg.append("text")
+				.attr("x", countryDataWidth - countryDataPadding)
+				.attr("y", 25)
+				.attr("text-anchor", "end")
+				.attr("fill", "#777777")
+				.attr("font-size", 16);
+
+			var countryData_legend = countryData_svg.append("g");
+			countryData_legend.append("rect")
+				.attr("x", countryDataPadding)
+				.attr("y", 55)
+				.attr("width", 20)
+				.attr("height", 5)
+				.attr("fill", dataColors.ppp);
+			countryData_legend.append("rect")
+				.attr("x", countryDataPadding)
+				.attr("y", 80)
+				.attr("width", 20)
+				.attr("height", 5)
+				.attr("fill", dataColors.le);
+			countryData_legend.append("rect")
+				.attr("x", countryDataPadding)
+				.attr("y", 105)
+				.attr("width", 20)
+				.attr("height", 5)
+				.attr("fill", dataColors.cal);
+			countryData_legend.append("text")
+				.attr("x", countryDataPadding + 35)
+				.attr("y", 55)
+				.attr("dominant-baseline", "middle")
+				.attr("fill", "#a7a7a7")
+				.attr("font-size", 16)
+				.text(dataLabels.ppp);
+			countryData_legend.append("text")
+				.attr("x", countryDataPadding + 35)
+				.attr("y", 80)
+				.attr("dominant-baseline", "middle")
+				.attr("fill", "#a7a7a7")
+				.attr("font-size", 16)
+				.text(dataLabels.le);
+			countryData_legend.append("text")
+				.attr("x", countryDataPadding + 35)
+				.attr("y", 105)
+				.attr("dominant-baseline", "middle")
+				.attr("fill", "#a7a7a7")
+				.attr("font-size", 16)
+				.text(dataLabels.cal);
+
+			var countryData_info = countryData_svg.append("g");
+			var countryData_info_ppp = countryData_info.append("text")
+				.attr("x", countryDataWidth - countryDataPadding)
+				.attr("y", 55)
+				.attr("text-anchor", "end")
+				.attr("dominant-baseline", "middle")
+				.attr("fill", "#777777")
+				.attr("font-size", 16);
+			var countryData_info_le = countryData_info.append("text")
+				.attr("x", countryDataWidth - countryDataPadding)
+				.attr("y", 80)
+				.attr("text-anchor", "end")
+				.attr("dominant-baseline", "middle")
+				.attr("fill", "#777777")
+				.attr("font-size", 16);
+			var countryData_info_cal = countryData_info.append("text")
+				.attr("x", countryDataWidth - countryDataPadding)
+				.attr("y", 105)
+				.attr("text-anchor", "end")
+				.attr("dominant-baseline", "middle")
+				.attr("fill", "#777777")
+				.attr("font-size", 16);
+
+
+			// Sets up SVG Canvas within #miniTrends element
+			// ==================================================
+			var trendWidth = 850,
+				trendHeight = 4100,
+				trendPadding = 50,
+				trendSize = 100;
+
+			var trend_svg = d3.select("#miniTrends").append("svg")
+				.attr("width", trendWidth)
+				.attr("height", trendHeight);
+
+
+			// Sets up SVG Canvas within #countrySelection element
+			// ==================================================
+				var countrySelHeight = 2000;
+				var countrySelWidth = 450;
+
+				var largeTrendsHeight = 500;
+				var largeTrendsWidth = 850;
+				var largeTrendsPadding = 100;
+				var largeTrendsGraphHeight = 250;
+
+				var countrySel = d3.select("#countrySelection").append("svg")
+					.attr("height", countrySelHeight)
+					.attr("width", countrySelWidth);
+
+				var largeTrends = d3.select("#largeTrends").append("svg")
+					.attr("height", largeTrendsHeight)
+					.attr("width", largeTrendsWidth);
+
+				d3.select("#displaySelect-ppp")
+					.style("border-color", dataColors.ppp)
+					.style("color", dataColors.ppp)
+					.style("background-color", colorRGBA(dataColorsRGB.ppp, 0.25))
+					.on("mouseover", function(){
+							d3.select("#displaySelect-ppp")
+								.transition()
+								.style("color", "#ffffff")
+								.style("background-color", colorRGBA(dataColorsRGB.ppp, 1));
+						})
+					.on("mouseout", function(){
+							d3.select("#displaySelect-ppp")
+								.transition()
+								.style("color", dataColors.ppp)
+								.style("background-color", colorRGBA(dataColorsRGB.ppp, 0.25));
+						});
+
+				d3.select("#displaySelect-le")
+					.style("border-color", dataColors.le)
+					.style("color", dataColors.le)
+					.style("background-color", colorRGBA(dataColorsRGB.le, 0.25))
+					.on("mouseover", function(){
+							d3.select("#displaySelect-le")
+								.transition()
+								.style("color", "#ffffff")
+								.style("background-color", colorRGBA(dataColorsRGB.le, 1));
+						})
+					.on("mouseout", function(){
+							d3.select("#displaySelect-le")
+								.transition()
+								.style("color", dataColors.le)
+								.style("background-color", colorRGBA(dataColorsRGB.le, 0.25));
+						});
+
+					d3.select("#displaySelect-cal")
+					.style("border-color", dataColors.cal)
+					.style("color", dataColors.cal)
+					.style("background-color", colorRGBA(dataColorsRGB.cal, 0.25))
+					.on("mouseover", function(){
+							d3.select("#displaySelect-cal")
+								.transition()
+								.style("color", "#ffffff")
+								.style("background-color", colorRGBA(dataColorsRGB.cal, 1));
+						})
+					.on("mouseout", function(){
+							d3.select("#displaySelect-cal")
+								.transition()
+								.style("color", dataColors.cal)
+								.style("background-color", colorRGBA(dataColorsRGB.cal, 0.25));
+						});
+
+
+			// Start playing with the data!
+			// ==================================================
+			d3.json("world-50m.json", function(error, world) {
+				d3.csv("data.csv", function(data){
+
+					// Calculate some relevant information about the data
+					// ==================================================
+					mainData = data;
+
+					// Calculate the Max of each variable accross all years
+					pppMax = d3.max(mainData, function(country){
+							var pppArr = [+country.ppp1990, +country.ppp1995, +country.ppp2000, +country.ppp2005];
+							return d3.max(pppArr);
+						});
+					leMax = d3.max(mainData, function(country){
+							var leArr = [+country.le1990, +country.le1995, +country.le2000, +country.le2005];
+							return d3.max(leArr);
+						});
+					calMax = d3.max(mainData, function(country){
+							var calArr = [+country.cal1990, +country.cale1995, +country.cal2000, +country.cal2005];
+							return d3.max(calArr);
+						});
+
+
+
+					// Interaction
+					// ==================================================
+					function mouseoverMaptoTrend(row) {
+						d3.selectAll(".label-country-" + row.id).attr("fill", "steelblue");
+						d3.selectAll(".bg-country-" +  row.id).attr("fill", "#f7f7f7");
+						d3.selectAll(".guideline-country-" +  row.id).style("stroke", "#bfbfbf");
+						map_svg.selectAll(".country-" +  row.id)
+							.attr("fill", "steelblue")
+							.style("stroke", "steelblue")
+							.style("stroke-width", 1.5);
+						countryData_name.text(row.country);
+						countryData_year.text("Year: 2005");
+						countryData_info.style("display", "block");
+						countryData_info_ppp.text((+row.ppp2005).toFixed(2));
+						countryData_info_le.text((+row.le2005).toFixed(2));
+						countryData_info_cal.text(row.cal2005);
+					}
+
+					function mouseoutMaptoTrend(row) {
+						d3.selectAll(".label-country-" + row.id).attr("fill", "#555555");
+						d3.selectAll(".bg-country-" + row.id).attr("fill", "#ffffff");
+						d3.selectAll(".guideline-country-" + row.id).style("stroke", "#dfdfdf");
+						map_svg.selectAll(".country-" + row.id)
+							.attr("fill", "#a7a7a7")
+							.style("stroke", "#fff")
+							.style("stroke-width", 0.75);
+						countryData_name.text("");
+						countryData_year.text("");
+						countryData_info.style("display", "none");
+					}
+
+					function mouseoverTrendtoMap(row) {
+						d3.selectAll(".label-country-" + row.id).attr("fill", "steelblue");
+						d3.selectAll(".bg-country-" + row.id).attr("fill", "#f7f7f7");
+						d3.selectAll(".guideline-country-" + row.id).style("stroke", "#bfbfbf");
+						d3.selectAll(".focus-country-" + row.id).style("display", "block");
+						map_svg.selectAll(".country-" + row.id)
+							.attr("fill", "steelblue")
+							.style("stroke", "steelblue")
+							.style("stroke-width", 1.5);
+						countryData_name.text(row.country);
+					}
+
+					function mouseoutTrendtoMap(row) {
+						d3.selectAll(".label-country-" + row.id).attr("fill", "#555555");
+						d3.selectAll(".bg-country-" + row.id).attr("fill", "#ffffff");
+						d3.selectAll(".guideline-country-" + row.id).style("stroke", "#dfdfdf")
+						d3.selectAll(".focus-country-" + row.id).style("display", "none");
+						map_svg.selectAll(".country-" + row.id)
+							.attr("fill", "#a7a7a7")
+							.style("stroke", "#fff")
+							.style("stroke-width", 0.75);
+						countryData_name.text("");
+						countryData_year.text("");
+						countryData_info.style("display", "none");
+
+					}
+
+					// Draw the map
+					// ==================================================
+					worldData = world;
+					countryData = topojson.feature(world, world.objects.countries).features;
+					countryPaths = map_svg.append("g");
+
+					// Draws each country. Each country should have attribute id = "country-##"
+					countryPaths.selectAll("path").data(countryData)
+						.enter().append("path").attr("d", worldPathData)
+						.attr("class", function(country) { return "country-" + country.id; })
+						.attr("fill", "#dfdfdf")
+						.style("stroke", "#fff")
+						.style("stroke-width", 0.75);
+
+
+
+
+					// Draw the trends for each country
+					// ==================================================
+					mainData.forEach(function(row, i){
+						map_svg.selectAll(".country-" + row.id)
+							.attr("fill", "#a7a7a7")
+							.on("mouseover", function() { mouseoverMaptoTrend(row); })
+							.on("mouseout", function() { mouseoutMaptoTrend(row); });
+
+						// Sets up a group for each country
+						var trendCountry = trend_svg.append("g")
+							.attr("class", "trend-country-" + row.id)
+							.attr("transform", function(){
+									if (i < mainData.length / 4) {
+										return "translate(0, " + (trendSize * i) + ")";
+									}
+									else if (i < mainData.length / 2){
+										return "translate(200, " + (trendSize * Math.floor(i - mainData.length / 4)) + ")";
+									}
+									else if (i < mainData.length * (3/4)){
+										return "translate(400, " + (trendSize * Math.floor(i - mainData.length * (1/2))) + ")";
+									}
+									else {
+										return "translate(600, " + (trendSize * Math.floor(i - mainData.length * (3/4))) + ")";
+									}
+								})
+							.on("mouseover", function() { mouseoverTrendtoMap(row); })
+							.on("mouseout", function() { mouseoutTrendtoMap(row); });
+
+						trendCountry.append("rect")
+							.attr("x", trendPadding - 15)
+							.attr("y", trendPadding - 25)
+							.attr("width", 180)
+							.attr("height", trendSize + 10)
+							.attr("fill", "#ffffff")
+							.attr("class", "bg-country-" + row.id);
+
+						// Set up scales for the trend lines
+						var xScaleTrend = d3.scale.linear().domain([1990, 2005]).range([trendPadding, trendPadding + 150]);
+						var yScaleTrend = d3.scale.linear().domain([0,1]).range([trendPadding + trendSize - 40, trendPadding + 10]);
+
+						trendCountry.append("line")
+							.attr("x1", xScaleTrend(1990))
+							.attr("y1", yScaleTrend(0.5))
+							.attr("x2", xScaleTrend(2005))
+							.attr("y2", yScaleTrend(0.5))
+							.style("stroke", "#dfdfdf")
+							.style("stroke-dasharray", ("3, 3"))
+							.attr("class", "guideline-country-" + row.id);
+						trendCountry.append("line")
+							.attr("x1", xScaleTrend(1995))
+							.attr("y1", yScaleTrend(0))
+							.attr("x2", xScaleTrend(1995))
+							.attr("y2", yScaleTrend(1))
+							.style("stroke", "#dfdfdf")
+							.style("stroke-dasharray", ("3, 3"))
+							.attr("class", "guideline-country-" + row.id);
+						trendCountry.append("line")
+							.attr("x1", xScaleTrend(2000))
+							.attr("y1", yScaleTrend(0))
+							.attr("x2", xScaleTrend(2000))
+							.attr("y2", yScaleTrend(1))
+							.style("stroke", "#dfdfdf")
+							.style("stroke-dasharray", ("3, 3"))
+							.attr("class", "guideline-country-" + row.id);
+
+						// Draw the trend lines
+						var drawTrendLines = function(prefix, max, color, svg, xScale, yScale, setId) {
+							var pathData = "M " +
+								xScale(1990) + "," + yScale(row[prefix + "1990"] / max) + " L " +
+								xScale(1995) + "," + yScale(row[prefix + "1995"] / max) + " L " +
+								xScale(2000) + "," + yScale(row[prefix + "2000"] / max) + " L " +
+								xScale(2005) + "," + yScale(row[prefix + "2005"] / max);
+
+							if (setId){
+								svg.append("path")
+								.attr("d", pathData)
+								.attr("fill", "none")
+								.attr("stroke", color)
+								.attr("stroke-width", 1)
+								.attr("id", row.country)
+								.attr("transform", "translate(0, 0)");
+							}
+							else{
+								svg.append("path")
+								.attr("d", pathData)
+								.attr("fill", "none")
+								.attr("stroke", color)
+								.attr("stroke-width", 1)
+								.attr("transform", "translate(0, 0)");
+							}
+
+						}
+
+						drawTrendLines("ppp", pppMax, dataColors.ppp, trendCountry, xScaleTrend, yScaleTrend, false);
+						drawTrendLines("le", leMax, dataColors.le, trendCountry, xScaleTrend, yScaleTrend, false);
+						drawTrendLines("cal", calMax, dataColors.cal, trendCountry, xScaleTrend, yScaleTrend, false);
+
+
+						// Mousemove Interactions
+						var trendFocus = trendCountry.append("g")
+							.attr("class", "focus-country-" + row.id)
+							.style("display", "none");
+
+						var pppFocus = trendFocus.append("circle")
+							.attr("cx", 0).attr("cy", 0)
+							.attr("r", 2)
+							.attr("fill", dataColors.ppp);
+						var leFocus = trendFocus.append("circle")
+							.attr("cx", 0).attr("cy", 0)
+							.attr("r", 2)
+							.attr("fill", dataColors.le);
+						var calFocus = trendFocus.append("circle")
+							.attr("cx", 0).attr("cy", 0)
+							.attr("r", 2)
+							.attr("fill", dataColors.cal);
+						var yearFocus = trendFocus.append("text")
+							.text("")
+							.attr("x", trendPadding + 75).attr("y", trendPadding + trendSize - 30)
+							.attr("text-anchor", "middle")
+							.attr("font-size", 10)
+							.attr("fill", "#777777");
+
+						// Mousemove Interactions
+						trendCountry.on("mousemove", function() {
+							var coordinates = [0, 0];
+							coordinates = d3.mouse(this);
+
+							if (coordinates[0] <= xScaleTrend(1992)) {
+								trendFocus.style("display", "block");
+								pppFocus.attr("cx", xScaleTrend(1990)).attr("cy", yScaleTrend(row.ppp1990 / pppMax));
+								leFocus.attr("cx", xScaleTrend(1990)).attr("cy", yScaleTrend(row.le1990 / leMax));
+								calFocus.attr("cx", xScaleTrend(1990)).attr("cy", yScaleTrend(row.cal1990 / calMax));
+								yearFocus.text("1990");
+
+								countryData_year.text("Year: 1990");
+								countryData_info.style("display", "block");
+								countryData_info_ppp.text((+row.ppp1990).toFixed(2));
+								countryData_info_le.text((+row.le1990).toFixed(2));
+								countryData_info_cal.text(row.cal1990);
+							}
+							else if (coordinates[0] <= xScaleTrend(1997) && coordinates[0] > xScaleTrend(1992)) {
+								trendFocus.style("display", "block");
+								pppFocus.attr("cx", xScaleTrend(1995)).attr("cy", yScaleTrend(row.ppp1995 / pppMax));
+								leFocus.attr("cx", xScaleTrend(1995)).attr("cy", yScaleTrend(row.le1995 / leMax));
+								calFocus.attr("cx", xScaleTrend(1995)).attr("cy", yScaleTrend(row.cal1995 / calMax));
+								yearFocus.text("1995");
+
+								countryData_year.text("Year: 1995");
+								countryData_info.style("display", "block");
+								countryData_info_ppp.text((+row.ppp1995).toFixed(2));
+								countryData_info_le.text((+row.le1995).toFixed(2));
+								countryData_info_cal.text(row.cal1995);
+							}
+							else if (coordinates[0] <= xScaleTrend(2002) && coordinates[0] > xScaleTrend(1997)) {
+								trendFocus.style("display", "block");
+								pppFocus.attr("cx", xScaleTrend(2000)).attr("cy", yScaleTrend(row.ppp2000 / pppMax));
+								leFocus.attr("cx", xScaleTrend(2000)).attr("cy", yScaleTrend(row.le2000 / leMax));
+								calFocus.attr("cx", xScaleTrend(2000)).attr("cy", yScaleTrend(row.cal2000 / calMax));
+								yearFocus.text("2000");
+
+								countryData_year.text("Year: 2000");
+								countryData_info.style("display", "block");
+								countryData_info_ppp.text((+row.ppp2000).toFixed(2));
+								countryData_info_le.text((+row.le2000).toFixed(2));
+								countryData_info_cal.text(row.cal2000);
+							}
+							else if (coordinates[0] > xScaleTrend(2002)) {
+								trendFocus.style("display", "block");
+								pppFocus.attr("cx", xScaleTrend(2005)).attr("cy", yScaleTrend(row.ppp2005 / pppMax));
+								leFocus.attr("cx", xScaleTrend(2005)).attr("cy", yScaleTrend(row.le2005 / leMax));
+								calFocus.attr("cx", xScaleTrend(2005)).attr("cy", yScaleTrend(row.cal2005 / calMax));
+								yearFocus.text("2005");
+
+								countryData_year.text("Year: 2005");
+								countryData_info.style("display", "block");
+								countryData_info_ppp.text((+row.ppp2005).toFixed(2));
+								countryData_info_le.text((+row.le2005).toFixed(2));
+								countryData_info_cal.text(row.cal2005);
+							}
+							else {
+								trendFocus.style("display", "none");
+								countryData_year.text("");
+							}
+						});
+
+						// Add country label
+						trendCountry.append("text")
+							.text(row.country)
+							.attr("x", trendPadding)
+							.attr("y", trendPadding)
+							.attr("fill", "#555555")
+							.attr("font-size", 12)
+							.attr("class", "label-country-" + row.id);
+
+
+
+
+
+						// Plot Country Data Together
+						// ==================================================
+						row.selected = true;
+
+						var countryToggle = countrySel.append("g")
+							.attr("id", "toggle-country-" + row.id)
+							.style("cursor", "pointer");
+
+						if (i % 2 == 0) {
+							countryToggle.append("rect")
+								.attr("x", 10)
+								.attr("y", 25 + (12 * i))
+								.attr("height", 35)
+								.attr("width", 220)
+								.attr("fill", "#ffffff")
+								.attr("class", "bg-country-" + row.id);
+
+							countryToggle.append("circle")
+								.attr("cx", 25)
+								.attr("cy", 35 + (12 * i))
+								.attr("r", 3)
+								.attr("fill", "steelblue")
+								.attr("class", "check-country-" + row.id)
+
+							countryToggle.append("text")
+								.attr("x", 40)
+								.attr("y", 35 + (12 * i))
+								.attr("dominant-baseline", "middle")
+								.attr("fill", "steelblue")
+								.attr("font-size", 14)
+								.attr("class", "label-country-" + row.id)
+								.text(row.country);
+						}
+						else {
+							countryToggle.append("rect")
+								.attr("x", 235)
+								.attr("y", 25 + 12 * (i - 1))
+								.attr("height", 35)
+								.attr("width", 220)
+								.attr("fill", "#ffffff")
+								.attr("class", "bg-country-" + row.id);
+
+							countryToggle.append("circle")
+								.attr("cx", 250)
+								.attr("cy", 35 + 12 * (i - 1))
+								.attr("r", 3)
+								.attr("fill", "steelblue")
+								.attr("class", "check-country-" + row.id);
+
+							countryToggle.append("text")
+								.attr("x", 265)
+								.attr("y", 35 + 12 * (i - 1))
+								.attr("dominant-baseline", "middle")
+								.attr("fill", "steelblue")
+								.attr("font-size", 14)
+								.attr("class", "label-country-" + row.id)
+								.text(row.country);
+						}
+
+						countryToggle
+							.on("mouseover", function() { mouseoverCountryToggle(row) })
+							.on("mouseout", function() { mouseoutCountryToggle(row) })
+							.on("click", function() { clickCountryToggle(row, false) });
+
+					});
+
+
+					// Generate Country Data Together Visuals
+					// ==================================================
+					updateVisuals();
+
+
+
+				});
+			});
+
+
+
+
+		</script>
+
+		<!-- Interaction Scripts
+		================================================== -->
+		<script>
+			// Handles pinning of the a specified cardID
+			function pinCard(cardID) {
+				var card = d3.select("#" + cardID);
+				var left = 0;
+				var elem = document.getElementById(cardID);
+
+				while (elem) {
+					left += elem.offsetLeft || 0;
+					elem = elem.offsetParent;
+				}
+
+				if (!cardPinned) {
+					card.style("position", "fixed")
+						.style("top", "50px")
+						.style("left", left);
+					d3.select("#" + cardID + "-pinBtn").text("Unpin Card");
+					cardPinned = true;
+				}
+				else {
+					card.style("position", "static")
+					d3.select("#" + cardID + "-pinBtn").text("Pin Card");
+					cardPinned = false;
+				}
+
+			}
+
+
+			// Country Data Together Interaction
+			// ==================================================
+			function mouseoverCountryToggle(row) {
+				var countryToggle = d3.select("#toggle-country-" + row.id);
+				countryToggle.select(".bg-country-" + row.id)
+					.attr("fill", "#f7f7f7");
+				countryToggle.select(".bg-country-" + row.id)
+					.attr("fill", "#f7f7f7");
+			}
+
+			function mouseoutCountryToggle(row) {
+				var countryToggle = d3.select("#toggle-country-" + row.id);
+				countryToggle.select(".bg-country-" + row.id)
+					.attr("fill", "#ffffff");
+			}
+
+			function clickCountryToggle(row, bulkSelect) {
+				var countryToggle = d3.select("#toggle-country-" + row.id);
+				if (row.selected) {
+					countryToggle.select(".check-country-" + row.id)
+						.attr("fill", "#dfdfdf");
+					countryToggle.select(".label-country-" + row.id)
+						.attr("fill", "#777777");
+					row.selected = false;
+				}
+				else {
+					countryToggle.select(".check-country-" + row.id)
+						.attr("fill", "steelblue");
+					countryToggle.select(".label-country-" + row.id)
+						.attr("fill", "steelblue");
+					row.selected = true;
+				}
+				if (!bulkSelect) {
+					updateVisuals();
+				}
+
+			}
+
+
+			// Update Visuals based on Selection
+			// ==================================================
+
+			/* Updates the visuals based on the countries that have been selected.
+			 * displayTrend indicates which trendlines to show ("ppp", "le", or "cal") */
+			function updateVisuals() {
+				var validUpdate = false;
+				var dataMax = 0;
+
+				var xScaleLT = d3.time.scale()
+					.domain([new Date("1989"), new Date("2006")])
+					.range([largeTrendsPadding * 1.25, largeTrendsWidth - largeTrendsPadding * 1.25]);
+				var yScaleLT = d3.scale.linear()
+
+				switch (displayTrendPrefix) {
+					case "ppp":
+						validUpdate = true;
+						dataMax = pppMax;
+						break;
+
+					case "le":
+						validUpdate = true;
+						dataMax = leMax;
+						break;
+
+					case "cal":
+						validUpdate = true;
+						dataMax = calMax;
+						break;
+
+					default:
+						break;
+				}
+
+				if (validUpdate) {
+					// If update is valid, first clear the graph.
+					// Then generate visuals.
+					largeTrends.html("");
+
+
+					// Write Title
+					largeTrends.append("text")
+						.attr("x", largeTrendsWidth / 2)
+						.attr("y", largeTrendsPadding * 0.75)
+						.attr("text-anchor", "middle")
+						.attr("font-size", 32)
+						.attr("font-weight", "bold")
+						.attr("fill", "#555555")
+						.text(dataLabels[displayTrendPrefix]);
+
+					// Hover Trendline Country Name
+					var hoverTrendCountry = largeTrends.append("text")
+						.attr("x", largeTrendsWidth / 2)
+						.attr("y", largeTrendsPadding * 1.25)
+						.attr("text-anchor", "middle")
+						.attr("font-size", 16)
+						.attr("fill", "steelblue")
+						.text("");
+
+					// Label the Axes
+					largeTrends.append("text")
+						.attr("x", largeTrendsPadding * 0.65)
+						.attr("y", (largeTrendsPadding * 1.5) + (largeTrendsGraphHeight / 2))
+						.attr("transform", "rotate(-90," + largeTrendsPadding * 0.65 + "," + ((largeTrendsPadding * 1.5) + (largeTrendsGraphHeight / 2)) + ")")
+						.attr("text-anchor", "middle")
+						.attr("font-size", 12)
+						.attr("fill", "#777777")
+						.text(dataUnits[displayTrendPrefix]);
+					largeTrends.append("text")
+						.attr("x", largeTrendsWidth / 2)
+						.attr("y", ((largeTrendsPadding * 2) + largeTrendsGraphHeight))
+						.attr("text-anchor", "middle")
+						.attr("font-size", 12)
+						.attr("fill", "#777777")
+						.text("Year");
+
+					// Draw the Axes
+					yScaleLT
+						.domain([0, dataMax])
+						.range([(largeTrendsPadding * 1.5) + largeTrendsGraphHeight, largeTrendsPadding * 1.5]);
+
+					var xAxisLT = d3.svg.axis().scale(xScaleLT).orient("bottom")
+						.ticks(d3.time.years, 5)
+						.tickPadding(10);
+					var yAxisLT = d3.svg.axis().scale(yScaleLT).orient("left");
+
+					largeTrends.append("g")
+						.attr("class", "axis")
+						.attr("transform", "translate(0, " + ((largeTrendsPadding * 1.5) + largeTrendsGraphHeight) + ")")
+						.call(xAxisLT);
+					largeTrends.append("g")
+						.attr("class", "axis")
+						.attr("transform", "translate(" + largeTrendsPadding * 1.25 + ", 0)")
+						.call(yAxisLT);
+
+					// Draw the Guidelines
+					largeTrends.append("line")
+						.attr("x1", xScaleLT(new Date("1989")))
+						.attr("y1", yScaleLT(dataMax / 2))
+						.attr("x2", xScaleLT(new Date("2006")))
+						.attr("y2", yScaleLT(dataMax /2))
+						.style("stroke", "#dfdfdf")
+						.style("stroke-dasharray", ("3, 3"))
+						.attr("class", "guideline-largeTrend");
+					largeTrends.append("line")
+						.attr("x1", xScaleLT(new Date("1995")))
+						.attr("y1", yScaleLT(0))
+						.attr("x2", xScaleLT(new Date("1995")))
+						.attr("y2", yScaleLT(dataMax))
+						.style("stroke", "#dfdfdf")
+						.style("stroke-dasharray", ("3, 3"))
+						.attr("class", "guideline-largeTrend");
+					largeTrends.append("line")
+						.attr("x1", xScaleLT(new Date("2000")))
+						.attr("y1", yScaleLT(0))
+						.attr("x2", xScaleLT(new Date("2000")))
+						.attr("y2", yScaleLT(dataMax))
+						.style("stroke", "#dfdfdf")
+						.style("stroke-dasharray", ("3, 3"))
+						.attr("class", "guideline-largeTrend");
+
+					// Used to calculate means for each year
+					var accumData = [0, 0, 0, 0];
+					var numSelected = 0;
+
+					// Draw the trend lines!
+					mainData.forEach(function(row, i) {
+						if (row.selected) {
+							numSelected++;
+
+							var dataPoint = [
+								[xScaleLT(new Date("1990")), yScaleLT(row[displayTrendPrefix + "1990"])],
+								[xScaleLT(new Date("1995")), yScaleLT(row[displayTrendPrefix + "1995"])],
+								[xScaleLT(new Date("2000")), yScaleLT(row[displayTrendPrefix + "2000"])],
+								[xScaleLT(new Date("2005")), yScaleLT(row[displayTrendPrefix + "2005"])]
+							]
+
+							// Add data to accumulator to calculate the Mean fore each year
+							accumData[0] += (+row[displayTrendPrefix + "1990"]);
+							accumData[1] += (+row[displayTrendPrefix + "1995"]);
+							accumData[2] += (+row[displayTrendPrefix + "2000"]);
+							accumData[3] += (+row[displayTrendPrefix + "2005"]);
+
+							var largeTrendFocus;
+
+							var pathData = "M " +
+								dataPoint[0][0] + "," + dataPoint[0][1] + " L " +
+								dataPoint[1][0] + "," + dataPoint[1][1] + " L " +
+								dataPoint[2][0] + "," + dataPoint[2][1] + " L " +
+								dataPoint[3][0] + "," + dataPoint[3][1];
+
+							largeTrends.append("path")
+								.attr("d", pathData)
+								.attr("fill", "none")
+								.attr("stroke", dataColors[displayTrendPrefix])
+								.attr("stroke-width", 2)
+								.style("opacity", 0.20)
+								.on("mouseover", function(){
+										d3.select(this)
+											.style("opacity", 1)
+											.style("z-index", 2)
+											.style("stroke", "steelblue");
+										largeTrendFocus = largeTrends.append("g");
+										dataPoint.forEach(function(dp) {
+											largeTrendFocus.append("circle")
+												.attr("cx", dp[0])
+												.attr("cy", dp[1])
+												.attr("r", 3)
+												.attr("fill", "steelblue");
+										hoverTrendCountry.text(row.country);
+										});
+
+									})
+								.on("mouseout", function(){
+										d3.select(this)
+											.style("opacity", 0.20)
+											.style("z-index", 0)
+											.style("stroke", dataColors[displayTrendPrefix]);
+										largeTrendFocus.remove();
+										hoverTrendCountry.text("");
+									});
+
+						}
+					});
+
+					// Draw the mean line as long as there are at least 2 lines
+					if (numSelected > 1) {
+
+						var meanPoint = [
+							[xScaleLT(new Date("1990")), yScaleLT(accumData[0] / numSelected)],
+							[xScaleLT(new Date("1995")), yScaleLT(accumData[1] / numSelected)],
+							[xScaleLT(new Date("2000")), yScaleLT(accumData[2] / numSelected)],
+							[xScaleLT(new Date("2005")), yScaleLT(accumData[3] / numSelected)]
+						]
+
+						var meanPathData = "M " +
+									meanPoint[0][0] + "," + meanPoint[0][1] + " L " +
+									meanPoint[1][0] + "," + meanPoint[1][1] + " L " +
+									meanPoint[2][0] + "," + meanPoint[2][1] + " L " +
+									meanPoint[3][0] + "," + meanPoint[3][1];
+
+						var meanLine = largeTrends.append("path")
+							.attr("d", meanPathData)
+							.attr("fill", "none")
+							.attr("opacity", 0.75)
+							.attr("stroke", "#555555")
+							.attr("stroke-width", 1.5)
+							.style("stroke-dasharray", ("9, 3"));
+
+						var largeTrendFocus;
+						meanLine
+							.on("mouseover", function() {
+									meanLine.style("stroke-width", 2)
+										.style("stroke-dasharray", "none")
+										.attr("opacity", 1);
+									largeTrendFocus = largeTrends.append("g");
+									meanPoint.forEach(function(mp) {
+										largeTrendFocus.append("circle")
+											.attr("cx", mp[0])
+											.attr("cy", mp[1])
+											.attr("r", 3)
+											.attr("fill", "#555555");
+									})
+									hoverTrendCountry.text("Mean Line of Data");
+								})
+							.on("mouseout", function() {
+									meanLine.style("stroke-width", 1.5)
+										.style("stroke-dasharray", ("9, 3"))
+										.attr("opacity", 0.75);
+									largeTrendFocus.remove();
+									hoverTrendCountry.text("");
+								});
+					}
+				}
+
+			}
+
+		</script>
+
+	</section>
+
+
+
+
+
+
+</body>
+</html>

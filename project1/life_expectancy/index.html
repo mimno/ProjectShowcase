@@ -1,0 +1,319 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<style>
+/* put a border around the svg element so we can see the coordinate system better. */
+body { font-family: "Open Sans"; } div { margin: 30px; }
+h1 {
+	text-align: center;
+	font-size: 45px;
+	margin: 20px;
+	font-weight: normal;
+}
+svg { 
+	border: solid gray 1px;
+	float: left; 
+	margin-top: 30px;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+div {
+	margin: 0;
+	padding: 0;
+}
+.axis path { fill: none; stroke: #777; }
+.axis line { stroke: #777; }
+
+#title{
+	position: absolute;
+	top: 40;
+	left: 260;
+	width: 1000px;
+	height: 100px;
+}
+
+#title2{
+	position: absolute;
+	top: 920;
+	left: 160;
+	width: 1200px;
+	height: 100px;
+}
+
+#l1{
+	position: absolute;
+	top: 580;
+	left: 50;
+	border: solid gray 1px;
+	width: 200px;
+	height: 142px;
+}
+
+#l2{
+	position: absolute;
+	top: 1680;
+	left: 190;
+	border: solid gray 1px;
+	width: 200px;
+	height: 142px;
+}
+
+.legend h1{
+	font-size: 20px;
+	font-weight: bold;
+	margin: 0;
+	margin-top: 8;
+	padding: 0;
+	text-align: center;
+}
+
+.legend p{
+	font-size: 15px;
+	margin: 0;
+	margin-top: 8;
+	padding: 0;
+	text-align: center;
+}
+
+#grad {
+  background: -webkit-linear-gradient(left, red , green); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(right, red, green); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(right, red, green); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to right, red , green); /* Standard syntax */
+  opacity: .6;
+  width: 100px;
+  height: 15px;
+  position: absolute;
+  top: 101;
+  left: 50;
+}
+</style>
+</head>
+<body>
+
+<div id="map">
+	<div id="title"><h1>Life Expectancy and Population of Countries</h1></div>
+	<div class="legend" id="l1"><h1>KEY</h1><p>Size: Population</p><p>Color: Life Expectancy</p><p>45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;83</p><div id="grad"></div></div>
+</div>
+<div id="graph">
+	<div id="title2"><h1>Life Expectancy vs. % of GDP Spent on Healthcare</h1></div>
+	<div class="legend" id="l2"><h1>KEY</h1><p>Size: Population</p><p>Color: Life Expectancy</p><p>45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;83</p><div id="grad"></div></div>
+</div>
+
+<script>
+var healthSpending;
+var money;
+var countryPopulation;
+var lifeExpectancy;
+var worldObjects;
+
+var allCountryData;
+
+var projection = d3.geo.equirectangular().scale(260).translate([650,480]);
+var path = d3.geo.path().projection(projection);
+	
+var svg = d3.select("#map").append("svg")
+         .attr("width", 1500)
+         .attr("height", 850);
+
+var svg2 = d3.select("#graph").append("svg")
+         .attr("width", 1500)
+         .attr("height", 1250);
+
+var g = svg.append("g");
+
+d3.json("healthExpenditure.json", function(error, spending) {
+	d3.json("world.json", function(error, world) {
+		d3.json("countryposition.json", function(error, position) {
+			d3.json("GDP.json", function(error, GDP) {
+				d3.json("population.json", function(error, population) {
+						d3.json("lifeExpectancy.json", function(error, age) {
+
+		healthSpending = spending;
+		worldObjects = world;
+		pos = position;
+		money = GDP;
+		countryPopulation = population;
+		lifeExpectancy = age;
+
+		//deletes any object with null FIELD57 aka 2012 data
+		healthSpending = healthSpending.filter(function(el){ return el.FIELD57 != null; });
+		allCountryData = healthSpending;
+
+		money = money.filter(function(el){ return el.FIELD57 != null; });
+		population = population.filter(function(el){ return el.FIELD57 != null; });
+		age = age.filter(function(el){ return el.FIELD57 != null; });
+
+		GDP.forEach(function(d) {
+			allCountryData.forEach(function(e) {
+				if (d.FIELD1 == e.FIELD1) {
+					e.GDP = d.FIELD57;
+				}
+			});
+		});
+
+		allCountryData = allCountryData.filter(function(el){ return el.GDP != null; });
+
+		population.forEach(function(d) {
+			allCountryData.forEach(function(e) {
+				if (d.FIELD1 == e.FIELD1) {
+					e.population = d.FIELD57;
+				}
+			});
+		});
+
+		allCountryData = allCountryData.filter(function(el){ return el.population != null; });
+
+		age.forEach(function(d) {
+			allCountryData.forEach(function(e) {
+				if (d.FIELD1 == e.FIELD1) {
+					if (isNaN(e.lifeExpectancy)) {
+						e.lifeExpectancy = d.FIELD57;
+					}
+				}
+			});
+		});
+
+		allCountryData = allCountryData.filter(function(el){ return el.lifeExpectancy != null; });
+
+		spending.forEach(function(d) {
+			allCountryData.forEach(function(e) {
+				if (d.FIELD1 == e.FIELD1) {
+					e.healthExpenditure = d.FIELD57;
+				}
+			});
+		});
+
+		g.selectAll("path")
+		.data(topojson.feature(world,
+			world.objects.countries).features)
+		.enter().append("path")
+		.attr("d",path)
+		.style("fill","none")
+		.style("stroke","#888");
+
+		position.forEach(function(d) {
+			allCountryData.forEach(function(e) {
+				if (d.FIELD1 == e.FIELD1) {
+					e.id=d.id;
+					e.lantitude=d.lantitude;
+					e.longitude=d.longitude;
+				}
+			});
+		});
+
+ 		allCountryData = allCountryData.filter(function(el){ return el.longitude != null; });
+
+ 		draw();
+
+							});
+						});
+					});
+				});
+			});
+		});
+
+
+
+function draw(){
+
+	//gdp: 39000000,17000000000000
+	//spending: 2, 20
+	//population: 9000,1500000000
+	//age: 45, 83
+
+   	//radius is scaled by population
+	var radiusScale = d3.scale.sqrt()
+	.domain([9000,1500000000]).range([5, 40]);
+
+	//color scaled by life expectancy
+	var color = d3.scale.linear().domain([45,83]).range(["red","green"]);
+
+	var contents = svg.append("g");
+
+	var circles = svg.selectAll("circle").data(allCountryData)
+		.enter().append("circle");
+	
+	circles.attr("cx", function(d){
+		var coord = projection([d.longitude,d.lantitude]);
+		return coord[0];})
+		.attr("cy", function(d){
+			var coord = projection([d.longitude,d.lantitude]);
+		return coord[1];})
+		.attr("r", function(d) { return radiusScale(d.population) })
+		.attr("fill", function(d) { return color(d.lifeExpectancy)})
+		.attr("opacity",0.5);
+
+	// var texts = contents.selectAll("text").data(allCountryData).enter().append("text");
+	
+	// 	texts.attr("x", function(d) {var coord = projection([d.longitude,d.lantitude,]);
+	// 	return coord[0];})
+	// 	.attr("y", function(d) { var coord = projection([d.longitude,d.lantitude]);
+	// 	return coord[1];})
+	// 	.attr("style","text-anchor: middle")
+	// 	.attr("font-size",6)
+	// 	.text(function(d) { return d.FIELD1 });
+
+	var xScale = d3.scale.log().domain([2,20])
+		.range([130, 1450]);
+
+	var yScale = d3.scale.linear().domain([45,83]).range([1150,120]);
+
+	var contents2 = svg2.append("g");
+
+	var circles2 = svg2.selectAll("circle").data(allCountryData)
+		.enter().append("circle");
+	
+	circles2.attr("cx", function(d) { return xScale(d.FIELD57) })
+		.attr("cy", function(d) { return yScale(d.lifeExpectancy) })
+		.attr("r", function(d) { return radiusScale(d.population) })
+		.attr("fill", function(d) { return color(d.lifeExpectancy)})
+		.attr("opacity",0.5);
+
+	var texts = contents2.selectAll("text").data(allCountryData).enter().append("text");
+	
+		texts.attr("x", function(d) { return xScale(d.FIELD57) })
+		.attr("y", function(d) { return yScale(d.lifeExpectancy) + 3 })
+		.text(function(d) { return d.FIELD1 })
+		.attr("font-size",function(d){return 11;})
+		.attr("style","text-anchor: middle");	
+
+	var xAxis = d3.svg.axis().scale(xScale)
+	.orient("bottom");
+	var yAxis = d3.svg.axis().scale(yScale)
+	.orient("left");
+	
+	svg2.append("g").attr("class", "axis")
+	.attr("transform", "translate(0,1170)")
+	.call(xAxis);
+	svg2.append("g").attr("class", "axis")
+	.attr("transform", "translate(" + 75 + ",0)")
+	.call(yAxis);
+
+	svg2.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "end")
+    .attr("x", 900)
+    .attr("y", 1225)
+    .text("% of GDP spent on healthcare (log scale)");
+
+    svg2.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "end")
+    .attr("x", -560)
+    .attr("y", 20)
+    .attr("dy", ".75em")
+    .attr("transform", "rotate(-90)")
+    .text("life expectancy (years)");
+
+};
+
+
+
+</script>
+
+</body>
+</html>

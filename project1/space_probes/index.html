@@ -1,0 +1,141 @@
+<html>
+<head>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="http://d3js.org/topojson.v1.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+	<style>
+	body { font-family: 'Open Sans Condensed', sans-serif; font-weight: bold; background-image: url("http://i.ytimg.com/vi/qbzFSfWwp-w/maxresdefault.jpg"); font-size: 30px; color: white; stroke-width: 1px;} 
+	div { margin: 30px; }
+</style>
+</head>
+<body>
+	<h3> A Map of the Space Probes </h3>
+	<p> Below is a map of significant space probes in our Solar System. 
+	<br> Please scroll right to see all the data. Mars is expanded below to clearly see all the orbits. </p>
+	<svg height = '300' width = '300'> 
+		<text x = '40' y = '25' fill = 'white'> KEY </text>
+		<line x1 = '20' y1 = '50'  x2 = '50' y2 = '50' style='stroke: blue; stroke-width:2' /> <text fill = "white" x = '60' y = '55'>Currently Orbiting</text>
+		<line x1 = '20' y1 = '80'  x2 = '50' y2 = '80' style='stroke: red; stroke-width:2' /> <text fill = "white" x = '60' y = '85'>en Route</text>
+		<line x1 = '20' y1 = '110'  x2 = '50' y2 = '110' style='stroke: green; stroke-width:2' /> <text fill = "white" x = '60' y = '115'>No longer in mission</text>
+	</svg>
+	<div id = "space" > 
+	</div>
+	<div id = "mars" > </div>
+
+	<script>
+		var width = 23000;
+		var height = 1000;
+
+		var planets;
+		var svg = d3.select("#space").append("svg").attr("width", width).attr("height", height);
+		svg.append("polygon").attr("points", "5600,500 5600,500 5800,1000 5400,1000").attr("fill", "url(#grad)").attr('opacity', '.2');
+		svg.append("linearGradient")
+			.attr("id", "grad").attr("x1", "0%").attr("y1", "0%")
+			.attr("x2", "100%").attr("y2", "100%")
+			.selectAll("stop")
+				.data([
+					{offset: "0", color: "white"},
+					{offset: "50%", color: "gray"},
+					{offset: "100%", color: "black"}])
+					.enter().append("stop")
+      .attr("offset", function(d) { return d.offset; })
+      .attr("stop-color", function(d) { return d.color; });
+	  //from http://bl.ocks.org/d3noob/4433087
+		d3.json("planets.json", function(error, data){
+			planets = data;
+			for (var i = 0; i < planets.length; i++){
+				svg.append("image")
+				.attr("x", ((planets[i].distfromSun * 70) - (planets[i].Size * 40)))
+				.attr("y", (500- (planets[i].Size * 40)))
+				.attr("fill", "black")
+				.attr("width", (planets[i].Size * 80))
+				.attr("height", (planets[i].Size * 80))
+				.attr("xlink:href", planets[i].imglink);
+				if (planets[i].name != "Sun"){
+				svg.append("text")
+				.attr("x",((planets[i].distfromSun * 70) - 40))
+				.attr("y", 60)
+				.attr("fill", "white")
+				.attr("font-size", "50px")
+				.text(planets[i].name);}
+			}
+		});
+		var orbits;
+		var offset = -50;
+		var offsetx = 0;
+		var offsety = 0;
+		var count = 0;
+		d3.json("data.json", function(error, data){
+			orbits = data;
+			for (var i = 0; i < planets.length; i++){
+				for (var j = 0; j < orbits.length; j++){
+					if (planets[i].name.toString() == orbits[j].destination.toString()){
+					svg.append("circle").attr("cx", (planets[i].distfromSun * 70)).attr("cy", 500).attr("fill-opacity", 0)
+					.attr("r", ((planets[i].Size * 40) + (orbits[j].orbitFromPlanet* .5)))
+					.attr("stroke", function(c){if (orbits[j].type == 1) return "blue"
+						else if (orbits[j].type == 2)return "green"
+						else return "red"})
+					svg.append("image").attr("x" ,((planets[i].distfromSun * 70) + (planets[i].Size*40)*offsety + (orbits[j].orbitFromPlanet * .5)*offsety + offsetx*offsety))
+					.attr("y", 475 + offset)
+					.attr("xlink:href", orbits[j].country).attr("height", 50).attr("width", 50)
+					svg.append("text").attr("x", ((planets[i].distfromSun * 70) + (planets[i].Size*40)*offsety + (orbits[j].orbitFromPlanet * .5)*offsety + offsetx*offsety))
+					.attr("y", 475 + offset)
+					.attr("fill", function(c){if (orbits[j].type == 1) return "#50E9E9"
+						else if (orbits[j].type == 2)return "#99D75C"
+						else return "#F06C71"})
+					.text(orbits[j].name + " " + orbits[j].arrivalDate);
+					count++;
+					if (count % 4 == 1){offset = -50; offsetx = -10; offsety = 1;}
+					else if(count % 4 == 2) {offset = 0; offsetx = 0; offsety = -1;}
+					else if (count % 4 == 3) {offset = 50; offsetx = -10; offsety = 1;}
+					else{offset = 100; offsetx = -20; offsety = -1;}
+					}
+				}
+			}
+					var svg2 = d3.select("#mars").append("svg").attr("width", 10000).attr("height", 2000);
+		var addtox = 4600;
+		for (var k = 0; k < planets.length; k++){
+				if (planets[k].name == "Mars"){
+				console.log("yes");
+				svg2.append("image")
+				.attr("x", ((planets[k].distfromSun * 70) - (planets[k].Size * 80)))
+				.attr("y", (920 - (planets[k].Size * 40)))
+				.attr("fill", "black")
+				.attr("width", (planets[k].Size * 160))
+				.attr("height", (planets[k].Size * 160))
+				.attr("xlink:href", planets[k].imglink);
+				}
+			}
+		for (var i = 0; i < planets.length; i++){
+		
+				for (var j = 0; j < orbits.length; j++){
+					if (planets[i].name.toString() == orbits[j].destination.toString()){
+					if (orbits[j].destination == "Mars"){
+					svg2.append("circle").attr("cx", 1000 + addtox).attr("cy", 1000).attr("fill-opacity", 0)
+					.attr("r", ((planets[i].Size * 50) + (orbits[j].orbitFromPlanet* 2)))
+					.attr("stroke", function(c){if (orbits[j].type == 1) return "blue"
+						else if (orbits[j].type == 2)return "green"
+						else return "red"})
+					svg2.append("image").attr("x" ,((1000) + (planets[i].Size*50)*offsety + (orbits[j].orbitFromPlanet * 2)*offsety + offsetx*offsety + addtox))
+					.attr("y", 1000 + offset)
+					.attr("xlink:href", orbits[j].country).attr("height", 50).attr("width", 50)
+					svg2.append("text").attr("x", ((1000) + (planets[i].Size*50)*offsety + (orbits[j].orbitFromPlanet * 2)*offsety + offsetx*offsety + addtox))
+					.attr("y", 1000 + offset)
+					.attr("fill", function(c){if (orbits[j].type == 1) return "#87cefa"
+						else if (orbits[j].type == 2)return "#00ff7f"
+						else return "#fa8072"})
+					.text(orbits[j].name + " " + orbits[j].arrivalDate);
+					count++;
+					if (count % 4 == 1){offset = -50; offsetx = -10; offsety = 1;}
+					else if(count % 4 == 2) {offset = 0; offsetx = 0; offsety = -1;}
+					else if (count % 4 == 3) {offset = 50; offsetx = -10; offsety = 1;}
+					else{offset = 100; offsetx = -20; offsety = -1;}
+					}
+					}
+				}
+			}
+		});
+
+	</script>
+<body>
+</html>

@@ -1,0 +1,369 @@
+<html>
+
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<!-- Load the d3 library. -->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+
+<style>
+body {
+  font: 16px sans-serif;
+  background-color: #ffff99;
+  margin: auto;
+  position: relative;
+  width: 960px;
+}
+
+.node {
+  border: solid 1px black;
+  color: black;
+  line-height: 14px;
+  overflow: hidden;
+  position: absolute;
+  text-indent: 2px;
+  text-align: center;
+  bottom:0;
+  vertical-align: bottom;
+}
+
+</style>
+
+
+<body align="left">
+<br>
+<h1 align="center">Which type of Kickstarter Projects are Most Successful?<br></h1>
+
+Kickstarter is currently the world's largest funding platform for creative projects. Project ideas range over fifteen categories including games, food, music, and technology. As of February 20, 2015, Kickstarter has raised over $1.5 billion dollars for over 200,000 projects. Kickstarter considers a project to be "successful" if the amount of money pledged is greater than the goal set by the creator. But is there one type of project that is more successful than others?
+
+
+<br><br>
+<div style="text-align:center;"> <!-- Sunburst Legend -->
+<svg width = "400" height = "100" align = "center" float = "center">
+<defs> <!--Diagonal Line pattern based on 
+http://stackoverflow.com/questions/13069446/simple-fill-pattern-in-svg-diagonal-hatching -->
+  <pattern id="legendFill" patternUnits ="userSpaceOnUse" width="4" height = "4">
+    <path d = "M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2" stroke = "#999999" stroke-width = "1"></path>
+  </pattern>
+</defs>
+  <text x = "200" y = "15" style="text-anchor: middle; font-weight: bold; font-size: 14px"> Legend for Sunburst Layout </text>
+  <rect fill="rgba(0,0,0,0)" x="0" y = "0" width = "399" height = "99" stroke-width = "1" stroke = "black" />
+
+  <rect fill="#999999" x="25" y = "30" width = "149" height = "39" stroke-width = "1" stroke = "black" />
+  <rect fill="url(#legendFill)" x="225" y="30" width = "149" height = "39" stroke-width = "1" stroke = "black" />
+  <text x = "100" y = "85" style = "text-anchor: middle; font-size: 14px" > Successful </text>
+  <text x = "300" y = "85" style = "text-anchor: middle; font-size: 14px"> Unsuccessful </text>
+
+</svg>
+
+</br></br></br>
+</div>
+<div float="center">
+<script>
+//Sunburst based on http://bl.ocks.org/mbostock/4063423
+
+var width = 760,
+    height = 760,
+    radius = Math.min(width, height) / 2,
+    color = d3.scale.category20();
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + 200)
+    .attr("height", height + 200)
+    .attr("align","left")
+    .attr("float","left")
+    .append("g")
+    .attr("transform", "translate(" + (width/2 + 100)  + "," + (height/2 + 100) + ")");
+
+d3.select("svg").append("defs"); // Create pattern defs list in svg
+
+//Category Labels
+var defslist = ["Games", "Film & Video", "Technology", "Design", "Music","Publishing",
+        "Food", "Fashion", "Art", "Comics", "Theater", "Journalism", "Crafts",
+        "Dance", "Photography"];
+
+for (var i = 0; i < defslist.length; i++){ // Generate Patterns Dynamically from defslist.
+    currentGenre = defslist[i] === "Film & Video" ? "Film&Video" : defslist[i]
+    d3.select("defs")
+      .append('pattern')
+          .attr('id', currentGenre+"Unsuccessful")
+          .attr('patternUnits', 'userSpaceOnUse')
+          .attr('width', 4)
+          .attr('height', 4)
+        .append('path')
+        //Diagonal Line pattern based on http://stackoverflow.com/questions/13069446/simple-fill-pattern-in-svg-diagonal-hatching
+        .attr('d', 'M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2')
+        .attr('stroke', color(defslist[i]))
+        .attr('stroke-width', 1);
+}
+
+var partition = d3.layout.partition()
+    .sort(null)
+    .size([2 * Math.PI, radius * radius])
+    .value(function(d) { return d.size; });
+
+var arc = d3.svg.arc()
+    .startAngle(function(d) { return d.x; })
+    .endAngle(function(d) { return d.x + d.dx; })
+    .innerRadius(function(d) { return Math.sqrt(d.y); })
+    .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+
+d3.json("sunburst.json", function(error, root) {
+    d = root;
+    //Left side of the sunburst will be rotated and placed differently than right side
+    var leftHalfArray = ["Publishing","Food","Fashion","Art","Comics","Theater",
+                         "Photography","Dance","Journalism","Crafts"];
+    var path = svg.datum(d).selectAll("path")
+        .data(partition.nodes)
+        .enter().append("path")
+        .attr("opacity", function (d) { return d.depth ? 1 : 0; }) // hide inner ring
+        .attr("d", arc)
+        .style("fill", function(d){ // Fills Partition arcs
+          if(d.children){ return(color(d.name)); } // Genres get their own solid color
+          else if(d.name === "Successful"){ //Successful get same
+            return color(d.parent.name);
+            
+          }
+          else if(d.parent.name === "Film & Video"){// Accounting for issues with spaces in URLS  
+
+            return "url(#Film&VideoUnsuccessful)";
+          }
+          else{ // Unsuccessful get patterns in parent's color
+
+            return "url(#"+d.parent.name+"Unsuccessful)";
+          }
+        });
+
+    var text = svg.selectAll("text")
+    .data(partition.nodes(d).slice(1))
+    .enter().append("text")
+    .attr("transform", function(d) { return "rotate(" + rotate(d) + ")"; })
+    .attr("x", function(d) {return placement(d)})
+    .attr("font-size", "14px")
+    .attr("dx", "6") // margin
+    .attr("dy", ".35em") // vertical-align
+    // If category, return category name, else return the number of projects & ratio
+    .text(function(d) {
+        if (d.depth == 2) {
+            return d.size + " (" + d.ratio + "%)"
+        }
+        else {
+            return d.name
+        }; 
+    });
+
+    // Sunburst Layout Title Label
+    svg.append("text")
+      .attr("X", "0")
+      .attr("y", "-20")
+      .attr("text-anchor", "middle")
+      .attr("alignment-baseline", "middle")
+      .attr("font-size", "36")
+      .text("Total Kickstarter Projects:");
+
+    svg.append("text")
+      .attr("X", "0")
+      .attr("y", "20")
+      .attr("text-anchor", "middle")
+      .attr("alignment-baseline", "middle")
+      .attr("font-size", "40")
+      .text("209,013");
+
+    svg.append("text")
+      .attr("X", "0")
+      .attr("y", "43")
+      .attr("text-anchor", "middle")
+      .attr("alignment-baseline", "middle")
+      .attr("font-size", "10")
+      .text("(as of 2/20/2015)");
+
+    // Rotates the text according to its placement in the graph
+    function rotate(d) {
+        var theta = (d.x + (d.dx)/2) * 180 / Math.PI - 90;
+        console.log(d.name + " Angle: " + theta);
+        //Anything on the left hand is rotated differently to prevent upside down words
+        if (theta > 120) {
+            return theta - 180;
+        }
+        else {
+            return theta;
+        }
+    }
+
+
+    // Due to the different lengths of words, different if branches are taken for centering them
+    function placement(d) {
+        if (d.depth == 1 && d.name == "Photography") {
+          return radius/-1.23;
+        }
+        else if (d.depth == 1 && d.name == "Journalism") {
+          return radius/-1.25;
+        }
+        else if (d.depth == 1 && d.name == "Publishing") {
+          return radius/-1.26;
+        }
+        else if (d.depth == 1 && d.name == "Art") {
+          return radius/-1.35;
+        }
+        else if (d.depth == 1 && d.name == "Film & Video") {
+          return radius/1.75;
+        }
+        else if (d.depth == 1 && d.name == "Technology") {
+          return radius/1.70;
+        }
+        else if (d.depth == 1 && leftHalfArray.indexOf(d.name) > -1) {
+            return radius/-1.31;
+        }
+        else if (d.depth == 2 && leftHalfArray.indexOf(d.parent.name) > -1) {
+            return radius/-0.79;
+        }
+        else if (d.depth == 2) {
+            return radius + 5;
+        }
+        else {
+            return radius/1.63
+        }
+    }
+});
+
+</script>
+</div>
+
+<br><br><br>
+
+Out of 209,013 projects launched, 78,799 of them (37.7%) were considered successful. <br>
+Film & Video take up the largest fraction of all projects (43939), but only 39% of these projects are successfully funded. <br>
+On the other hand, Dance projects have the highest success rate (66.6%) but only 2466 projects have been created.
+
+<br><br><br>
+
+
+<!-- Treemap legend --> <!--Fill patterns based on samples from lea.verou.me/css3patterns-->
+<div style="text-align: center;">
+<svg width = "600" height = "100" align = "center" float = "center">
+<defs>
+  <pattern id="liveFill" patternUnits ="userSpaceOnUse" width="38" height = "77">
+    <image xlink:href="LivePattern.png" x="0" y="0" width="38" height="77"></image>
+  </pattern>
+  <pattern id="unsuccessfulFill" patternUnits ="userSpaceOnUse" width="7" height = "10">
+    <image xlink:href="UnsuccessfulPattern.png" x="0" y="0" width = "72" height = "98"></image>
+  </pattern>
+</defs>
+  <text x = "300" y = "15" style="text-anchor: middle; font-weight: bold; font-size: 14px"> Legend for Treemap </text>
+  <rect fill="rgba(0,0,0,0)" x="0" y = "0" width = "599" height = "99" stroke-width = "1" stroke = "black" />
+  <rect fill="#999999" x="25" y = "30" width = "149" height = "39" stroke-width = "1" stroke = "black" />
+  <rect fill="url(#unsuccessfulFill)" x="225" y = "30" width = "149" height = "39" stroke-width = "1" stroke = "black" />
+  <rect fill="url(#liveFill)" x="425" y="30" width = "149" height = "39" stroke-width = "1" stroke = "black" />
+  <text x = "100" y = "85" style = "text-anchor: middle"> Successful </text>
+  <text x = "300" y = "85" style = "text-anchor: middle"> Unsuccessful </text>
+  <text x = "500" y = "85" style = "text-anchor: middle"> Live </text>
+
+</svg>
+</div>
+
+<br>
+<!-- Treemap Title Label -->
+<div style = "text-align: center">
+<svg width = "960" height = "65" align = "center" float = "center">
+  <text x = "480" y = "40" style="text-anchor: middle; font-size: 30px"> Total Kickstarter Funds: $1,537,157,427 </text>
+  <text x = "480" y = "60" style="text-anchor: middle; font-size: 10px"> (as of 2/20/2015) </text>
+</svg>
+</div>
+
+<script>
+// Treemap based on http://bl.ocks.org/mbostock/4063582
+var margin = {top: 20, right: 10, bottom: 20, left: 10},
+    width1 = 960 - margin.left - margin.right,
+    height1 = 480 - margin.top - margin.bottom;
+
+var treemap = d3.layout.treemap()
+    .size([width1, height1])
+    .sticky(true)
+    .value(function(d) { return d.size; });
+
+var div = d3.select("body").append("div")
+    .style("position", "relative")
+    .style("width", (width1 + margin.left + margin.right) + "px")
+    .style("height", (height1 + margin.top + margin.bottom) + "px")
+    .style("left", margin.left + "px")
+    .style("top", margin.top + "px");
+
+d3.json("treemap.json", function(error, root) {
+  var node = div.datum(root).selectAll(".node")
+      .data(treemap.nodes)
+      .enter().append("div")
+      .attr("class", "node")
+      .call(position)
+
+      .style("background-color", function(d) { //Background color/solid fill for patterns
+          if(!d.children){
+            if(d.name === "S"){
+              return color(d.parent.name)
+            }
+            else if(d.name === "U"){
+              return "#ffff99"
+            }
+            else if(d.name === "L"){
+              return "#ffff99"
+            }
+          }
+       })
+      .style("background-image", function(d) { //Patterns
+          if(!d.children){
+            if(d.name === "S"){
+              return color(d.parent.name)
+            }//Fill patterns based on samples from lea.verou.me/css3patterns
+            else if(d.name === "U"){ // Vertical Lines
+              return "linear-gradient(90deg, transparent 70%, "+color(d.parent.name)+" 30%)";
+            }
+            else if(d.name === "L"){// Dots
+              return "radial-gradient("+color(d.parent.name)+" 35%, transparent 10%), radial-gradient("+color(d.parent.name)+" 35%, transparent 16%)";
+            }
+          }
+       })
+      .style("background-size", function(d) { //Size for pattern if not successful
+          if(!d.children){
+            if(d.name === "S"){
+            }
+            else if(d.name === "U"){
+              return "5px 10px"
+            }
+            else if(d.name === "L"){
+              return "5px 5px"
+            }
+          }
+       })
+      .style("font", function(d){ // Smaller font for smaller categories
+        return d.name==="S"&&(d.parent.name==="Journalism"||d.parent.name==="Photography") ? "10px sans-serif" : "14px sans-serif";
+      })
+      .text(function(d) { return d.name==="S" ? d.parent.name : null; }); //Labels for Genres
+});
+
+function position() {
+  this.style("left", function(d) { return d.x + "px"; })
+      .style("top", function(d) { return d.y + "px"; })
+      .style("width", function(d) { return Math.max(0, d.dx - 1) + "px"; })
+      .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
+}
+
+</script>
+
+<br>
+
+Out of the $1.54 billion pledged by backers in Kickstarter projects, $1.32 billion went on to fund successful projects. <br>
+Games is the category that is most funded, with over $300 million in pledges. <br>
+Film & Video, Technology and Design are the next four categories that have the most funding, with over $200 million in pledges each. <br>
+Dance, Journalism and Crafts are the least funded categories with less than $10 million in pledges.
+
+<br><br>
+
+<!-- Treemap Title Label -->
+<div style = "text-align: center">
+<svg width = "960" height = "65" align = "center" float = "center">
+  <text x = "480" y = "40" style="text-anchor: middle; font-size: 30px"> What does all this information say about Kickstarter projects? </text>
+</svg>
+</div>
+The average Kickstarter project raises $7,219.65 in funds. On one end of the spectrum, the average Games project with a success rate of 34% and the average Technology project with a success rate of 23% raised over $20 thousand. On the other hand, a Crafts project averages only $1,338.70 in pledges.
+
+<br><br><br><br><br>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<html>
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
+    <script src = "http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+ 
+  </head>
+<body>
+  <p></p>
+
+
+   <script>
+      //{start,stop,speed,time}
+      var taxi_trips = [];
+      var hours = [];
+      for(var i = 0; i<6; i++){
+        hours.push([])
+        for (var k = 0; k<24; k++){
+          hours[i].push([])
+        }
+      }
+      var route_lat_langs = []
+      var found = 0;
+      var not_found = 0;
+
+
+
+    function saveRoutes(routes){
+
+        var csvContent = "routes:text/csv;charset=utf-8,";
+        routes.forEach(function(infoArray, index){
+
+         dataString = infoArray.join(",");
+         csvContent += index < data.length ? dataString+ "\n" : dataString;
+
+        }); 
+
+    }
+
+   function calculateRoute(from, to, curr_speed, date_time) {
+    var current_length=0;
+    var directionsService = new google.maps.DirectionsService();
+    var directionsRequest = {
+        origin: from,
+        destination: to,
+        travelMode: google.maps.DirectionsTravelMode.DRIVING,
+        unitSystem: google.maps.UnitSystem.IMPERIAL
+    };
+    directionsService.route(directionsRequest, function(response, status)
+    {
+      if (status == google.maps.DirectionsStatus.OK)
+      {
+        console.log("maps request");
+        found++;
+        var route=(response.routes[0]).overview_path;
+        var latLngs = [];
+        for (var k = 0; k < route.length; k++) {
+           var curr_coord=[route[k].k,route[k].D];
+           latLngs = latLngs.concat([curr_coord]);
+           
+        }
+        route_lat_langs.push({"time":date_time,"path":latLngs,"speed":curr_speed});
+      }
+      else
+      {
+        console.log("no route found");
+        not_found ++;
+      }
+    });
+  };
+
+
+  var nyc_speed_limit= 30;
+  function parse_date_time(s){
+    console.log(s)
+    var dat = new Date(Date.parse(s.split(" ")[0]));
+    var time = s.split(" ")[1];
+    var hour = parseInt(time.split(":")[0])*3600000;
+    var min =  parseInt(time.split(":")[1])*60000;
+    var minusfive =  -5*3600000;
+    dat.setMilliseconds(dat.getMilliseconds() + hour + min + minusfive);
+    return dat;
+
+    }
+  // var pickup_lat, pickup_long, dropoff_lat, dropoff_long, trip_time, trip_distance, date, start_time, am_pm, 
+  var pickup, dropoff, time_in_hours, curr_speed;
+  d3.csv("trip_data_january.csv", function(d) {
+    return {
+      pickup_lat: +d.pickup_latitude,
+      pickup_long: +d.pickup_longitude,
+      dropoff_lat: +d.dropoff_latitude,
+      dropoff_long: +d.dropoff_longitude,
+      trip_time: +d.trip_time_in_secs,
+      trip_distance: +d.trip_distance,
+      date: d.trip_date,
+      start_time: d.trip_start,
+      am_pm: d.trip_tod,
+      date_time: d.pickup_datetime
+      };
+    }, 
+    function(error, rows) {
+      rows.forEach(function(d){
+        var day = d.date_time.split("/")[1];
+        var hour = d.date_time.split(" ")[1][0];
+        if (day >= 13 && day <= 18 && hours[day-13][hour].length<10){
+          var start = new google.maps.LatLng(d.pickup_lat,d.pickup_long,true)
+          var stop = new google.maps.LatLng(d.dropoff_lat,d.dropoff_long,true)
+          taxi_trips.push({
+          "start":start,
+          "stop":stop,
+          "speed":d.trip_distance/(d.trip_time/3600),
+          "date_time":d.date_time
+          })
+          hours[day-13][hour].push(1);
+        }
+      });
+
+      var counter = 0;
+      setInterval(function(){
+        if (counter == taxi_trips.length)
+          clearInterval();
+        calculateRoute(taxi_trips[counter].start
+          ,taxi_trips[counter].stop
+          ,taxi_trips[counter].speed
+          ,taxi_trips[counter].date_time)
+        counter++;
+        console.log("ticked");
+        },1500);
+      console.log("done");
+      // for (var k=1; k<taxi_trips.length; k++){
+        
+      //   if(taxi_trips[k]!=undefined){
+      //       //for every 10 trips in this hour
+      //       for (var j=0; j<taxi_trips[k].length; j++){
+      //         calculateRoute(taxi_trips[k][j][0],taxi_trips[k][j][1],taxi_speeds[k][j], k);
+
+      //       }
+            
+      //     }
+      //     console.log("iteration");
+      // }
+      // console.log("done");
+      //now turn all routes into polylines
+
+
+    });
+
+
+
+
+   </script>
+</body>
+</html>

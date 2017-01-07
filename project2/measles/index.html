@@ -1,0 +1,334 @@
+<html>
+<head>
+    <!-- Load the d3 library. -->
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="js/tip.js"></script>
+    <!--Load JQuery-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+
+    <!-- Load fonts-->
+    <link href='https://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+
+    <!--Load auxillary scripts-->
+    <script src="js/states.js"></script>
+    <script src="js/lineFunctions.js"></script>
+    <script src="js/clean.js"></script>
+
+    <title>Measles in the Modern Era</title>
+
+    <!--styles-->
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <style>
+        #deathText{
+            height:110px;
+            margin: 0 auto;
+            text-align: center;
+            padding-top:30px;
+            width:70%;
+        }
+
+        .deathDramatic{
+            font-size: 1.5em;
+            color:#D05050;
+        }
+
+        #lotsOfLittleMen{
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .man, .man2{
+            fill:gray;
+            display:inline-block;
+            margin-left:7px;
+            margin-right: 7px;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="dividingLine"></div>
+<div class="explanatoryText">
+    <h1>MEASLES IN THE MODERN ERA</h1>
+    <p style="text-align:center;font-style:italic;font-size:1.2em;">An exploration of measles vaccination, mortality, and <br/>outbreak trends in the United States, 2003-2015.</p>
+    <!--<div>
+        <ul id="names" class="mapOptions">
+            <li>Tai Wei Guo</li>
+            <li>Connor McGinnis</li>
+            <li>Sarah Sinclair</li>
+        </ul>
+    </div>-->
+
+</div>
+<div class="dividingLine"></div>
+<div id="lotsOfLittleMen">
+
+</div>
+<br/><br/>
+<script>
+var man = 'class="man" x="0px" y="0px" width="38px" height="38px" viewBox="5.0 -10.0 100.0 135.0" enable-background="new 0 0 100 100" xml:space="preserve"><circle cx="50" cy="11.705" r="11.705" /><path d="M66.789,57.198c2.449,0,4.055-2.856,3.569-6.347l-2.441-17.534c-0.486-3.491-3.768-6.347-7.292-6.347H39.374  c-3.524,0-6.806,2.856-7.292,6.347l-2.44,17.534c-0.486,3.491,1.12,6.347,3.569,6.347s4.667,2.876,4.929,6.391l2.242,30.021  c0.262,3.515,3.361,6.391,6.885,6.391h5.467c3.524,0,6.623-2.876,6.885-6.391l2.24-30.021C62.121,60.074,64.34,57.198,66.789,57.198  z"/></svg>';
+
+var manString = "";
+for (var i=0;i<(15*6);i++){
+    manString += '<svg id="man' +i + '"';
+    if(i>86){manString+="style='opacity:0;'";}
+    manString += man;
+    if(i%15 == 14){manString+="</br>";}
+
+}
+$("#lotsOfLittleMen")[0].innerHTML = manString;
+
+</script>
+<div id="buttonList" class="mapOptions">
+<button type="button" class="button">1980</button>
+<button type="button" class="button">1990</button>
+<button type="button" class="button">2000</button>
+<button type="button" class="button" style="background:#d3d3d3">2013</button>
+<button type="button" class="button">2015</button>
+</div>
+<div id="deathText"></div><br/>
+<div style="margin:0 auto;text-align:center;vertical-align:middle;">
+<svg class="man2" x="0px" y="0px" width="38px" height="38px" viewBox="5.0 0.0 100.0 135.0" enable-background="new 0 0 100 100" xml:space="preserve" style="margin:0 auto;vertical-align:middle;"><circle cx="50" cy="11.705" r="11.705" fill="#d05050"/><path d="M66.789,57.198c2.449,0,4.055-2.856,3.569-6.347l-2.441-17.534c-0.486-3.491-3.768-6.347-7.292-6.347H39.374  c-3.524,0-6.806,2.856-7.292,6.347l-2.44,17.534c-0.486,3.491,1.12,6.347,3.569,6.347s4.667,2.876,4.929,6.391l2.242,30.021  c0.262,3.515,3.361,6.391,6.885,6.391h5.467c3.524,0,6.623-2.876,6.885-6.391l2.24-30.021C62.121,60.074,64.34,57.198,66.789,57.198  z" fill="#d05050"/></svg>
+
+<div style="display:inline-block; text-align:center;vertical-align:middle;margin-top:-10px;color:gray">= 30,000 people dead. Backdrop is total worldwide measles deaths in 1980.</div>
+</div>
+
+<div class="dividingLine"></div>
+<div class="explanatoryText">
+<h2>Measles Mortality</h2>
+<p>
+    Measles was officially declared eliminated from the United States in 2000 due to the widespread success of the measles vaccine. In many countries around the world, however, measles still represents a serious problem. According to the World Health Organization, <a href="http://www.who.int/mediacentre/factsheets/fs286/en/" class="prettyLink">deaths worldwide associated with the disease</a> have dropped significantly in recent years, but global mortality rates give us a sobering perspective into what can be a highly deadly disease.
+ </p>
+</div>
+<div class="dividingLine sectionPadding"></div>
+    <div id="mapContainer">
+        <div id="national"></div>
+    </div>
+
+<script src="js/nationwide.js"></script>
+
+
+<div class="dividingLine"></div>
+<div class="explanatoryText">
+<h2>Vaccination Rates</h2>
+<p>The MMR vaccine is used to prevent measles, mumps, and rubella, and is generally first administered to children at the age of 12-15 months. Here, we sampled data from the <a href="http://www.cdc.gov/vaccines/imz-managers/coverage/nis/child/index.html" class="prettyLink">National Immunization Survey (NIS)</a> to understand the vaccination coverage of children 19-36 months in the United States, who are expected to have already received their first dose. Herd immunity, the phenomenon by which the community has enough immune indiviudals to resist infection, generally requires 90-95% vaccination.<br><br> In the past 10 years, the United States' average immunization rate has been in this range, but there are some pockets that are way under the herd immunity range and at risk for outbreaks. Colorado's rate is quite low, and both Ohio and Connecticut's rates have been dropping. On the other hand, New Hampshire's rate has been consistently above that required for herd immunity over the past few years. Mississippi and West Virginia are the only states that allow only medical (and not religious or philosophical) exemptions from vaccination for students attending public school - interestly, they have quite high rates of vaccination for kindergarten students, but not necessarily for toddlers!
+</p>
+</div>
+<div class="dividingLine sectionPadding"></div>
+<div id="storiesMap" style="margin:0 auto;"></div>
+<div id="mapYears">
+    <ul id="years" class="mapOptions">
+        <li id="2003" class="yr">2003</li>
+        <li id="2004" class="yr">2004</li>
+        <li id="2005" class="yr">2005</li>
+        <li id="2006" class="yr">2006</li>
+        <li id="2007" class="yr">2007</li>
+        <li id="2008" class="yr">2008</li>
+        <li id="2009" class="yr">2009</li>
+        <li id="2010" class="yr">2010</li>
+        <li id="2011" class="yr">2011</li>
+        <li id="2012" class="yr">2012</li>
+        <li id="2013" class="yr">2013</li>
+        <li id="2014" class="yr">2014</li>
+        <li id="2015" class="yr" style="font-size:2.1em;">2015</li>
+        <!--<li id="viewAll" class="yr" style="font-size:1.4em;">View All</li>-->
+    </ul>
+</div>
+<div class="dividingLine"></div>
+<div class="explanatoryText">
+<h2>Story of an Outbreak</h2>
+<p>Measles outbreaks are more than just a statistic: they're a story. We've curated all of the measles-related articles from the CDC's <a href="http://www.cdc.gov/measles/pubs-mmwr.html#outbreaks" class="prettyLink">Morbidity and Mortality Weekly Report (MMWR)</a> in order to provide a comprehensive visualization of measles outbreaks in the United States since 2003. Hover over each of the outbreaks to get our summarization of the corresponding CDC report. It's interesting that many measles outbreaks are centralized around religious communities! Note, too, that each outbreak is tied to a particular location abroad: with measles officially declared eliminated from the United States, new cases must be brought in from overseas. </p>
+</div>
+<div class="dividingLine" id="bottomPadding"></div>
+
+<script>
+
+// Map of Outbreaks Portion
+var STORY_MAP_HEIGHT = 550,
+    STORY_MAP_WIDTH = 900;
+
+var MAX_CIRCLE_SIZE = 50,
+    MIN_CIRCLE_SIZE = 5;
+
+var monthDict = {1:'Jan', 2:'Feb', 3:'Mar', 4:'Apr', 5:'May', 6:'Jun', 7:'Jul', 8:'Aug', 9:'Sep', 10:'Oct', 11:'Nov', 12:'Dec'};
+
+var mapSVG = d3.select("#storiesMap").append("svg")
+    .attr("height",STORY_MAP_HEIGHT)
+    .attr("width", STORY_MAP_WIDTH)
+    .style("margin", "0 auto");
+
+var g = mapSVG.append("g");
+//place projection within bounds of the svg element
+var projection = d3.geo.albersUsa();
+var path = d3.geo.path().projection(projection);
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset(function(d){if(d.Latitude<40){return [-10, 0];}else{return [10,0];}})
+  .direction(function(d){
+    if(d.Latitude>40){return 's';}else{return 'n';}
+  })
+  .html(function(d) {
+    var listOfWords = d.Story.split(" ");
+    var accString = "<br/><br/>";
+    var lineCount = 0;
+    //put in some line breaks at nice lengths
+    for(i=0; i<listOfWords.length; i++){
+        if (lineCount + listOfWords[i].length >45 && i!=(listOfWords.length - 1)){
+            accString+="<br/>";
+            lineCount = 0;
+        }
+        accString+=listOfWords[i] + " ";
+        lineCount += listOfWords[i].length;
+
+    }
+    return "<b><span style='color:#D05050;font-size:1.3em;padding:7px;'>" + d.Location + "</span></b><br/>"+ monthDict[d.Month] +" "+d.Year+"<br/><br/><b>Number of Cases:</b> " + String(d["Number Affected"]) +
+        accString + "<br/><br/><b>Country of Origin: </b>" + d.Origin;
+  })
+
+mapSVG.call(tip);
+
+
+var stories;
+d3.json("data/stories.json", function(error, data) {
+    stories = data;
+
+    var minOutbreaks = d3.min(stories, function(d){return d['Number Affected'];});
+    var maxOutbreaks = d3.max(stories, function(d){return d['Number Affected'];});
+
+    var radiusScale = d3.scale.sqrt().domain([minOutbreaks, maxOutbreaks]).range([MIN_CIRCLE_SIZE, MAX_CIRCLE_SIZE]);
+
+    d3.json("data/us-10m.json", function(error, mapData) {
+        //create and color map
+        g.selectAll("path").data(topojson.feature(mapData,mapData.objects.states).features)
+        .enter().append("path")
+        .attr("d", path)
+        .style("stroke", "white")
+        .style("fill","lightgray")
+        .style("stroke-width", 1);
+
+        var coords;
+
+        //pins
+        var circles = mapSVG.selectAll("circle").data(stories).enter().append("circle")
+            .attr("cx", function(outbreak){coords = projection([outbreak.Longitude, outbreak.Latitude]); return coords[0];})
+            .attr("cy", function(outbreak){coords = projection([outbreak.Longitude, outbreak.Latitude]); return coords[1];})
+            .attr("r", function(outbreak){return radiusScale(outbreak['Number Affected']);})
+            .style("fill", "maroon")
+            .style("opacity", 0.5)
+            .on('mouseover', tip.show)
+            .on('mouseout', tip.hide);
+
+    $(".yr").click(function(){
+        //$(".yr").css("font-size","");
+        //$(this).css("font-size", "1.6em");
+        var clicked = $(this);
+        var yrVal = clicked[0].innerHTML;
+        $(".yr").css("font-size",function(p){
+            v = $(".yr")[p];
+            if(v.innerHTML< yrVal){return "1.2em";}
+            else if(v.innerHTML == yrVal){return "2.1em";}
+            else{return ".9em";}
+        });
+        circles.transition().style("opacity", function(d){
+            if(d.Year<=yrVal || yrVal=="View All"){
+                return .5;
+            }else{
+                return 0;
+            }
+        });
+        circles.on("mouseover", function(d){
+            mapSVG.call(tip);
+            if (d.Year <= yrVal || yrVal=="View All"){return tip.show(d);}
+            else{return tip.hide(d);}
+        });
+    });
+
+
+})
+})
+
+
+/*Death Counter Portion */
+deathDict = {1980: 2600000,
+            1990: 872000,
+            2000: 544200,
+            2013: 145700,
+            2015: 27200};
+//enter data into the svg men
+var men= d3.selectAll(".man")[0];
+for(var i=0;i<90;i++){
+    men[i].__data__ = {"id":i};
+}
+
+var timerUpdate;
+
+var selectedYear = 2013;
+setUpDeathText(selectedYear);
+
+
+/*how many people have died of measles today?*/
+function deathCounter(deathHour){
+    var deathSec = deathHour/3600;
+    var d = new Date(), e = new Date(d);
+    var ms = e - d.setHours(0,0,0,0);
+    var s = ms/1000.;
+    var deaths = (Math.round(100*s*deathSec)/100).toString(); //hack to get 2 dec places
+    return deaths;
+}
+
+/* formats numbers. regex from http://bit.ly/1ooHsSO */
+function commaMaker(s){
+    return s.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+
+function setUpDeathText(yrVal){
+    clearInterval(timerUpdate);
+    var deathCount = deathDict[Number(yrVal)];
+    var commaSep = commaMaker(deathCount);
+
+    var textString = "<p style='margin-top:-10px;'><i>";
+    if(yrVal == 2015){textString+="By the end of 2015, there are predicted to have been ";}
+    else{textString+="In "+yrVal+", there were";}
+    textString+= "<span class='deathDramatic'> " + commaSep + " </span>deaths worldwide from measles.";
+    $("#deathText")[0].innerHTML = "</i><p>" + textString;
+
+    var deathDay = Math.floor(deathCount/365);
+    var deathHour = Math.floor(deathCount/(365*24));
+
+    var mathString = "<p style='margin-top:-10px;'><i>That's " + deathDay +  " per day and " + deathHour + " per hour.</i></p>";
+    var timerString = "<p><i>At this mortality rate, <span id='theTimerSpan' class='deathDramatic'>"+deathCounter(deathHour) + "</span> people would have died of measles since midnight.</i></p>";
+    $("#deathText")[0].innerHTML += mathString + timerString;
+    selectedYear = yrVal;
+
+    var manSize = 30000;
+    d3.selectAll(".man").style("fill", function(d){
+       if(d.id<Math.round(deathCount/manSize)){return "#D05050";} //each man represents 30,000 people
+       else{return "gray";}
+    })
+
+    timerUpdate =setInterval(function(){
+        var deadPeople = deathCounter(deathHour);
+        $("#theTimerSpan")[0].innerHTML = deadPeople;
+    },1000);
+}
+
+
+$(".button").click(function(){
+    var clicked = $(this);
+    $(".button").css("background", "white");
+    $(this).css("background", "#d3d3d3");
+    var yrVal = clicked[0].innerHTML;
+    setUpDeathText(yrVal);
+    selectedYear *= 0;
+    selectedYear += Number(yrVal);
+});
+
+
+
+
+
+</script>

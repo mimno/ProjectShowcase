@@ -1,0 +1,38 @@
+<html>
+<script>
+
+labels = ["A", "B", "C", "D"];
+options = [0, 1, 2, 3];
+
+// Build the dropdown menu
+d3.select("#drop")
+    .append("select")
+    .selectAll("option")
+    .data(options)
+    .enter()
+    .append("option")
+    // Provide available text for the dropdown options
+    .text(function(d) {return labels[d];})
+
+d3.select('select')
+    .on("change", function() {
+    key = this.selectedIndex;
+    d3.selectAll('circle')
+        .transition()
+        .duration(300)
+        .ease("quad")
+        .attr( 'r', 5)
+        .attr('cx', function(d) {return d.x;})
+        .attr('cy', function(d) {return d.y;})
+        // if a data point is selected highlight other 
+        // data points of the same color
+        .style('fill', function(d, i) { 
+            if (d.label == key) 
+            {return fill_arr[key]}
+            else {return "#ccc"}
+        ;})
+    });
+
+
+</script>
+</html>

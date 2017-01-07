@@ -1,0 +1,764 @@
+<html>
+<head>
+<script src="d3.v3.min.js" charset="utf-8"></script>
+<script src="topojson.v1.min.js"></script>
+<script src="jquery-1.11.2.min.js"></script>
+<link rel="stylesheet" href="bootstrap.min.css">
+<link rel="stylesheet" href="bootstrap-theme.min.css">
+<script src="bootstrap.min.js"></script>
+</head>
+
+
+<body>
+	<style>
+		  .axis path, .axis line {
+		    fill: none;
+		    stroke: #575757;
+		    stroke-width:2;
+		    opacity: 0.8;
+		    shape-rendering: crispEdges;
+		  }
+
+	</style>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Analysis of the Spread of and Response to Ebola</a>
+        </div>
+        <!-- <div id="navbar">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Ryan Campbell (rjc362)</a></li>
+            <li><a href="#">Jiabin Dong (jd836)</a></li>
+            <li><a href="#">Andrew Halpern (amh272)</a></li>
+          </ul>
+        </div> -->
+
+
+      </div>
+    </nav>
+    <br><br>
+
+        <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+    	<div class="container">
+      		<div class="row">
+	      		<div class="col-md-8">
+
+			        <h1>Ebola: Pandemic in the making?</h1>
+			        <p>Since mid-2014, the Ebola virus has plagued western Africa and other areas in Europe and the Americas. What does the case distribution look like at the global scale? </p>
+		      </div>
+
+	  	  <div class="col-md-4">
+	  	  	<img src="logo.png" height="250" width="250">
+	  	  </div>
+	  	 </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h2>Distribution of Total Confirmed, Probable, and Suspected Ebola Cases</h2>
+		  <div id="map"></div>
+		  <div id="colorScale"></div>
+
+		  <script>
+			var width = d3.select("#map").style("width"); //dynamically set the width of the SVG
+			width = +width.substring(0, width.length-2);
+			var height = 500;
+
+			var caseCounts = new Object();
+			var projection = d3.geo.mercator().scale(325).translate([width/2 + 250, height/2+200]); //map projection scale
+			var path = d3.geo.path().projection(projection);
+
+			var mapSvg = d3.select("#map").append("svg")
+			    .attr("width", width)
+			    .attr("height", height); //svg for the map
+			var mapG = mapSvg.append("g");
+
+			var scaleSvg = d3.select("#colorScale").append("svg")
+				.attr("width", width)
+				.attr("height", 150); //svg for the color gradient below the map
+			var scaleG = scaleSvg.append("g");
+
+			//Converts a data string to a JavaScript Date object
+			function parseDate(d) {
+			  var parts = d.split('-');
+			  return new Date(parts[0], parts[1]-1, parts[2]);
+			}
+
+			var exponent = 0.35; //exponent for use in color scales
+			//Creates the color bar below the map
+			function makeScale(){
+				var padding = 50;
+				//Scale maps an X coordinate to a color in the gradient bar
+				var pointToColor = d3.scale.pow().exponent(0.35).domain([padding,width-padding]).range([grayToRed(0), grayToRed(maxCases)]);
+				//Scale maps Ebola case count to the x location in the gradient bar
+				var valueToPoint = d3.scale.linear().domain([0, maxCases]).range([padding, width-padding]);
+				var data = Array.apply(null, Array(width)).map(function (d, i) {return i;});
+				//Create the color bar
+				var scale = scaleG.selectAll("line")
+							.data(data)
+							.enter().append("line")
+							.attr("x1", function(d){ return d;})
+							.attr("x2", function(d){ return d;})
+							.attr("y1", 0).attr("y2", 20)
+							.style("fill", function(d){return pointToColor(d)})
+							.style("stroke", function(d){return pointToColor(d)});
+			 	//Add text labels to the color bar
+				scaleG.append("text")
+					.attr("x", "50%")
+					.attr("y", 75)
+					.style("font-weight", "bold")
+					.style("font-size", 18)
+					.style("text-anchor", "middle")
+					.text("Total Number of Confirmed, Probable and Suspected Ebola Cases");
+				var xValues = new Array();
+				for(var i = 0; i < orderedIds.length; i++){
+					var id = orderedIds[i];
+					var x = valueToPoint(caseCounts[id].mostRecent.caseCount);
+					var yOffset = 0;
+					var collisions = 0;
+					for(val in xValues){
+						if(Math.abs(x - xValues[val]) < 40){
+							yOffset += 15; collisions++; //offset label vertically if it is within 40 horizontal pixels of another label
+						}
+					}
+					xValues.push(x);
+					caseCounts[id].x = x;
+					caseCounts[id].collisions = collisions;
+					//Create the string that will indicate each country on the color scale: (Name: Count)
+					var name = caseCounts[id].details.name.length > 8 ? caseCounts[id].details["alpha-3"] : caseCounts[id].details.name;
+					name += ": " + caseCounts[id].mostRecent.caseCount;
+					//Create a vertical bar indicating the Ebola count of a country
+					scaleG.append("line")
+						.attr("x1", x)
+						.attr("x2", x)
+						.attr("y1", 0).attr("y2", 30)
+						.style("fill", "black")
+						.style("stroke", "black")
+						.style("stroke-width", 1);
+					//Add the country label below the vertical bar in the gradient
+					scaleG.append("text")
+						.attr("x", x)
+						.attr("y", 40 + yOffset)
+						.style("text-anchor", "middle")
+						.style("fill", "black")
+						.text(name);
+				}
+			}
+			//Creates a first data point for all countries to make sure that all data starts at the origin.
+			function fixDates(){
+				for(d in caseCounts){
+					var record = new Object();
+					record.date = minDate;
+					record.caseCount = 0;
+					caseCounts[d].records.unshift(record);
+				}
+			}
+
+			//Reads in all of the data from GeneralCasesDeaths.json and matches countries with their ISO-3166 Code while also
+			//Finding the most recent data point for each country
+			function processData(deaths, codeList){
+				for(var i = 0 ; i < deaths.length; i++){
+						var country = codeList.get(deaths[i].COUNTRY);
+						var code = country["country-code"];
+						var str1 = "Cumulative number of confirmed, probable and suspected Ebola deaths";
+						var str2 = "Cumulative number of confirmed, probable and suspected Ebola cases";
+						var date = parseDate(deaths[i]["DATE"]);
+						if(code == null || (deaths[i]["INDICATOR"] != str1 && deaths[i]["INDICATOR"] != str2)) continue;
+						if(!caseCounts.hasOwnProperty(code)){
+								caseCounts[code] = new Object();
+								caseCounts[code].mostRecent = new Object();
+								caseCounts[code].mostRecent.date = date;
+								caseCounts[code].mostRecent.caseCount = 0;
+								caseCounts[code].mostRecent.deathCount = 0;
+								caseCounts[code].records = new Array();
+								caseCounts[code].name = deaths[i]["COUNTRY"];
+								caseCounts[code].details = country;
+						}
+						if(deaths[i]["INDICATOR"] == str1){
+							if(caseCounts[code].mostRecent.date <= date){
+								caseCounts[code].mostRecent.date = date;
+								caseCounts[code].mostRecent.deathCount = deaths[i]["VALUE"];
+							}
+						}
+						else{
+							if(caseCounts[code].mostRecent.date < date){
+								caseCounts[code].mostRecent.date = date;
+								caseCounts[code].mostRecent.caseCount = deaths[i]["VALUE"];
+							}
+							var record = new Object();
+							record.date = date;
+							record.caseCount = deaths[i]["VALUE"];
+							caseCounts[code].records.push(record);
+							if(caseCounts[code].mostRecent.caseCount > maxCases) maxCases = caseCounts[code].mostRecent.caseCount;
+							if(minDate==null || record.date < minDate) minDate = record.date;
+							if(maxDate==null || record.date > maxDate) maxDate = record.date;
+						}
+					}
+					fixDates();
+					for(id in caseCounts) orderedIds.push(id);
+
+					orderedIds.sort(function(a,b){
+						return caseCounts[a].mostRecent.caseCount - caseCounts[b].mostRecent.caseCount;
+					});
+			}
+
+			var minDate = null; //minimum date in the data set
+			var maxDate = null; //maximum date in the data set
+			var maxCases = 0; //maximum number of Ebola cases in any country
+			var grayToRed; //scale from Ebola case counts to a color ranging from gray to red; colors the map accordingly
+			var orderedIds = new Array(); //stores the indices of the countries in order from lowest to highest case count
+			d3.json("countryCodes.json", function(error, codes){ //get the ISO-3166 country codes
+				var codeList = d3.map(codes, function(country){ return country["name"];});
+				d3.json("GeneralCasesDeaths.json", function(error,deaths){ //get the data for Ebola cases
+					processData(deaths, codeList);
+					grayToRed = d3.scale.pow().exponent(exponent).domain([0, maxCases]).range(["#eee", "#990000"]);
+					makeScale();
+
+					d3.json("world-50m.json", function(error, world) { //get the JSON for creating a world map
+						var countries = topojson.feature(world, world.objects.countries).features;
+						//Create the map
+						mapG.selectAll("path")
+							.data(countries)
+							.enter().append("path")
+							.attr("d", path)
+							.style("fill", function(country) {
+								if(caseCounts.hasOwnProperty(country.id)){
+									caseCounts[country.id].feature = country;
+									return grayToRed(caseCounts[country.id].mostRecent.caseCount);
+								}
+								else return "#eee";
+							})
+							.style("stroke", "#888");
+						//For each country, create a line from its center to the color gradient scale below the map
+						for(var i = 0; i < orderedIds.length; i++){
+							var country = caseCounts[orderedIds[i]];
+							var centroid = path.centroid(country.feature);
+							if(orderedIds[i]==840){
+								centroid[0] += 100;
+								centroid[1] += 100;
+							}
+							mapG.append("line")
+								.attr("x1", country.x)
+								.attr("x2", centroid[0])
+								.attr("y1", height).attr("y2", centroid[1])
+								.style("fill", "black")
+								.style("opacity", 0.8)
+								.style("stroke", "black");
+							mapG.append("circle")
+								.attr("cx", centroid[0])
+								.attr("cy", centroid[1])
+								.attr("fill", "black")
+								.attr("r", 2);
+							//Create a country label on the map for the countries that are all tightly bunched below 50 cases.
+							if(country.mostRecent.caseCount < 50){
+								mapG.append("text")
+									.attr("x", centroid[0])
+									.attr("y", centroid[1]-3)
+									.style("text-anchor", "middle")
+									.style("font-weight", "bold")
+									.style("font-size", 11)
+									.text(country.name);
+							}
+						}
+
+						buildLineGraph(); //create the line graph next (relies on the same JSON data)
+						buildPieGraphs(); //create the pie graphs next (relies on the same JSON data)
+					});
+				});
+			});
+		</script>
+
+        </div>
+      </div>
+      <br><br>
+      <div class="row">
+      	<div class="col-md-12">
+          <h1>Cumulative Number of Ebola Cases By Country</h1>
+		  <div id="lineGraph">
+		  	<script>
+		  		//Builds the line graph showing the change in Ebola case counts by country
+		  		function buildLineGraph(){
+		  			var padding = 75;
+		  			var lineSvg = d3.select("#lineGraph").append("svg").attr("height", height).attr("width", width)
+		  				.style("background-color", "#f4f5f6"); //svg for the line graph
+		  			//Time scale that maps time to X coordinate
+		  			var xScale = d3.time.scale().domain([minDate, maxDate]).range([padding, width - padding]);
+		  			//Scale that maps case count to a Y coordinate
+		  			var yScale = d3.scale.sqrt().domain([0, maxCases]).range([height-padding,padding/3]);
+		  			//Color scale that gets more "red" for higher case counts
+		  			var colorScale = d3.scale.pow().exponent(exponent).domain([0, maxCases]).range(["#33000", "red"]);
+
+		  			var line = d3.svg.line()
+						.x(function (d) { return xScale(d.date); })
+						.y(function (d) { return yScale(d.caseCount); });
+
+					var yValues = new Array();
+					for(var i = orderedIds.length - 1; i >= 0; i--){
+						var id = orderedIds[i];
+						var y = yScale(caseCounts[id].mostRecent.caseCount);
+						for(j in yValues){
+							if(Math.abs(yValues[j]-y) < 20){
+								y += 7; //Shifts the label down if another label is within 20 vertical distance
+							}
+						}
+						var name = caseCounts[id].details.name.length > 8 ? caseCounts[id].details["alpha-3"] : caseCounts[id].details.name;
+						//Add the data line for each country
+						lineSvg.append("path").attr("d", line(caseCounts[id].records))
+							.style("fill", "none").style("stroke", colorScale(caseCounts[id].mostRecent.caseCount)).style("opacity",0.5).style("stroke-width", 2);
+						//Create a text label next to each line
+						lineSvg.append("text")
+							.attr("x", width-padding)
+							.attr("y", y)
+							.style("text-anchor", "left")
+							.style("font-size", 10)
+							.text(name);
+						yValues.push(y);
+					}
+
+					//Create the X axis
+					var xAxis = d3.svg.axis()
+					    .scale(xScale)
+					    .orient('bottom')
+					    .ticks(d3.time.weeks, 2)
+					    .tickFormat(d3.time.format('%m/%d/%y'))
+					    .tickSize(5)
+					    .tickPadding(8);
+
+				    lineSvg.append('g')
+					    .attr('class', 'x axis')
+					    .attr('transform', 'translate(0, ' + (height - padding) + ')')
+					    .call(xAxis);
+
+					//Create the y axis
+					var yAxis = d3.svg.axis()
+					    .scale(yScale)
+					    .orient('left')
+					    .ticks(15)
+					    .tickSize(5)
+					    .tickPadding(3);
+
+					lineSvg.append('g')
+					    .attr('class', 'y axis')
+					    .attr('transform', 'translate(' + padding + ', 0)')
+					    .call(yAxis);
+
+					//Create the text label for the Y axis
+					lineSvg.append("text")
+						.text("Number of Reported, Probable, and Suspected Ebola Cases")
+						.style("text-anchor", "middle")
+						.style("font-weight", "bold")
+						.style("font-size", 12)
+						.attr("x", -(height-padding)/2)
+						.attr("transform", "rotate(-90)")
+						.attr("y", 20);
+					//Create the text label for the X axis
+					lineSvg.append("text")
+						.text("Date (MM/DD/YY)")
+						.style("text-anchor", "middle")
+						.style("font-size", 15)
+						.style("font-weight", "bold")
+						.attr("x", (width-padding)/2)
+						.attr("y", height-padding/3);
+		  		}
+		  	</script>
+
+		  </div>
+        </div>
+      </div>
+      <br><br>
+      <div class="row">
+      	<div class="col-md-12">
+          <h1> <span style="color: #262626"> Death Count </span> <span style="color: #888888">vs</span> <span style="color: #960000"> Case Count </span> </h1>
+		  <div id="pie">
+
+		  	<script>
+
+		  		//Builds the chart that shows the death count vs. case count
+		  		function buildPieGraphs() {
+			  		var pieSvg = d3.select("#pie").append("svg")
+						.attr("width", width)
+						.attr("height", 475)
+						.style("background-color", "#f4f5f6") //gray background
+					var padding = 50;
+					//First group will contain number of cases
+					var pieSvgOne = pieSvg.append("g");
+					//Second group will contain number of deaths
+					var pieSvgTwo = pieSvg.append("g");
+					//Maps the first 3/5 of the dataset to the first third of the x-axis and the last 2/5 to the last 2/3 of the width.
+					var xScale = d3.scale.linear().domain([0,3*width/5, 3*width/5, width]).range([150, width/3, width/3, width]);
+					var yScale = d3.scale.linear().domain([0, 60]).range([height-padding, padding]);
+
+					countryData = [];
+					for(id in caseCounts) {
+						countryData.push(caseCounts[id]);
+					}
+
+					//Sorts country data by ascending case count number
+					countryData.sort((function(a, b){return a.mostRecent.caseCount - b.mostRecent.caseCount}));
+
+					var circles = pieSvgOne.selectAll("circle").data(countryData).enter().append("circle");
+
+					var circlesTwo = pieSvgTwo.selectAll("circle").data(countryData).enter().append("circle");
+
+					//Generates Number of Cases
+					circles.attr("cx", function(d, i){
+								return xScale(width * (i / 9)); // 9 countries evenly spaced but then scaled appropriately
+							})
+							.attr("cy", function(d) {
+								return yScale(25);
+							})
+							.attr("r", function(d) {
+								var radius = Math.sqrt(d.mostRecent.caseCount);
+								if (radius <=5) { //Increases radius size 4x if the radius is too small to see
+									return radius * 4;
+								}
+								return radius;
+							})
+							.attr("opacity", .8)
+							.style("fill", "#960000") //red fill
+							.style("stroke-width", function(d) {
+								return String(10);
+							})
+
+					//Generates Number of Deaths
+					circlesTwo.attr("cx", function(d, i){
+								return xScale(width * (i / 9));
+							})
+							.attr("cy", function(d) {
+								return yScale(25);
+							})
+							.attr("r", function(d) {
+								var radius = Math.sqrt(d.mostRecent.deathCount);
+								if (radius <=5) { //Increases radius size 4x if the radius is too small to see
+									return radius * 4;
+								}
+								return radius;
+							})
+							.attr("opacity", .8)
+							.style("fill", "#262626") //black fill
+							.style("stroke-width", function(d) {
+								return String(10);
+							})
+
+					// Generates Name of Country
+					for (var j = 0; j < countryData.length; j++) {
+						//console.log(countryData[j].details.name)
+						pieSvg.append("text")
+						.attr("x", xScale(width * (j / 9)))
+						.attr("y", yScale(55))
+						.style("text-anchor", "middle")
+						.style("fill", "#888888")
+						.text(function() {
+							if (countryData[j].details.name == "Senegal" || countryData[j].details.name == "United States of America" || countryData[j].details.name == "United Kingdom") { //Uses 3 letter code if country name is too long
+								return countryData[j].details["alpha-3"];
+							} else {
+								return countryData[j].details.name;
+							}
+						})
+					}
+
+					//Generates the text for Number of Deaths
+					for (var j = 0; j < countryData.length; j++) {
+						//console.log(countryData[j].details.name)
+						pieSvg.append("text")
+						.attr("x", xScale(width * (j / 9)))
+						.attr("y", yScale(52))
+						.style("text-anchor", "middle")
+						.style("fill", "#262626")
+						.text(function() {
+							return countryData[j].mostRecent.deathCount;
+						})
+					}
+
+					//Generates the text for Number of Cases
+					for (var j = 0; j < countryData.length; j++) {
+						//console.log(countryData[j].details.name)
+						pieSvg.append("text")
+						.attr("x", xScale(width * (j / 9)))
+						.attr("y", yScale(49))
+						.style("text-anchor", "middle")
+						.style("fill", "#960000")
+						.text(function() {
+							return countryData[j].mostRecent.caseCount;
+						})
+					}
+					//Generates text for the ratio of death count to case Count
+					for (var j = 0; j < countryData.length; j++) {
+						//console.log(countryData[j].details.name)
+						pieSvg.append("text")
+						.attr("x", xScale(width * (j / 9)))
+						.attr("y", yScale(46))
+						.style("text-anchor", "middle")
+						.style("fill", "#000000")
+						.text(function() {
+							return (countryData[j].mostRecent.deathCount / countryData[j].mostRecent.caseCount).toFixed(2); //Rounds to two decimal places
+						})
+					}
+					//Generates text for table labels on the side
+					function labels(title, position) {
+						pieSvg.append("text")
+							.attr("x", 15)
+							.attr("y", yScale(position))
+							.style("text-anchor", "left")
+							.style("fill", "#262626")
+							.text(title)
+					}
+					labels("Country: ", 55)
+					labels("Death Count: ", 52)
+					labels("Case Count: ", 49)
+					labels("DC / CC:", 46)
+				}
+		  	</script>
+	      </div>
+	      <br><br>
+      <div class="row">
+      	<div class="col-md-12">
+      	  <h1><span style="color: #009900"> But there is hope... </span> </h1>
+          <h2>Weekly World Food Program Assistance By Country</h2>
+		  <div id="foodGraph">
+
+		  	<script>
+		  	//Generate the Weekly World Food Program Assistance By Country graph
+		  	var foodRecord = new Array();
+		  	var foodMinDate = null;
+		  	var foodMaxDate = null;
+		  	var foodMin = Number.MAX_VALUE;
+		  	var foodMax = 0;
+
+		  	//To convert the date format in .json file to time style in javascript, splitted by '/'
+		  	function foodParseDate(d) {
+			  var parts = d.split('/');
+			  return new Date(parts[2], parts[0] - 1, parts[1]);
+			}
+
+			//To convert the number value from string to number since there are bunch of ',' there
+			function foodParse(d){
+				var parts = d.split(',');
+				var str = String(parts[0] + parts[1]);
+				if(parts[2] != null)
+					str += parts[2];
+				return +str;
+			}
+		  	//Reading number of infected people receiving food from WTP from FoodAssistance.json
+		  	d3.json("FoodAssistance.json", function(error, foodNum){
+		  		for(var i = 0; i < foodNum.length; i++){
+		  			foodRecord[i] = new Object();
+		  			foodRecord[i].date = foodParseDate(foodNum[i]["DATE"]);
+		  			foodRecord[i].guinea = foodParse(foodNum[i]["NUMBER OF AFFECTED PEOPLE RECEIVING FOOD FROM WFP  IN GUINEA"]);
+		  			foodRecord[i].liberia = foodParse(foodNum[i]["NUMBER OF AFFECTED PEOPLE RECEIVING FOOD FROM WFP  IN LIBERIA"]);
+		  			foodRecord[i].sierraLeone = foodParse(foodNum[i]["NUMBER OF AFFECTED PEOPLE RECEIVING FOOD FROM WFP  IN SIERRA LEONE"]);
+		  			//Compute the first report date point
+		  			if(foodMinDate == null || foodRecord[i].date < foodMinDate)
+		  				foodMinDate = foodRecord[i].date;
+		  			//compute the last report date point
+		  			if(foodMaxDate == null || foodRecord[i].date > foodMaxDate)
+		  				foodMaxDate = foodRecord[i].date;
+		  			//compute the minimum number of people receiving food
+		  			if(foodMin > foodRecord[i].guinea)
+		  				foodMin = foodRecord[i].guinea;
+		  			//compute the maximum number of people receiving food
+		  			if(foodMax < foodRecord[i].sierraLeone)
+		  				foodMax = foodRecord[i].sierraLeone;
+		  		}
+		  		//Draw the figure
+		  		buildFoodBarFigure();
+		  	});
+
+		  	//Generating food assistance figure
+		  	function buildFoodBarFigure(){
+		  		var foodHeight = 300;
+		  		var foodPadding = 50;
+		  		//Create the svg file
+		  		var foodSvg = d3.select("#foodGraph").append("svg").attr("height", foodHeight).attr("width", width).style("background-color", "#f4f5f6");
+		  		//To map the date variable to x-axis
+		  		var foodXScale = d3.time.scale().domain([foodMinDate, foodMaxDate]).range([foodPadding, width - 6 * foodPadding]);
+		  		//To map the number of people receiving food variable to color(gray to green)
+		  		var foodYScale = d3.scale.linear().domain([foodMin, foodMax]).range(["#eee", "#009900"]);
+		  		//Draw the gradient green bar for reference
+		  		var foodGradient = foodSvg.append("svg:defs")
+  					.append("svg:linearGradient")
+				    .attr("id", "gradient")
+				    .attr("x1", "0%")
+				    .attr("y1", "100%")
+				    .attr("x2", "0%")
+				    .attr("y2", "0%")
+				    .attr("spreadMethod", "pad");
+
+				foodGradient.append("svg:stop")
+				    .attr("offset", "0%")
+				    .attr("stop-color", "#eee")
+				    .attr("stop-opacity", 1);
+
+				foodGradient.append("svg:stop")
+				    .attr("offset", "100%")
+				    .attr("stop-color", "#009900")
+				    .attr("stop-opacity", 1);
+
+				foodSvg.append("svg:rect")
+					.attr("x", width - 2 * foodPadding)
+					.attr("y", 20)
+				    .attr("width", 20)
+				    .attr("height", 250)
+				    .style("fill", "url(#gradient)");
+
+				//Add the name of green gradient color bar
+		  		foodSvg.append("text")
+		  			.attr("x", width - 2 * foodPadding + 10)
+		  			.attr("y", 290)
+		  			.style("text-anchor", "middle")
+		  			.style("alignment-baseline", "below")
+		  			.text("People Receiving Food");
+
+		  		//the vertical axis to specify statistical meaning of color bar
+		  		foodSvg.append("line")
+		  			.attr("x1", width - 2 * foodPadding + 25)
+		  			.attr("y1", 20)
+		  			.attr("x2", width - 2 * foodPadding + 25)
+		  			.attr("y2", 270)
+		  			.style("stroke", "black");
+		  		var peopleReFood = [1644264, 42503];
+		  		for(var i = 0; i < peopleReFood.length; i++){
+		  			foodSvg.append("line")
+		  				.attr("x1", width - 2 * foodPadding + 25)
+		  				.attr("y1", 20 + i * 250)
+		  				.attr("x2",  width - 2 * foodPadding + 30)
+		  				.attr("y2", 20 + i * 250)
+		  				.style("stroke", "black");
+
+		  			foodSvg.append("text")
+		  				.attr("x", width - 2 * foodPadding + 30)
+		  				.attr("y", 20 + i * 250)
+		  				.style("alignment-baseline", "middle")
+		  				.style("text-anchor", "right")
+		  				.text(String(peopleReFood[i]));
+		  		}
+
+		  		for(var i = 0; i < foodRecord.length; i++){
+		  			//append guinea food assistance data
+		  			foodSvg.append("rect")
+		  				.attr("x", foodXScale(foodRecord[i].date))
+		  				.attr("y", 50)
+		  				.attr("width", 50)
+		  				.attr("height", 30)
+		  				.style("fill", foodYScale(foodRecord[i].guinea));
+		  			//append liberia food assistance data
+		  			foodSvg.append("rect")
+		  				.attr("x", foodXScale(foodRecord[i].date))
+		  				.attr("y", 125)
+		  				.attr("width", 50)
+		  				.attr("height", 30)
+		  				.style("fill", foodYScale(foodRecord[i].liberia));
+		  			//append sierra leaone food assistance data
+		  			foodSvg.append("rect")
+		  				.attr("x", foodXScale(foodRecord[i].date))
+		  				.attr("y", 200)
+		  				.attr("width", 50)
+		  				.attr("height", 30)
+		  				.style("fill", foodYScale(foodRecord[i].sierraLeone));
+		  			//Generate the number of people receive food text for several date points
+		  			if(i % 3 == 0){
+		  				//append guinea data
+		  				foodSvg.append("text")
+		  					.attr("x", foodXScale(foodRecord[i].date))
+		  					.attr("y", 45)
+		  					.style("text-anchor", "middle")
+	  						.style("alignment-baseline", "above")
+		  					.text(String(foodRecord[i].guinea));
+		  				foodSvg.append("line")
+		  					.attr("x1", foodXScale(foodRecord[i].date))
+		  					.attr("y1", 50)
+		  					.attr("x2", foodXScale(foodRecord[i].date))
+		  					.attr("y2", 48)
+		  					.style("stroke", "black");
+		  				//append liberia data
+		  				foodSvg.append("text")
+		  					.attr("x", foodXScale(foodRecord[i].date))
+		  					.attr("y", 120)
+		  					.style("text-anchor", "middle")
+	  						.style("alignment-baseline", "above")
+		  					.text(String(foodRecord[i].liberia));
+		  				foodSvg.append("line")
+		  					.attr("x1", foodXScale(foodRecord[i].date))
+		  					.attr("y1", 125)
+		  					.attr("x2", foodXScale(foodRecord[i].date))
+		  					.attr("y2", 123)
+		  					.style("stroke", "black");
+		  				//append sierra leone data
+		  				foodSvg.append("text")
+		  					.attr("x", foodXScale(foodRecord[i].date))
+		  					.attr("y", 195)
+		  					.style("text-anchor", "middle")
+	  						.style("alignment-baseline", "above")
+		  					.text(String(foodRecord[i].sierraLeone));
+		  				foodSvg.append("line")
+		  					.attr("x1", foodXScale(foodRecord[i].date))
+		  					.attr("y1", 200)
+		  					.attr("x2", foodXScale(foodRecord[i].date))
+		  					.attr("y2", 198)
+		  					.style("stroke", "black");
+		  			}
+		  		}
+		  		//Attach Name of countries
+		  		foodSvg.append("text")
+	  				.attr("x", width - 5 * foodPadding + 20)
+	  				.attr("y", 65)
+	  				.style("text-anchor", "left")
+	  				.style("alignment-baseline", "middle")
+	  				.text("Guinea");
+  				foodSvg.append("text")
+	  				.attr("x", width - 5 * foodPadding + 20)
+	  				.attr("y", 140)
+	  				.style("text-anchor", "left")
+	  				.style("alignment-baseline", "middle")
+	  				.text("Liberia");
+				foodSvg.append("text")
+	  				.attr("x", width - 5 * foodPadding + 20)
+	  				.attr("y", 215)
+	  				.style("text-anchor", "left")
+	  				.style("alignment-baseline", "middle")
+	  				.text("Sierra Leone");
+
+		  		//draw the x-axis timeline
+		  		foodSvg.append("line")
+		  			.attr("x1", foodPadding)
+		  			.attr("y1", 260)
+		  			.attr("x2", foodXScale(foodRecord[20].date))
+		  			.attr("y2", 260)
+		  			.style("stroke", "black");
+		  		var step = [0, 3, 7, 11, 16, 20];
+		  		var monthStr = ["09/14", "10/14", "11/14", "12/14", "01/15", "02/15"];
+		  		for(var i = 0; i < step.length; i++){
+		  			foodSvg.append("line")
+		  				.attr("x1", foodXScale(foodRecord[step[i]].date))
+		  				.attr("y1", 260)
+		  				.attr("x2", foodXScale(foodRecord[step[i]].date))
+		  				.attr("y2", 265)
+		  				.style("stroke", "black");
+
+		  			foodSvg.append("text")
+		  				.attr("x", foodXScale(foodRecord[step[i]].date))
+		  				.attr("y", 275)
+		  				.style("alignment-baseline", "middle")
+		  				.style("text-anchor", "middle")
+		  				.text(monthStr[i]);
+		  		}
+		  		//Append the timeline name
+		  		foodSvg.append("text")
+		  			.attr("x", width - 5 * foodPadding - 40)
+		  			.attr("y", 265)
+		  			.style("text-anchor", "right")
+		  			.style("alignment-baseline", "middle")
+		  			.text("Timeline(MM/YY)");
+		  	}
+		  	</script>
+
+		  </div>
+		  <br><br><br>
+        </div>
+    </div>
+</body>
+</html>

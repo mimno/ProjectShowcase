@@ -1,0 +1,382 @@
+<html>
+
+<head>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,300' rel='stylesheet' type='text/css'>
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="js/cal-heatmap.min.js"></script>
+  <link href="css/cal-heatmap.css" rel="stylesheet" />
+  <link href="css/style.css" rel="stylesheet" />
+  <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <script src="js/d3.slider.js"></script>
+  <link rel="stylesheet" href="css/d3.slider.css"/>
+
+  <meta charset="utf-8">
+  <title> Project 2 | International Holidays</title>
+</head>
+<body>
+
+
+<div id="maincontainer">
+
+<h1 class="graphheader" id="calendartitle">What are the most popular holidays internationally?</h1>
+
+<div id="cal-heatmap">
+<script>
+  var calData;  //just days and values
+  var fullCalData;
+  var valArray=[];
+
+  d3.json("data/data5.json", function (error, data) {
+     calData=data;
+     for (var key in calData) {
+      valArray.push(calData[key]);
+      }
+  });
+
+  d3.json("data/data7.json", function (error, data) {
+      fullCalData=data;
+  });
+
+  var cal = new CalHeatMap();
+  cal.init({
+    data: "data/data5.json",
+    start: new Date(2014, 4),
+    id : "graph_k",
+    domain : "month",
+    subDomain : "x_day",
+    subDomainTextFormat: "%d",
+    domainMargin: 10,
+    range : 4,
+    cellSize: 25,
+    cellPadding: 3,
+    cellRadius: 2,
+    domainGutter: 15,
+    displayLegend: false,
+    legend: [5, 25, 50, 75, 100],
+    legendCellSize: 20,
+    legendMargin:10,
+    onClick: function(date, val){
+      var univDate= Date.parse(date)/1000;
+      var dateObj= (fullCalData.filter(function(e){
+        if (e.Date==univDate){
+          return true;
+        }
+        return false;
+      }))[0];
+
+      var truncatedDate= date.toDateString()
+      if (val>0){
+        var cStr= dateObj.Countries
+        var hStr= dateObj.Holidays
+        var countries= cStr.substring(1,cStr.length-1).split(',');
+        var holidays= hStr.substring(1,hStr.length-1).split(',');
+        var output="";
+
+        document.getElementById("holidayListTitle").innerHTML="<h2 id='fixedtitle'><span class='highlight'>"+ val+"</span> countries with holidays on <span class='highlight'>"+truncatedDate+"</span></h2>";
+
+        for (var i =0; i<countries.length; i++){
+          output+= "<p><span class='highlight'>"+ countries[i]+"</span> - "+ holidays[i]+"</p>"
+        }
+        document.getElementById("holidayList").innerHTML= output
+        }
+
+      else{
+        document.getElementById("holidayListTitle").innerHTML="<h2 id='fixedtitle'><span class='highlight'>0</span> countries with holidays on <span class='highlight'>"+truncatedDate+"</span></h2>";
+        console.log(val);
+        document.getElementById("holidayList").innerHTML= "No holidays on "+truncatedDate
+      }
+    }
+  });
+
+var cal2 = new CalHeatMap();
+  cal2.init({
+    data: "data/data5.json",
+    start: new Date(2014, 8),
+    id : "graph_k",
+    domain : "month",
+    subDomain : "x_day",
+    subDomainTextFormat: "%d",
+    domainMargin: 10,
+    range : 4,
+    cellSize: 25,
+    cellPadding: 3,
+    cellRadius: 2,
+    domainGutter: 15,
+    displayLegend: false,
+    legend: [5, 25, 50, 75, 100],
+    legendCellSize: 20,
+    legendMargin:10,
+    onClick: function(date, val){
+      var univDate= Date.parse(date)/1000;
+      var dateObj= (fullCalData.filter(function(e){
+        if (e.Date==univDate){
+          return true;
+        }
+        return false;
+      }))[0];
+      var truncatedDate= date.toDateString()
+      if (val>0){
+        var cStr= dateObj.Countries
+        var hStr= dateObj.Holidays
+        var countries= cStr.substring(1,cStr.length-1).split(',');
+        var holidays= hStr.substring(1,hStr.length-1).split(',');
+        var output="";
+
+        document.getElementById("holidayListTitle").innerHTML="<h2 id='fixedtitle'><span class='highlight'>"+ val+"</span> countries with holidays on <span class='highlight'>"+truncatedDate+"</span></h2>";
+
+        for (var i =0; i<countries.length; i++){
+          output+= "<p><span class='highlight'>"+ countries[i]+"</span> - "+ holidays[i]+"</p>"
+        }
+        document.getElementById("holidayList").innerHTML= output
+        }
+      else{
+        document.getElementById("holidayListTitle").innerHTML="<h2 id='fixedtitle'><span class='highlight'>0</span> countries with holidays on <span class='highlight'>"+truncatedDate+"</span></h2>";
+        console.log(val);
+        document.getElementById("holidayList").innerHTML= "No holidays on "+truncatedDate
+      }
+    }
+  });
+
+var cal3 = new CalHeatMap();
+  cal3.init({
+    data: "data/data5.json",
+    start: new Date(2014, 12),
+    id : "graph_k",
+    domain : "month",
+    subDomain : "x_day",
+    subDomainTextFormat: "%d",
+    domainMargin: 10,
+    range : 4,
+    cellSize: 25,
+    cellPadding: 3,
+    cellRadius: 2,
+    domainGutter: 15,
+    displayLegend: false,
+    legend: [5, 25, 50, 75, 100],
+    legendCellSize: 20,
+    legendMargin:10,
+    onClick: function(date, val){
+      var univDate= Date.parse(date)/1000;
+      var dateObj= (fullCalData.filter(function(e){
+        if (e.Date==univDate){
+          return true;
+        }
+        return false;
+      }))[0];
+      var truncatedDate= date.toDateString()
+      if (val>0){
+        var cStr= dateObj.Countries
+        var hStr= dateObj.Holidays
+        var countries= cStr.substring(1,cStr.length-1).split(',');
+        var holidays= hStr.substring(1,hStr.length-1).split(',');
+        var output="";
+
+        document.getElementById("holidayListTitle").innerHTML="<h2 id='fixedtitle'><span class='highlight'>"+ val+"</span> countries with holidays on <span class='highlight'>"+truncatedDate+"</span></h2>";
+
+        for (var i =0; i<countries.length; i++){
+          output+= "<p><span class='highlight'>"+ countries[i]+"</span> - "+ holidays[i]+"</p>"
+        }
+        document.getElementById("holidayList").innerHTML= output
+        }
+      else{
+        document.getElementById("holidayListTitle").innerHTML="<h2 id='fixedtitle'><span class='highlight'>0</span> countries with holidays on <span class='highlight'>"+truncatedDate+"</span></h2>";
+        console.log(val);
+        document.getElementById("holidayList").innerHTML= "No holidays on "+truncatedDate
+      }
+    }
+  });
+
+</script>
+
+<div class="datasource">Data from by <a href="https://modeanalytics.com/benn/tables/holidays">Mode Analytics</a></div>
+
+</div>
+
+<div id="holidayListTitle">
+  <h2>Choose a date to see what holidays occured on that date.</h2>
+</div>
+
+<div id="holidayList">
+  A list of holidays will show up here.
+</div>
+
+<div style="clear:both"></div>
+
+<hr>
+
+<div class="graphheader">
+<h1 class="graphtitle">Does having a lot of holidays affect life expectancy?</h1>
+<h2>Hover over a country data point to learn more about it.</h2>
+</div>
+
+<div id="scatterPlotContainer">
+  <div id="scatterPlot"></div>
+  <div id="scatterPlot2"></div>
+</div>
+
+<script>
+    var height = 500;
+    var width = 600;
+    var padding = 60;
+    var svg = d3.select("#scatterPlot")
+          .append("svg").attr("height", height)
+          .attr("width", width);
+
+
+
+    d3.json("data/final.json", function(data) {
+      var xMax = d3.max(data, function (d) { return d.numHolidaysOfHolidays; });
+      var xMin = d3.min(data, function (d) { return d.numHolidaysOfHolidays; });
+
+      var yMax = d3.max(data, function (d) { return d.lifeExpectancy; });
+      var yMin = d3.min(data, function (d) { return d.lifeExpectancy; });
+
+      var xScale = d3.scale.linear()
+        .domain([xMin, 50]).range([padding, width-padding]);
+
+        var yScale = d3.scale.linear()
+          .domain([yMin, yMax])
+          .range([height - padding, padding]);
+
+        var xAxis = d3.svg.axis().scale(xScale);
+        svg.append("g")
+          .attr("class", "axis")
+          .attr("transform", "translate(0, " + (height - padding) + ")")
+          .attr("fill", "white")
+          .call(xAxis);
+      var yAxis = d3.svg.axis().scale(yScale).orient("left");
+        svg.append("g")
+          .attr("class", "axis")
+          .attr("transform", "translate(" + padding + ", 0)")
+          .attr("fill", "white")
+          .attr("font-weight", "300")
+          .call(yAxis);
+
+      var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+      svg.selectAll("circle").data(data).enter()
+          .append("circle")
+          .attr("class", "circle")
+          .attr("cx", function (d) { return xScale(d.numHolidaysOfHolidays) })
+          .attr("cy", function (d) { return yScale(d.lifeExpectancy) })
+          .attr("r", 6)
+          .attr("fill", '#ff6378')
+          .attr("opacity", '.7')
+          .on("mouseover", function(d) {
+            tooltip.transition()
+                  .duration(150)
+                  .style("opacity", .7);
+            tooltip.html(
+              "<b>"+d.countryName+"</b></br>"+
+              "life expectancy: <b>"+d.lifeExpectancy +" yrs</b><br>"+
+              "# of holidays: <b>"+d.numHolidaysOfHolidays+"</b>"
+              )
+                  .style("left", (d3.event.pageX + 10) + "px")
+                  .style("top", (d3.event.pageY - 20) + "px");
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+        });
+    });
+
+    svg.append("text")
+      .attr("class", "tooltip")
+      .attr("text-anchor", "middle")
+      .attr("x", width/2)
+      .attr("y", height-20)
+      .attr("fill", "white")
+      .text("number of holidays per year");
+
+      svg.append("text")
+      .attr("class", "tooltip")
+      .attr("text-anchor", "middle")
+      .attr("x", -height/2)
+      .attr("y", 20)
+      .attr("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("life expectancy");
+  </script>
+
+  <div class="datasource">Data from by <a href="https://modeanalytics.com/benn/tables/holidays">Mode Analytics</a> and <a href="http://www.happyplanetindex.org/">Happy Planet Index</a> </div>
+
+
+
+<hr>
+
+<div class="graphheader">
+<h1 class="graphtitle">Where are the most celebrated holidays celebrated?</h1>
+<h2>Click through the slider to find out.</h2>
+</div>
+
+<div id="map"></div>
+<div id="slider5"></div>
+
+<script>
+  var width2 = 960, height2 = 500;
+  var projection = d3.geo.equirectangular();
+  var path = d3.geo.path().projection(projection);
+  var svg2 = d3.select("#map").append("svg")
+    .attr("width", width2)
+    .attr("height", height2);
+  var g = svg2.append("g");
+  var worldData;
+  var holidayData;
+  d3.json("data/data9.json", function(error, data){
+    holidayData = data;
+    function getCountryCodes(time){
+      for(var i = 0; i < data.length; i++){
+        var entry = data[i];
+        if(parseInt(entry["Date"]) == parseInt(time)){
+          return (entry["Country Codes"]);
+        }
+      }
+      return [];
+    };
+    var domainList = ["Labour Day", "Ascenscion Day", "End of Ramadan", "Feast of Sacrifice", "Christmas Day",
+                     "Boxing Day", "New Year's Day", "Prophet's Birthday", "Good Friday", "Easter Monday"];
+    var holidayValue = {"Labour Day": 1398902400, "New Year's Day": 1420070400, "Christmas Day":1419465600, "Boxing Day": 1419552000, "Good Friday": 1428019200, "Easter Monday":1428278400, "End of Ramadan":  1406505600, "Feast of Sacrifice": 1412380800, "Ascenscion Day":1401321600, "Prophet's Birthday":1420243200};
+    d3.json("data/world-50m.json", function(error, world){
+    worldData = world;
+    var initialTime = holidayValue["Labour Day"];
+    var initCountryList = getCountryCodes(initialTime);
+
+    g.selectAll("path")
+    .data(topojson.feature(world, world.objects.countries).features)
+    .enter().append("path").attr("d", path)
+    .style("fill", function(country){
+      if(initCountryList.indexOf(country.id) >= 0){
+        return "#ff6378";
+      } else {
+        return "#2a3642";
+      }
+     });
+
+     d3.select('#slider5').call(d3.slider().scale(d3.scale.ordinal().domain(domainList).rangePoints([0,1], 0.5)).axis(d3.svg.axis()).snap(true).value("Labour Day").on("slide", function(evt, value){
+       var time = holidayValue[value];
+       var countryList = getCountryCodes(time);
+       g.selectAll("path")
+       .style("fill", function(country){
+        if(countryList.indexOf(country.id) >= 0){
+        return "#ff6378";
+      } else {
+        return "#2a3642";
+      }
+       });
+     }));
+   });
+  });
+</script>
+
+<div style="clear:both"></div>
+
+ <div class="datasource" id="lastSource">Data from <a href="https://modeanalytics.com/benn/tables/holidays">Mode Analytics</a></div>
+
+</div>
+
+</body>
+</html>
