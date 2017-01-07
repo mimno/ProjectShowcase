@@ -1,0 +1,811 @@
+
+<html>
+
+<head>
+
+	<link href='http://fonts.googleapis.com/css?family=Lato:300,900' rel='stylesheet' type='text/css'>
+	
+	
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+	<!-- Load the d3 library. -->
+	<script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
+		<script src="http://d3js.org/topojson.v1.min.js"></script>
+<style>
+body { background-color: #51A5BA;}
+
+
+#intro{
+	font-family: 'Lato', sans-serif;
+	font-weight: 300;
+	font-size: 25px;
+	color: white;
+	width: 100%;
+	margin: -10px 0px 60px -10px;
+	padding: 10px 10px 0px 10px;
+	background: #404040;
+	position: fixed;    
+	z-index: 1; 
+	height: 50px;
+	box-shadow: 0px 0px 10px 0px #202020;
+
+}
+
+#controls{
+	font-family: 'Lato', sans-serif;
+	font-weight: 300;
+	font-size: 14px;
+	color: white;
+	width: 250px;
+	float: right;
+	background: #404040;
+	margin: -480px 0px 0px -30px;
+	height: 250px;
+	padding: 10px 10px 0px 10px;
+}
+#information_reader{
+	font-family: 'Lato', sans-serif;
+	font-weight: 300;
+	font-size: 14px;
+	color: white;
+	width: 250px;
+	float: right;
+	background: #404040;
+	margin: -250px 0px 0px -30px;
+	height: 200px;
+	padding: 10px 10px 0px 10px;
+
+}
+#feedback{
+	font-family: 'Lato', sans-serif;
+	font-size: 10px;
+}
+
+#othercoolfont{
+padding: 0px 30px 0px 0px;
+float: left;
+}
+
+#coolfont{
+float: right;
+margin: 0px 20px 0px 0px;
+}
+
+h2{
+font-size: 20px;
+font-family: 'Lato', sans-serif;
+color: #FE8402;
+margin: 0px;
+}
+h3{
+font-family: 'Lato', sans-serif;
+
+color: #FE8402
+
+}
+
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+#states {
+  fill: #87E293;
+  opacity: 0.7;
+}
+
+#states .active {
+  fill: #FE8402;
+ 
+}
+
+#state-borders {
+  fill: none;
+  stroke: #51A5BA;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.loader {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	background: url('https://d13yacurqjgara.cloudfront.net/users/121337/screenshots/916951/small-load.gif') 50% 50% no-repeat #15191F;
+}
+
+#hideplane{
+	width: 50px;
+	height: 50px;
+	background-color: #51A5BA;
+	position: fixed;
+	
+}
+
+#chooseday{
+	font-size: 16px;
+	font-family: 'Lato', sans-serif;
+	color: #FE8402;
+	width: 250px;
+	float: right;
+	background: #404040;
+	margin: -550px 0px 0px -30px;
+	height: 30px;
+	padding: 10px 10px 0px 10px;
+
+}
+
+#disease_story{
+	font-family: 'Lato', sans-serif;
+	font-weight: 300;
+	font-size: 14px;
+	color: white;
+	width: 250px;
+	float: right;
+	background: #404040;
+	margin: -480px 0px 0px -30px;
+	height: 250px;
+	padding: 10px 10px 0px 10px;
+	visibility: hidden
+
+}
+</style>
+</head>
+<body>
+
+
+<div class="loader"></div>
+
+
+
+<div id="intro"> <div id="coolfont">Info 3300</div> <div id="othercoolfont"> <h2> 28 Days Later (Spread of Different Diseases in America)</h2> </div></div>
+<br> <br> <br>
+
+<br> <br> <br> <br>
+<div id="hideplane"> </div>
+
+
+
+<div id="map"></div>
+
+<div id="information_reader"> <br> <h3>State Information: </h3> Click on a state to learn more about how the disease is affecting it. </div>
+
+<div id="chooseday">
+
+
+ <select id="daychoice">
+  <option value="2"> 2</option>
+  <option value="3"> 3</option>
+  <option value="4"> 4</option>
+    <option value="5">5</option>
+	<option value="6"> 6 </option>
+	<option value="7"> 7 </option>
+	<option value="8"> 8 </option>
+	<option value="9"> 9 </option>
+	<option value="10"> 10 </option>
+	<option value="11"> 11</option>
+  <option value="12"> 12</option>
+  <option value="13"> 13</option>
+  <option value="14"> 14</option>
+    <option value="15">15</option>
+	<option value="16">16 </option>
+	<option value="17"> 17 </option>
+	<option value="18"> 18 </option>
+	<option value="19"> 19 </option>
+	<option value="20"> 20 </option>
+	  <option value="21"> 21</option>
+  <option value="22"> 22</option>
+  <option value="23"> 23</option>
+  <option value="24"> 24</option>
+    <option value="25">25</option>
+	<option value="26"> 26 </option>
+	<option value="27"> 27 </option>
+	<option value="28"> 28 </option>
+</select>
+ <b>Days After Disease Start </b> 
+
+ 
+</div>
+
+<div id="controls">
+<h3> Controls </h3>
+
+<select id="diseasechoice">
+  <option value="18">Measles</option>
+  <option value="10">Mumps</option>
+  <option value="4">AIDS</option>
+  <option value="4">SARS</option>
+    <option value="2">Ebola</option>
+	<option value="100"> Zombie Outbreak </option>
+</select>
+ <br> <br>
+ Flight Animation Speed<br>
+fast <input type="range" id="myrange" min=".5" max="100"> slow
+<br> <br> 
+<button type="button" id="set">Set Map!</button> <div id="feedback">
+
+</div>
+<br> 
+<button type="button" id="sample">Start Animation!</button> <br> <br>
+
+---------------------------------------
+</div>
+
+
+<div id="disease_story">
+...
+
+</div>
+
+
+
+<script>
+
+var trial_details = { 'R0': 0, 'Disease': 'Something', 'Init_State': 'Somewhere', 'Num_patientzeros': 0 , 'Speed' : 250, 'Current Day': 2};
+
+// Add drop down menu to select disease
+
+// r0 = # of ppl one sick person will infect on average
+var r0s = {Measles: 18, Mumps: 10, AIDS: 4, SARS: 4, Ebola: 2}
+
+var r0 = 18;
+
+
+
+
+var state_fullnames = {
+            'AL':'Alabama',
+            'AK':'Alaska',
+            'AZ':'Arizona',
+            'AR':'Arkansas',
+            'CA':'California',
+            'CO':'Colorado',
+            'CT':'Connecticut',
+            'DE':'Delaware',
+            'DC':'District Of Columbia',
+            'FL':'Florida',
+            'GA':'Georgia',
+            'HI':'Hawaii',
+            'ID':'Idaho',
+            'IL':'Illinois',
+            'IN':'Indiana',
+            'IA':'Iowa',
+            'KS':'Kansas',
+            'KY':'Kentucky',
+            'LA':'Louisiana',
+            'ME':'Maine',
+            'MD':'Maryland',
+            'MA':'Massachusetts',
+            'MI':'Michigan',
+            'MN':'Minnesota',
+            'MS':'Mississippi',
+            'MO':'Missouri',
+            'MT':'Montana',
+            'NE':'Nebraska',
+            'NV':'Nevada',
+            'NH':'New Hampshire',
+            'NJ':'New Jersey',
+            'NM':'New Mexico',
+            'NY':'New York',
+            'NC':'North Carolina',
+            'ND':'North Dakota',
+            'OH':'Ohio',
+            'OK':'Oklahoma',
+            'OR':'Oregon',
+            'PA':'Pennsylvania',
+            'RI':'Rhode Island',
+            'SC':'South Carolina',
+            'SD':'South Dakota',
+            'TN':'Tennessee',
+            'TX':'Texas',
+            'UT':'Utah',
+            'VT':'Vermont',
+            'VA':'Virginia',
+            'WA':'Washington',
+            'WV':'West Virginia',
+            'WI':'Wisconsin',
+            'WY':'Wyoming',
+        };
+		
+		
+
+		
+// Click button to colorings/ Ro / speed for the trial
+d3.select("#set").on("click", function () {
+
+var day = document.getElementById("daychoice").value;
+	trial_details['Current Day'] = day;
+
+		var speed = document.getElementById("myrange").value;
+		trial_details['Speed'] = speed;
+		var hi = document.getElementById("feedback");
+	
+		hi.innerHTML = "Settings have been stored!";
+		
+	
+	var selectedValue = document.getElementById("diseasechoice").value;
+	var selectedDisease = $("#diseasechoice :selected").text();
+	
+
+	trial_details['Disease'] = selectedDisease;
+	
+	r0 = parseInt( selectedValue);
+trial_details['R0'] = r0;
+	
+	return r0;
+	
+});
+
+
+
+// Click button to start trial
+d3.select("#sample").on("click", function () {
+
+var speed = document.getElementById("myrange").value;
+
+	// Disease spread is equal to r0 for each new infective
+	// Old infectives no longer infect other people
+	
+	var randstate = randomState();
+	states[randstate].newInfected += 100;
+	dayno = 0;
+	goToDate = trial_details['Current Day'];
+	flightsPerDay(dayno,goToDate);
+	
+	trial_details['Init_State'] = randstate;
+
+	
+	var patientzero = 50000;
+	trial_details['Num_patientzeros'] = patientzero;
+	states[randstate].newInfected += patientzero;
+
+	
+	
+});
+// USA Map work, using help from 0225 notes
+
+var width = 960,
+    height = 500,
+    centered;
+	
+var projection = d3.geo.albersUsa()
+    .scale(1070)
+    .translate([width / 2, height / 2]);
+
+var path = d3.geo.path().projection(projection);
+	
+var svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+	
+
+
+svg.append("rect")
+    .attr("class", "background")
+    .attr("width", width)
+    .attr("height", height)
+    .on("click", clicked);
+
+var g = svg.append("g");
+
+// The id from click represents the ANSI code of the state.
+	// Right here I initialize an array of states, in the order they
+	//appear in ansi form.
+	
+	var ANSI_state = ["US", "AL", "AK","US", "AZ", "AR", "CA","US", "CO", "CT", "DE", "DC", "FL", "GA", "US", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA","US", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA","US", "WA", "WV", "WI", "WY"];
+
+var usdaAtlas;
+
+// kept for later use involving the color changing based on infection
+
+
+
+drawmap(states, false);
+
+function drawmap(blah, yes){
+
+d3.json("us.json", function(error, us) {
+g.append("g")
+      .attr("id", "states")
+    .selectAll("path")
+      .data(topojson.feature(us, us.objects.states).features)
+    .enter().append("path").attr("class", "something").attr("id", function(states){
+		return 'a'+states.id;
+	})
+      .attr("d", path)
+      .on("click", clicked);
+
+
+
+  g.append("path")
+      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+      .attr("id", "state-borders")
+      .attr("d", path);
+	});
+
+	};
+	
+	
+	// Will update and change the state colors based on the new values stored in the state object's color feature.
+	function update_state_colors(color1, color2){
+		for(var i = 1; i < 57; i++){
+			if(i != 3 && i != 7 && i != 11 && i != 14 && i != 43 && i != 52){
+			var id = "#a"+i;
+			var state_name = ANSI_state[i];
+			var total = states[state_name]['population'];
+			var infected = states[state_name]['newInfected'] + states[state_name]['oldInfected'];
+			
+			var illpercent = infected/total * 100;
+			
+			colorshift = d3.scale.linear()
+			.domain([0, 1]).range([color1, color2]);
+			
+			d3.select(id).style("fill", colorshift(illpercent));
+			}
+		
+		}
+		
+	
+	
+	}
+	
+	//Will zoom in when you click it.
+function clicked(d) {
+
+//gathers information about the state that was clicked
+var state_name = ANSI_state[d["id"]];
+var state_object = states[state_name];
+
+var state_pop = states[state_name]["population"];
+var state_infected = states[state_name]["newInfected"] + states[state_name]["oldInfected"];
+
+var pop = parseInt(state_pop);
+var inf = parseInt(state_infected);
+
+var percent_infected = inf / pop * 100;
+var percent_infected = percent_infected.toFixed(2);
+
+var fullname = state_fullnames[state_name];
+
+//Updates the information reader to show information about the state
+		var hi = document.getElementById("information_reader");
+		hi.innerHTML = "<br> <h3>"+ fullname +"  ( " + state_name + ") </h3>";
+		hi.innerHTML = hi.innerHTML + "State Population:   <b>" + state_pop + "</b><br><br>";
+		hi.innerHTML = hi.innerHTML + "Number Infected:  <b> " + state_infected +"</b><br> <br>";
+		hi.innerHTML = hi.innerHTML + "Percent Sick:  <b> " + percent_infected + "</b> %";
+
+
+
+  if (d && centered !== d) {
+    var centroid = path.centroid(d);
+ 
+    centered = d;
+  } else {
+
+    centered = null;
+  }
+
+  g.selectAll("path")
+      .classed("active", centered && function(d) { return d === centered; });
+
+}
+
+	
+	// STATE STUFF
+	var statesCSV = [];
+	/*states = {
+		AL: {
+			population
+			numNewInfected
+			numOldInfected
+			color	(white)
+		}
+		...
+	}*/
+	var states = {};
+	d3.csv("2008StatePop.csv", function(data) {
+		statesCSV = data;
+		statesCSV.forEach(function(s) {
+			var pop = s.Population
+			pop = pop.replace(/,/g , '');
+			states[s.Name] = {
+				population: parseInt(pop), 
+				newInfected: 0,
+				oldInfected: 0,
+				// total infected is newInfected + oldInfected
+				color: 'ffffff'};
+		})
+		
+		
+	
+	});
+	
+	stories = { 1: 'After a dead chicken is discovered in a well, locals discover strange green bumps on their flesh. Now everyone is running around wildly in panic.', 2: 'The freak snow storm unleashed a new wave of low immune systems and rather irritated bees.', 3: 'After the world discovered the powers of d3, one suspicious INFO 3300 student uploaded a powerful visual design that hypnotizes people and urges them to drink in toilets. Unfortunately, now many people are sick.', 4: 'It started with one guy who refused to cover his mouth. Now even the dogs are sniffling.' , 5: 'Nikki Minaj released a new album today. Oh, and a lot of people are sick. Like, a lot.' ,6: 'The people in this state thought that this 28 Days Later simulation was so sick, they actually GOT sick. We send them our condolences.', 7: 'Something strange is happening and Grandma Rudy came back from the grave. She wanted to remind you to use hand sanitizer, because people are getting ill.', 8: 'We... think people are eating brains. Or maybe they just have the flu.'
+	};
+	
+	//creates the interface you see after you run a day of the simulation, with options to choose which day to view, along with a story blurb about the disease spread.
+	function createinterface(){
+		document.getElementById("disease_story").style.visibility = "visible";
+		document.getElementById("chooseday").style.visibility = "visible";
+		
+		var rand = Math.ceil(Math.random()*8);
+		document.getElementById("disease_story").innerHTML = "<h3> Breaking News: </h3> "+ trial_details['Disease'] + " running amok in " + state_fullnames[trial_details['Init_State']] + "! <br> <br>" + stories[rand];
+	};
+
+	function randomState() {
+	    var result;
+	    var count = 0;
+	    for (state in states) {
+	        if (Math.random() < 1/++count)
+	           result = state;
+	   }
+	    return result;
+	};
+
+
+
+	// AIRPORT STUFF
+	var airportsCSV = [];
+	/*airports = {
+		JFK: {
+			state = 'NY'
+			incoming = 0
+			newInfected = 0
+			oldInfected
+			spreadRatio = 0.0
+			latitude = 0.0
+			longitude = 0.0
+		}
+	}*/
+	var airports = {};
+	var flights = [];
+	var flightsCSV = [];
+	d3.csv("airports.csv", function(data) {
+		airportsCSV = data;
+		airportsCSV.forEach(function(a) {
+			if (a.State in states && projection([a.Longitude,a.Latitude])!== null) {
+				airports[a.IATA] = {
+					state: a.State, 
+					incoming: 0, 
+					newInfected: 0,
+					oldInfected: 0,
+					spreadRatio: 0.0, 
+					latitude: a.Latitude, 
+					longitude: a.Longitude};
+			}
+		});
+		
+
+
+		
+		for (var i = 0; i < 28; i++) {
+			flights[i] = [];
+		};
+		d3.csv("2008flights.csv", function(data) {
+			flightsCSV = data;
+
+			for (var i = 0; i < flightsCSV.length; i++) {
+				f = flightsCSV[i]
+				if (f.Cancelled === 1) {
+					continue;
+				}
+				/*if (i < 1900 ) {continue;}
+				if (i === 1903) {break;}*/
+				//if (i > 19000) {break;}
+				d = parseInt(f.DayofMonth);
+				flyer = {
+					src: f.Origin,
+					dest: f.Dest,
+				}
+				if (flyer.src in airports && flyer.dest in airports) {
+				flights[(d-1)].push(flyer);
+				};
+			
+					$(".loader").fadeOut("slow");
+			};
+	});
+	});
+
+
+
+	
+	// FLIGHT STUFF
+	
+	/*flights = [
+		[{src: SRC, dest: DEST}, ...],	day 1
+		[{src: SRC, dest: DEST}, ...],	day 2
+	]
+	Flights only contains one month's worth of data. 
+	Day 1 is flights[0]
+	}*/
+	count = 0;
+	size = 100;
+	animatedNo = 0;
+	dayAmt = 0;
+	chunkno = 0
+	//if goToDate = 28, then it should be the 27th day
+	function flightsPerDay(dayno,goToDate) {
+		console.log('in flightsperday');
+		console.log('dayno and gotodate :' + dayno + ' ' + goToDate)
+		if (dayno === 28){return;}
+		if (dayno === goToDate) {
+			console.log('END NOW')
+			return;}
+		var arrays = [], size = 100;
+		day = flights[dayno];
+		dayAmt = day.length;
+		console.log('heres the length: ' + day.length)
+		console.log('should only print twice')
+		fnum = 0;
+		while (day.length > 0){
+   		arrays.push(day.splice(0, size));}
+   		arrays.forEach(function(flights) {
+			flightsPerChunk(flights,0,fnum,dayAmt,dayno,goToDate);
+			chunkno += 1
+			
+		});
+		
+	}
+
+
+	function flightsPerChunk(chunk,no,fnum,dayAmt,dayno,goToDate) {
+		//console.log(dayno + ' please dont be undefined')
+		fnum += 1
+		flight = chunk[no];
+		if (flight === undefined) {return;}
+		//chunk.forEach(function(flight) {
+		srcCoords = [airports[flight.src].longitude, airports[flight.src].latitude];
+		destCoords = [airports[flight.dest].longitude, airports[flight.dest].latitude];
+
+		fly(airports[flight.src],airports[flight.dest]);
+		if (dayno !== goToDate-1 && (chunkno*size + fnum) === dayAmt) {
+			console.log('going to unloadPlane')
+			unloadPlane(dayno,goToDate);
+		} else if (dayno === goToDate-1){
+			animateFlight(srcCoords, destCoords,chunk,no,fnum,dayAmt,dayno,goToDate);
+		} else {
+			flightsPerChunk(chunk,no+1,fnum,dayAmt,dayno,goToDate)
+		}
+			
+		//});
+	}
+
+	function unloadPlane(dayno,goToDate) {
+		console.log('in unloading ' + dayno)
+		for (airport in airports) {
+			var a = airports[airport]
+			a.spreadRatio = (a.newInfected+a.oldInfected)/a.incoming
+			// ##############################################
+			// ##### DISPLAY SPREAD RATIO FOR AIRPORTS ######
+			// ##############################################
+
+			// Get people off planes into states
+			
+			states[a.state].population += a.incoming
+			a.incoming = 0
+			states[a.state].newInfected += a.newInfected
+			a.newInfected = 0
+			states[a.state].oldInfected += a.oldInfected
+			a.oldInfected = 0
+		}
+		for (state in states) {
+			var s = states[state];
+			s.oldInfected += s.newInfected
+			potNew = r0*s.newInfected
+			if (potNew+s.oldInfected > s.population) {
+				potNew = s.population-s.oldInfected}
+			s.newInfected = potNew
+		}
+		dayno += 1
+		update_state_colors("#87E293", "#E82246");
+		createinterface();
+		flightsPerDay(dayno,goToDate)
+		
+
+	}
+	
+
+
+	//What will be used to display the airplanes flying from airport to airport
+	function animateFlight(srcCoords, destCoords,chunk,no,fnum,dayAmt,dayno,goToDate){
+	var route = svg.append("path")
+               .datum({type: "LineString", coordinates: [srcCoords, destCoords]})
+               .attr("class", "route")
+               .style('opacity',0.0)
+               .attr("d", path);
+	var plane = svg.append("path")
+                   .attr("class", "plane")
+                   .attr("d", "m25.21488,3.93375c-0.44355,0 -0.84275,0.18332 -1.17933,0.51592c-0.33397,0.33267 -0.61055,0.80884 -0.84275,1.40377c-0.45922,1.18911 -0.74362,2.85964 -0.89755,4.86085c-0.15655,1.99729 -0.18263,4.32223 -0.11741,6.81118c-5.51835,2.26427 -16.7116,6.93857 -17.60916,7.98223c-1.19759,1.38937 -0.81143,2.98095 -0.32874,4.03902l18.39971,-3.74549c0.38616,4.88048 0.94192,9.7138 1.42461,13.50099c-1.80032,0.52703 -5.1609,1.56679 -5.85232,2.21255c-0.95496,0.88711 -0.95496,3.75718 -0.95496,3.75718l7.53,-0.61316c0.17743,1.23545 0.28701,1.95767 0.28701,1.95767l0.01304,0.06557l0.06002,0l0.13829,0l0.0574,0l0.01043,-0.06557c0,0 0.11218,-0.72222 0.28961,-1.95767l7.53164,0.61316c0,0 0,-2.87006 -0.95496,-3.75718c-0.69044,-0.64577 -4.05363,-1.68813 -5.85133,-2.21516c0.48009,-3.77545 1.03061,-8.58921 1.42198,-13.45404l18.18207,3.70115c0.48009,-1.05806 0.86881,-2.64965 -0.32617,-4.03902c-0.88969,-1.03062 -11.81147,-5.60054 -17.39409,-7.89352c0.06524,-2.52287 0.04175,-4.88024 -0.1148,-6.89989l0,-0.00476c-0.15655,-1.99844 -0.44094,-3.6683 -0.90277,-4.8561c-0.22699,-0.59493 -0.50356,-1.07111 -0.83754,-1.40377c-0.33658,-0.3326 -0.73578,-0.51592 -1.18194,-0.51592l0,0l-0.00001,0l0,0z").style("opacity", 0.0);
+    plane.style('opacity',1).style('fill','white');
+    var l = route.node().getTotalLength();
+    plane.transition()
+        .duration(l * trial_details['Speed'])
+        .attrTween("transform", delta(route.node()))
+        .each("end", function() { 
+        	route.remove(); 
+        	animatedNo += 1
+        	if (animatedNo === dayAmt) {
+        		console.log('is it done?')
+        		animatedNo = 0;
+        		console.log('yahhh unloading fosho')
+        		unloadPlane(dayno,goToDate);
+        		
+        	} else {
+        		/*console.log('this is # of animated planes: ' + animatedNo);
+        		console.log('day amount' + dayAmt)*/
+        		flightsPerChunk(chunk,no+1,fnum,dayAmt,dayno,goToDate)
+
+        	}
+        })
+        .remove();
+	}
+  
+  function delta(path) {    
+  	var l = path.getTotalLength();
+
+    return function(i) {
+    	return function(t) {
+        var p = path.getPointAtLength(t * l);
+
+        var t2 = Math.min(t + 0.05, 1);
+        var p2 = path.getPointAtLength(t2 * l);
+
+        var x = p2.x - p.x;
+        var y = p2.y - p.y;
+        var r = 90 - Math.atan2(-y, x) * 180 / Math.PI;
+
+        var s = Math.min(Math.sin(Math.PI * t) * 0.7, 0.3);
+
+        return "translate(" + p.x + "," + p.y + ") scale(" + s + ") rotate(" + r + ")";
+      }
+	}
+  }
+
+
+
+
+
+
+	// Assume 100 people on each flight
+	// src and dest are objects in airport
+	function fly(src, dest) {
+		// Get people on plane and to dest airport
+		
+		//console.log(states[src.state].population)
+		newinfected = 0;
+		oldinfected = 0;
+		for (var i = 0; i < 100; i++) {
+			r = Math.random();
+			newInfectedProb = states[src.state].newInfected/states[src.state].population
+			oldInfectedProb = states[src.state].oldInfected/states[src.state].population
+			if (r < newInfectedProb && states[src.state].newInfected > 0) {
+				newinfected += 1
+				dest.newInfected += 1
+				states[src.state].newInfected -= 1
+			} else if (r < newInfectedProb + oldInfectedProb) {
+				oldinfected += 1
+				dest.oldInfected += 1
+				states[src.state].oldInfected -= 1
+			}
+			dest.incoming += 1
+			states[src.state].population -= 1
+		}
+		
+
+	};
+
+
+
+	
+	
+	
+	</script>
+
+
+  </body>
+</html>

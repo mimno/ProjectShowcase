@@ -1,0 +1,833 @@
+Region,Year,VaccinationRate
+US National,2013,91.9±0.9
+Alabama,2013,89.7±5.8
+Alaska,2013,90.5±3.6
+Arizona,2013,91.4±3.7
+Arkansas,2013,88.3±5.9
+California,2013,90.7±5.3
+Colorado,2013,86.0±5.5
+Connecticut,2013,91.4±5.4
+Delaware,2013,94.8±3.4
+Dist. of Columbia,2013,96.2±3.1
+Florida,2013,93.4±4.0
+Georgia,2013,93.9±4.1
+Hawaii,2013,92.8±3.8
+Idaho,2013,91.1±4.3
+Illinois,2013,91.4±3.1
+IL-City of Chicago,2013,90.0±5.2
+IL-Rest of State,2013,91.9±3.8
+Indiana,2013,92.0±3.6
+Iowa,2013,94.5±3.9
+Kansas,2013,89.4±4.7
+Kentucky,2013,89.5±5.1
+Louisiana,2013,88.1±5.1
+Maine,2013,91.0±4.5
+Maryland,2013,95.3±4.4
+Massachusetts,2013,95.8±3.6
+Michigan,2013,89.2±5.1
+Minnesota,2013,90.8±5.5
+Mississippi,2013,95.2±3.0
+Missouri,2013,89.8±5.3
+Montana,2013,87.3±5.2
+Nebraska,2013,92.5±4.1
+Nevada,2013,90.4±3.5
+New Hampshire,2013,96.3±2.6
+New Jersey,2013,95.6±3.3
+New Mexico,2013,89.1±4.6
+New York,2013,95.5±2.3
+NY-City of New York,2013,96.8±2.5
+NY-Rest of State,2013,94.2±3.9
+North Carolina,2013,96.0±3.3
+North Dakota,2013,91.4±3.8
+Ohio,2013,86.0±5.2
+Oklahoma,2013,89.8±3.8
+Oregon,2013,89.4±4.4
+Pennsylvania,2013,93.3±3.2
+PA-Philadelphia County,2013,95.9±2.7
+PA-Rest of State,2013,92.8±3.8
+Rhode Island,2013,95.6±3.3
+South Carolina,2013,89.2±5.3
+South Dakota,2013,93.1±4.4
+Tennessee,2013,92.3±4.4
+Texas,2013,92.7±2.8
+TX-Bexar County,2013,93.0±3.7
+TX-City of Houston,2013,92.4±4.5
+TX-El Paso County,2013,93.7±3.3
+TX-Rest of State,2013,92.7±3.5
+Utah,2013,92.6±3.6
+Vermont,2013,91.2±4.0
+Virginia,2013,88.6±7.0
+Washington,2013,93.5±3.9
+West Virginia,2013,86.0±5.8
+Wisconsin,2013,93.2±4.2
+Wyoming,2013,89.0±5.4
+US National,2012,90.8±0.8
+Alabama,2012,93.1±3.5
+Alaska,2012,86.2±5.1
+Arizona,2012,88.3±4.9
+Arkansas,2012,92.3±4.0
+California,2012,91.5±4.3
+Colorado,2012,91.5±4.5
+Connecticut,2012,94.8±2.9
+Delaware,2012,94.4±3.4
+Dist. of Columbia,2012,93.0±3.7
+Florida,2012,91.0±4.8
+Georgia,2012,91.9±4.2
+Hawaii,2012,95.0±2.7
+Idaho,2012,93.3±3.6
+Illinois,2012,91.6±2.7
+IL-City of Chicago,2012,86.8±6.1
+IL-Rest of State,2012,93.2±2.9
+Indiana,2012,90.0±4.5
+Iowa,2012,93.3±3.4
+Kansas,2012,88.5±4.6
+Kentucky,2012,89.2±4.4
+Louisiana,2012,90.5±4.0
+Maine,2012,91.2±4.2
+Maryland,2012,92.5±4.8
+Massachusetts,2012,93.7±3.4
+Michigan,2012,91.4±4.4
+Minnesota,2012,90.1±5.6
+Mississippi,2012,93.4±4.3
+Missouri,2012,92.7±4.1
+Montana,2012,91.5±4.0
+Nebraska,2012,89.0±4.4
+Nevada,2012,89.8±4.1
+New Hampshire,2012,93.7±3.4
+New Jersey,2012,94.8±2.7
+New Mexico,2012,88.8±4.4
+New York,2012,90.2±2.9
+NY-City of New York,2012,90.3±3.9
+NY-Rest of State,2012,90.0±4.2
+North Carolina,2012,89.0±4.9
+North Dakota,2012,90.6±5.4
+Ohio,2012,90.3±4.9
+Oklahoma,2012,90.0±4.8
+Oregon,2012,87.3±4.7
+Pennsylvania,2012,87.0±4.6
+PA-Philadelphia County,2012,92.6±4.3
+PA-Rest of State,2012,85.9±5.5
+Rhode Island,2012,94.3±3.1
+South Carolina,2012,93.2±3.5
+South Dakota,2012,93.3±3.0
+Tennessee,2012,92.2±4.0
+Texas,2012,89.7±2.4
+TX-Bexar County,2012,90.9±4.0
+TX-City of Houston,2012,92.2±4.7
+TX-Dallas County,2012,86.5±5.6
+TX-El Paso County,2012,87.1±4.7
+TX-Rest of State,2012,89.7±3.3
+Utah,2012,87.3±5.5
+Vermont,2012,91.7±3.8
+Virginia,2012,94.3±3.9
+Washington,2012,84.8±5.8
+West Virginia,2012,84.6±6.0
+Wisconsin,2012,89.3±5.2
+Wyoming,2012,91.2±3.9
+US National,2011,91.6±0.8
+Alabama,2011,94.0±2.9
+Alaska,2011,90.8±3.9
+Arizona,2011,86.7±6.7
+Arkansas,2011,93.7±3.2
+California,2011,91.0±3.7
+Colorado,2011,88.4±5.4
+Connecticut,2011,95.0±2.6
+Delaware,2011,90.6±5.1
+Dist. of Columbia,2011,93.5±3.0
+Florida,2011,90.8±4.1
+Georgia,2011,94.1±2.8
+Hawaii,2011,94.2±3.5
+Idaho,2011,89.5±4.8
+Illinois,2011,90.8±3.3
+IL-City of Chicago,2011,90.6±4.5
+IL-Rest of State,2011,90.8±4.2
+Indiana,2011,90.6±3.9
+Iowa,2011,86.7±5.6
+Kansas,2011,91.0±4.4
+Kentucky,2011,91.4±4.9
+Louisiana,2011,92.6±3.6
+Maine,2011,90.3±4.0
+Maryland,2011,95.2±2.6
+MD-Prince George's County,2011,94.6±3.3
+MD-Rest of Maryland,2011,95.3±3.0
+Massachusetts,2011,93.1±4.8
+Michigan,2011,87.6±6.2
+Minnesota,2011,96.0±3.4
+Mississippi,2011,89.6±4.9
+Missouri,2011,88.2±4.0
+Montana,2011,87.8±5.2
+Nebraska,2011,95.3±3.5
+Nevada,2011,90.5±4.6
+New Hampshire,2011,92.0±4.1
+New Jersey,2011,91.3±3.5
+New Mexico,2011,93.1±3.6
+New York,2011,91.0±2.8
+NY-City of New York,2011,91.5±3.6
+NY-Rest of State,2011,90.6±4.3
+North Carolina,2011,92.3±5.1
+North Dakota,2011,95.8±3.0
+Ohio,2011,93.3±4.2
+Oklahoma,2011,94.0±3.3
+Oregon,2011,90.6±4.2
+Pennsylvania,2011,92.8±2.7
+PA-Philadelphia County,2011,93.1±4.0
+PA-Rest of State,2011,92.8±3.1
+Rhode Island,2011,96.6±2.0
+South Carolina,2011,89.3±4.9
+South Dakota,2011,89.2±6.9
+Tennessee,2011,91.1±3.9
+Texas,2011,94.3±1.7
+TX-Bexar County,2011,91.5±4.1
+TX-City of Houston,2011,95.3±2.9
+TX-Dallas County,2011,90.8±4.3
+TX-El Paso County,2011,92.8±4.1
+TX-Rest of State,2011,95.1±2.3
+Utah,2011,88.8±4.6
+Vermont,2011,95.3±2.3
+Virginia,2011,89.0±5.2
+Washington,2011,89.3±4.4
+West Virginia,2011,85.8±4.3
+Wisconsin,2011,94.9±2.7
+Wyoming,2011,85.6±9.1
+US National,2010,91.5±0.7
+Alabama,2010,95.4±2.3
+Alaska,2010,88.4±3.9
+Arizona,2010,87.7±4.9
+Arkansas,2010,90.5±4.2
+California,2010,91.4±3.5
+CA-Los Angeles County,2010,93.0±3.1
+CA-Rest of State,2010,90.8±4.6
+Colorado,2010,89.3±3.7
+Connecticut,2010,97.8±1.5
+Delaware,2010,94.0±3.0
+Dist. of Columbia,2010,94.7±3.7
+Florida,2010,94.1±3.0
+Georgia,2010,91.5±4.0
+Hawaii,2010,93.2±3.3
+Idaho,2010,87.2±5.0
+Illinois,2010,90.5±3.2
+IL-City of Chicago,2010,88.8±3.8
+IL-Rest of State,2010,91.1±4.2
+Indiana,2010,92.3±3.5
+Iowa,2010,93.8±3.7
+Kansas,2010,90.0±4.6
+Kentucky,2010,89.5±4.1
+Louisiana,2010,89.7±4.5
+Maine,2010,90.9±4.5
+Maryland,2010,90.5±4.8
+Massachusetts,2010,92.3±4.3
+Michigan,2010,91.1±3.8
+Minnesota,2010,92.7±4.0
+Mississippi,2010,93.8±2.7
+Missouri,2010,90.4±3.9
+Montana,2010,85.1±5.6
+Nebraska,2010,94.2±3.3
+Nevada,2010,87.0±5.2
+New Hampshire,2010,95.8±3.0
+New Jersey,2010,86.1±5.7
+New Mexico,2010,88.8±3.8
+New York,2010,89.3±3.6
+NY-City of New York,2010,89.3±5.2
+NY-Rest of State,2010,89.4±5.1
+North Carolina,2010,94.5±2.9
+North Dakota,2010,92.6±3.5
+Ohio,2010,93.6±3.5
+Oklahoma,2010,91.0±5.0
+Oregon,2010,92.8±3.3
+Pennsylvania,2010,92.3±2.9
+PA-Philadelphia County,2010,93.5±3.2
+PA-Rest of State,2010,92.1±3.4
+Rhode Island,2010,95.8±2.7
+South Carolina,2010,91.7±3.3
+South Dakota,2010,92.1±3.6
+Tennessee,2010,93.9±3.3
+Texas,2010,91.8±2.4
+TX-Bexar County,2010,94.6±2.8
+TX-City of Houston,2010,93.8±3.8
+TX-Dallas County,2010,91.1±4.0
+TX-El Paso County,2010,87.0±5.4
+TX-Rest of State,2010,91.6±3.4
+Utah,2010,85.5±5.1
+Vermont,2010,92.7±3.3
+Virginia,2010,92.3±3.5
+Washington,2010,89.8±3.6
+WA-Eastern WA,2010,89.2±4.7
+WA-Western WA,2010,90.0±4.5
+West Virginia,2010,92.0±3.4
+Wisconsin,2010,93.2±3.3
+Wyoming,2010,92.5±3.6
+US National¥,2009,90.0±0.8
+Alabama,2009,95.4±2.9
+Alaska,2009,85.2±5.8
+Arizona,2009,90.8±3.6
+Arkansas,2009,81.8±6.0
+California,2009,89.8±3.7
+   CA-Los Angeles County,2009,88.9±5.4
+   CA-Rest of State,2009,90.1±4.7
+Colorado,2009,83.6±7.0
+Connecticut,2009,93.7±3.3
+Delaware,2009,90.2±4.2
+District of Columbia,2009,91.2±4.5
+Florida,2009,91.2±3.8
+Georgia,2009,91.3±4.2
+Hawaii,2009,86.7±5.3
+Idaho,2009,88.1±4.8
+Illinois,2009,88.2±3.9
+   IL-City of Chicago,2009,90.4±4.0
+   IL-Rest of State,2009,87.5±5.1
+Indiana,2009,86.6±4.6
+   IN-Lake County,2009,82.7±6.4
+   IN-Marion County,2009,87.4±5.0
+   IN-Rest of State,2009,86.8±6.1
+Iowa,2009,93.2±3.8
+Kansas,2009,92.5±4.6
+Kentucky,2009,88.9±3.8
+Louisiana,2009,94.4±3.0
+Maine,2009,91.4±3.9
+Maryland,2009,89.7±5.2
+   MD-City of Baltimore,2009,91.0±4.4
+   MD-Rest of State,2009,89.5±5.9
+Massachusetts,2009,93.7±3.2
+Michigan,2009,90.9±5.1
+Minnesota,2009,93.6±3.0
+Mississippi,2009,91.6±3.3
+Missouri,2009,88.8±5.0
+Montana,2009,87.2±5.0
+Nebraska,2009,93.6±3.1
+Nevada,2009,86.3±4.6
+New Hampshire,2009,92.0±3.8
+New Jersey,2009,86.9±4.3
+New Mexico,2009,89.1±4.1
+New York,2009,90.3±3.2
+   NY-City of New York,2009,91.9±4.4
+   NY-Rest of State,2009,88.7±4.5
+North Carolina,2009,92.9±4.0
+North Dakota,2009,94.4±3.2
+Ohio,2009,89.4±4.2
+Oklahoma,2009,94.2±2.7
+Oregon,2009,88.1±4.3
+Pennsylvania,2009,89.3±4.4
+   PA-Philadelphia County,2009,90.7±4.0
+   PA-Rest of State,2009,89.1±5.1
+Rhode Island,2009,90.8±4.2
+South Carolina,2009,86.9±4.9
+South Dakota,2009,92.8±3.5
+Tennessee,2009,94.7±2.7
+Texas,2009,88.5±3.2
+   TX-Bexar County,2009,87.6±5.6
+   TX-City of Houston,2009,86.9±4.9
+   TX-Dallas County,2009,84.9±6.1
+   TX-El Paso County,2009,87.1±4.4
+   TX-Rest of State,2009,89.5±4.6
+Utah,2009,91.3±4.1
+Vermont,2009,91.9±3.2
+Virginia,2009,85.8±6.8
+Washington,2009,90.8±3.0
+   WA-Eastern/Western WA,2009,87.8±4.4
+   WA-Rest of State,2009,92.1±3.8
+West Virginia,2009,89.2±5.7
+Wisconsin,2009,94.4±2.7
+Wyoming,2009,91.3±3.6
+US National         ,2008,92.1±0.7
+Alabama,2008,93.6±3.8
+Alaska,2008,88.4±5.0
+Arizona,2008,92.2±4.4
+Arkansas,2008,92.2±4.1
+California,2008,92.7±2.8
+   CA-Los Angeles County,2008,91.1±3.6
+   CA-Northern CA,2008,87.7±4.6
+   CA-Santa Clara County,2008,93.7±3.3
+   CA-Rest of State,2008,93.5±3.9
+Colorado,2008,92.3±5.4
+Connecticut,2008,95.3±3.1
+Delaware,2008,93.1±4.5
+District of Columbia,2008,89.7±4.4
+Florida,2008,91.7±3.5
+   FL-Miami-Dade County,2008,88.6±5.1
+   FL-Orange County,2008,91.2±4.6
+   FL-Rest of State,2008,92.3±4.3
+Georgia,2008,92.7±3.7
+Hawaii,2008,94.8±2.9
+Idaho,2008,86.1±5.4
+Illinois,2008,91.0±2.7
+   IL-City of Chicago,2008,89.0±3.7
+   IL-Madison/St. Clair coun.,2008,90.5±4.0
+   IL-Rest of State,2008,91.7±3.6
+Indiana,2008,88.0±4.8
+Iowa,2008,91.4±4.4
+Kansas,2008,91.9±3.6
+Kentucky,2008,90.2±4.4
+Louisiana,2008,94.2±2.5
+Maine,2008,91.8±3.6
+Maryland,2008,94.5±2.4
+   MD-City of Baltimore,2008,89.9±4.1
+   MD-Rest of State,2008,95.2±2.7
+Massachusetts,2008,94.4±4.2
+Michigan,2008,88.1±4.5
+Minnesota,2008,91.8±3.5
+   MN-Twin Cities,2008,92.3±4.1
+   MN-Rest of State,2008,91.2±5.9
+Mississippi,2008,89.3±4.2
+Missouri,2008,91.7±4.1
+Montana,2008,85.9±5.1
+Nebraska,2008,91.9±3.3
+Nevada,2008,88.0±4.4
+New Hampshire,2008,94.8±3.0
+New Jersey,2008,89.9±4.4
+New Mexico,2008,90.6±4.4
+New York,2008,92.2±2.4
+   NY-City of New York,2008,93.4±3.1
+   NY-Rest of State,2008,91.2±3.6
+North Carolina,2008,92.2±3.6
+North Dakota,2008,90.6±3.9
+Ohio,2008,93.9±3.1
+Oklahoma,2008,92.3±4.2
+Oregon,2008,92.0±3.8
+Pennsylvania,2008,92.2±3.0
+   PA-Philadelphia County,2008,93.1±3.3
+   PA-Rest of State,2008,92.0±3.6
+Rhode Island,2008,93.7±3.5
+South Carolina,2008,88.5±4.6
+South Dakota,2008,93.7±3.2
+Tennessee,2008,95.6±3.0
+Texas,2008,93.7±2.5
+   TX-Bexar County,2008,92.8±3.9
+   TX-City of Houston,2008,90.8±4.2
+   TX-Dallas County,2008,91.4±3.9
+   TX-El Paso County,2008,93.0±2.8
+   TX-Rest of State,2008,94.7±3.6
+Utah,2008,90.8±4.9
+Vermont,2008,88.1±4.6
+Virginia,2008,92.3±5.2
+Washington,2008,91.2±3.5
+   WA-Eastern/Western WA,2008,89.6±4.0
+   WA-Rest of State,2008,91.9±4.7
+West Virginia,2008,88.3±5.0
+Wisconsin,2008,94.3±3.9
+Wyoming,2008,87.6±4.3
+US National,2007,92.3±0.7
+Alabama,2007,95.0±2.8
+Alaska,2007,89.7±4.1
+Arizona,2007,89.0±4.8
+Arkansas,2007,92.5±3.1
+California,2007,94.6±2.4
+   CA-Alameda County,2007,91.6±4.4
+   CA-Los Angeles County,2007,95.8±2.8
+   CA-San Berrdino County,2007,90.3±4.3
+   CA-Rest of State,2007,94.7±3.5
+Colorado,2007,91.2±4.5
+Connecticut,2007,95.3±2.8
+Delaware,2007,94.8±3.3
+District of Columbia,2007,95.2±3.3
+Florida,2007,92.3±4.1
+   FL-Miami-Dade County,2007,95.4±3.0
+   FL-Rest of State,2007,91.8±4.8
+Georgia,2007,91.4±4.2
+Hawaii,2007,93.8±3.7
+Idaho,2007,86.1±5.2
+Illinois,2007,93.1±2.7
+   IL-City of Chicago,2007,89.5±4.7
+   IL-Rest of State,2007,94.4±3.2
+Indiana,2007,90.4±3.3
+   IN-Marion County,2007,87.5±4.6
+   IN-Rest of State,2007,91.0±3.9
+Iowa,2007,93.0±3.8
+Kansas,2007,93.1±3.5
+Kentucky,2007,90.8±4.6
+Louisiana,2007,92.9±3.4
+Maine,2007,90.2±4.8
+Maryland,2007,97.1±2.0
+Massachusetts,2007,93.3±4.6
+Michigan,2007,89.5±5.3
+Minnesota,2007,94.9±2.8
+Mississippi,2007,87.2±5.8
+Missouri,2007,89.0±5.2
+Montana,2007,89.6±4.0
+Nebraska,2007,94.0±3.7
+Nevada,2007,86.3±4.9
+New Hampshire,2007,96.6±2.6
+New Jersey,2007,91.2±5.5
+New Mexico,2007,90.6±3.6
+New York,2007,93.6±2.1
+   NY-City of New York,2007,91.9±3.2
+   NY-Rest of State,2007,95.2±2.6
+North Carolina,2007,96.9±2.0
+North Dakota,2007,95.2±2.9
+Ohio,2007,90.7±3.7
+Oklahoma,2007,89.9±5.0
+Oregon,2007,88.9±5.3
+Pennsylvania,2007,93.8±2.5
+   PA-Philadelphia County,2007,92.2±4.5
+   PA-Rest of State,2007,94.1±2.8
+Rhode Island,2007,94.7±3.9
+South Carolina,2007,92.5±3.2
+South Dakota,2007,95.0±2.4
+Tennessee,2007,94.5±4.3
+Texas,2007,90.4±2.6
+   TX-Bexar County,2007,90.9±3.9
+   TX-City of Houston,2007,89.4±3.8
+   TX-Dallas County,2007,89.9±4.1
+   TX-El Paso County,2007,90.3±4.8
+   TX-Rest of State,2007,90.6±3.8
+Utah,2007,90.9±4.0
+Vermont,2007,93.6±5.2
+Virginia,2007,90.9±3.8
+Washington,2007,90.5±3.9
+   WA-Western WA,2007,91.9±3.9
+   WA-Rest of State,2007,90.2±4.6
+West Virginia,2007,96.2±2.1
+Wisconsin,2007,91.4±4.6
+Wyoming,2007,87.5±5.2
+US National,2006,92.3±0.6
+Alabama,2006,94.0±4.0
+Alaska,2006,85.7±5.1
+Arizona,2006,87.7±3.5
+Arkansas,2006,87.3±4.7
+California,2006,88.5±5.0
+   CA-Alameda County,2006,85.8±6.8
+   CA-Los Angeles County,2006,92.8±2.7
+   CA-San Berrdino County,2006,92.5±3.5
+   CA-Rest of State,2006,92.0±3.9
+Colorado,2006,89.3±4.1
+Connecticut,2006,91.4±4.0
+Delaware,2006,94.6±2.9
+District of Columbia,2006,93.4±4.5
+Florida,2006,88.3±6.0
+   FL-Miami-Dade County,2006,96.5±2.0
+   FL-Rest of State,2006,96.4±2.6
+Georgia,2006,92.2±3.4
+Hawaii,2006,91.2±3.3
+Idaho,2006,90.8±3.9
+Illinois,2006,94.3±3.1
+   IL-City of Chicago,2006,90.6±4.1
+   IL-Rest of State,2006,91.0±3.7
+Indiana,2006,93.6±4.2
+   IN-Marion County,2006,90.4±4.4
+   IN-Rest of State,2006,89.9±4.6
+Iowa,2006,88.0±4.8
+Kansas,2006,89.2±5.1
+Kentucky,2006,88.5±4.7
+Louisiana,2006,89.4±6.7
+Maine,2006,89.6±4.3
+Maryland,2006,90.1±4.2
+Massachusetts,2006,89.4±5.1
+Michigan,2006,90.3±4.8
+Minnesota,2006,92.7±3.2
+Mississippi,2006,90.7±4.1
+Missouri,2006,93.4±4.1
+Montana,2006,92.5±3.6
+Nebraska,2006,88.9±4.3
+Nevada,2006,92.2±4.4
+New Hampshire,2006,96.3±2.8
+New Jersey,2006,93.3±3.6
+New Mexico,2006,96.7±3.2
+New York,2006,96.6±2.4
+   NY-City of New York,2006,95.4±2.7
+   NY-Rest of State,2006,96.7±2.6
+North Carolina,2006,92.2±3.4
+North Dakota,2006,83.7±5.5
+Ohio,2006,93.2±3.8
+Oklahoma,2006,92.3±4.0
+Oregon,2006,88.5±4.8
+Pennsylvania,2006,95.7±3.9
+   PA-Philadelphia County,2006,87.3±5.5
+   PA-Rest of State,2006,91.4±4.4
+Rhode Island,2006,85.1±5.4
+South Carolina,2006,92.9±3.5
+South Dakota,2006,91.2±3.8
+Tennessee,2006,89.6±4.2
+Texas,2006,91.3±4.0
+   TX-Bexar County,2006,89.1±4.0
+   TX-City of Houston,2006,87.4±4.5
+   TX-Dallas County,2006,89.8±5.4
+   TX-El Paso County,2006,95.9±2.0
+   TX-Rest of State,2006,95.7±2.5
+Utah,2006,96.2±3.0
+Vermont,2006,97.6±2.0
+Virginia,2006,91.7±3.8
+Washington,2006,93.5±3.1
+   WA-Western WA,2006,94.2±3.7
+   WA-Rest of State,2006,93.4±3.4
+West Virginia,2006,94.1±3.1
+Wisconsin,2006,88.7±4.5
+Wyoming,2006,94.0±2.9
+US National,2005,90.1±5.4
+Alabama,2005,95.8±2.8
+   AL-Jefferson County,2005,94.2±3.7
+   AL-Rest of State,2005,96.1±2.4
+Alaska,2005,93.9±3.3
+Arizona,2005,94.3±3.1
+   AZ-Maricopa County,2005,93.0±3.1
+   AZ-Rest of State,2005,86.7±5.7
+Arkansas,2005,94.4±3.6
+California,2005,92.1±2.0
+   CA-Alameda County,2005,89.2±4.7
+   CA-Los Angeles County,2005,87.8±4.4
+   CA-San Berrdino County,2005,92.9±4.4
+   CA-Rest of State,2005,89.0±4.4
+Colorado,2005,93.2±2.8
+   CO-Denver,2005,92.4±4.1
+   CO-Rest of State,2005,95.1±2.5
+Connecticut,2005,93.6±3.4
+Delaware,2005,87.5±3.5
+District of Columbia,2005,93.7±3.2
+Florida,2005,86.3±6.2
+   FL-Duval County,2005,86.8±5.0
+   FL-Rest of State,2005,91.1±4.3
+Georgia,2005,94.0±2.7
+   GA-Fulton/DeKalb Counties,2005,94.0±3.0
+   GA-Rest of State,2005,94.0±3.3
+Hawaii,2005,87.7±4.7
+Idaho,2005,86.5±5.0
+Illinois,2005,93.0±3.0
+   IL-City of Chicago,2005,87.8±5.2
+   IL-Rest of State,2005,94.9±3.6
+Indiana,2005,91.2±5.6
+Iowa,2005,91.7±4.2
+Kansas,2005,92.7±3.4
+Kentucky,2005,90.2±5.5
+Louisiana,2005,89.2±3.0
+Maine,2005,92.2±4.2
+Maryland,2005,93.6±3.4
+   MD-City of Baltimore,2005,94.5±4.1
+   MD-Rest of State,2005,93.5±3.9
+Massachusetts,2005,97.0±2.2
+Michigan,2005,93.7±2.8
+   MI-City of Detroit,2005,90.7±5.2
+   MI-Rest of State,2005,94.0±3.0
+Minnesota,2005,91.4±4.8
+Mississippi,2005,91.0±4.3
+Missouri,2005,90.3±3.3
+   MO-St. Louis County/City of,2005,93.0±3.8
+   MO-Rest of State,2005,89.5±4.2
+Montana,2005,93.6±3.8
+Nebraska,2005,94.8±2.9
+Nevada,2005,85.7±4.6
+   NV-Clark County,2005,84.4±5.8
+   NV-Rest of State,2005,89.4±5.9
+New Hampshire,2005,88.3±4.9
+New Jersey,2005,85.3±5.1
+   NJ-City of Newark,2005,87.2±5.2
+   NJ-Rest of State,2005,85.2±5.3
+New Mexico,2005,91.2±4.7
+New York,2005,92.9±3.0
+   NY-City of New York,2005,92.4±4.8
+   NY-Rest of State,2005,93.3±3.7
+North Carolina,2005,94.4±3.7
+North Dakota,2005,92.3±3.9
+Ohio,2005,93.1±3.0
+   OH-Cuyahoga County,2005,93.0±3.6
+   OH-Franklin County,2005,95.6±3.6
+   OH-Rest of State,2005,92.8±3.8
+Oklahoma,2005,89.8±4.1
+Oregon,2005,82.7±5.6
+Pennsylvania,2005,93.6±4.1
+   PA-Philadelphia County,2005,95.7±2.8
+   PA-Rest of State,2005,93.2±4.7
+Rhode Island,2005,95.2±2.5
+South Carolina,2005,87.3±5.7
+South Dakota,2005,94.4±3.0
+Tennessee,2005,92.0±2.9
+   TN-Davidson County,2005,92.5±4.7
+   TN-Shelby County,2005,86.6±6.0
+   TN-Rest of State,2005,93.4±3.6
+Texas,2005,89.1±3.1
+   TX-Bexar County,2005,89.2±4.8
+   TX-City of Houston,2005,92.3±4.6
+   TX-Dallas County,2005,87.4±6.3
+   TX-El Paso County,2005,89.3±4.5
+   TX-Rest of State,2005,88.8±4.4
+Utah,2005,89.0±5.5
+Vermont,2005,92.6±4.0
+Virginia,2005,93.3±4.2
+Washington,2005,90.6±3.5
+   WA-King County,2005,92.1±5.3
+   WA-Rest of State,2005,89.9±4.5
+West Virginia,2005,85.7±5.0
+Wisconsin,2005,91.6±3.3
+   WI-Milwaukee County,2005,89.1±6.5
+   WI-Rest of State,2005,92.2±3.8
+Wyoming,2005,89.4±4.7
+US National         ,2004,93.0±0.6
+Alabama,2004,91.8±4.5
+   AL-Jefferson County,2004,89.4±5.4
+   AL-Rest of State,2004,92.2±5.2
+Alaska,2004,89.7±4.8
+Arizona,2004,92.9±2.5
+   AZ-Maricopa County,2004,91.8±3.5
+   AZ-Rest of State,2004,95.0±3.1
+Arkansas,2004,94.6±3.0
+California,2004,93.1±2.1
+   CA-Los Angeles County,2004,94.1±2.9
+   CA-San Diego County,2004,89.5±4.5
+   CA-Santa Clara County,2004,92.5±4.1
+   CA-Rest of State,2004,93.2±3.3
+Colorado,2004,90.8±3.8
+Connecticut,2004,95.0±3.7
+Delaware,2004,94.5±3.9
+District of Columbia,2004,94.6±3.2
+Florida,2004,95.4±2.0
+   FL-Miami-Dade County,2004,93.9±3.4
+   FL-Duval County,2004,87.7±6.2
+   FL-Rest of State,2004,96.3±2.4
+Georgia,2004,91.9±4.3
+   GA-Fulton/DeKalb Counties,2004,93.7±3.7
+   GA-Rest of State,2004,91.5±5.2
+Hawaii,2004,94.7±2.9
+Idaho,2004,91.7±3.9
+Illinois,2004,95.0±2.4
+   IL-City of Chicago,2004,93.4±4.2
+   IL-Rest of State,2004,95.5±2.9
+Indiana,2004,91.5±3.9
+   IN-Marion County,2004,91.3±4.8
+   IN-Rest of State,2004,91.6±4.6
+Iowa,2004,92.9±5.4
+Kansas,2004,92.3±4.3
+Kentucky,2004,91.0±5.6
+Louisiana,2004,88.7±3.9
+   LA-Orleans Parish,2004,90.2±4.8
+   LA-Rest of State,2004,88.6±4.4
+Maine,2004,91.7±3.8
+Maryland,2004,94.8±3.3
+   MD-City of Baltimore,2004,93.9±3.6
+   MD-Rest of State,2004,95.0±3.7
+Massachusetts,2004,96.0±2.4
+   MA-City of Boston,2004,92.4±4.2
+   MA-Rest of State,2004,96.4±2.7
+Michigan,2004,91.8±3.7
+   MI-City of Detroit,2004,90.7±4.2
+   MI-Rest of State,2004,91.9±4.1
+Minnesota,2004,91.7±4.7
+Mississippi,2004,94.4±3.8
+Missouri,2004,93.8±3.4
+Montana,2004,91.2±3.9
+Nebraska,2004,92.7±3.5
+Nevada,2004,87.4±4.1
+New Hampshire,2004,93.5±4.1
+New Jersey,2004,94.6±3.1
+   NJ-City of Newark,2004,93.5±3.9
+   NJ-Rest of State,2004,94.6±3.2
+New Mexico,2004,89.9±4.5
+New York,2004,95.5±2.1
+   NY-City of New York,2004,93.2±3.9
+   NY-Rest of State,2004,97.6±2.0
+North Carolina,2004,95.6±3.5
+North Dakota,2004,92.6±3.3
+Ohio,2004,93.1±3.1
+   OH-Cuyahoga County,2004,96.2±2.5
+   OH-Franklin County,2004,94.9±3.4
+   OH-Rest of State,2004,92.3±4.0
+Oklahoma,2004,90.6±4.4
+Oregon,2004,93.7±3.1
+Pennsylvania,2004,95.0±2.6
+   PA-Philadelphia County,2004,94.0±3.6
+   PA-Rest of State,2004,95.2±3.0
+Rhode Island,2004,95.6±2.8
+South Carolina,2004,92.0±4.5
+South Dakota,2004,93.7±4.1
+Tennessee,2004,91.3±3.1
+   TN-Davidson County,2004,95.2±2.9
+   TN-Shelby County,2004,89.1±4.6
+   TN-Rest of State,2004,91.2±4.1
+Texas,2004,89.2±2.7
+   TX-Bexar County,2004,89.9±4.8
+   TX-City of Houston,2004,86.0±4.9
+   TX-Dallas County,2004,89.5±4.4
+   TX-El Paso County,2004,90.1±4.4
+   TX-Rest of State,2004,89.6±4.0
+Utah,2004,89.8±3.8
+Vermont,2004,94.4±3.2
+Virginia,2004,96.6±2.4
+Washington,2004,92.3±2.8
+   WA-King County,2004,94.8±3.0
+   WA-Rest of State,2004,91.4±3.7
+West Virginia,2004,94.6±4.4
+Wisconsin,2004,93.6±2.9
+   WI-Milwaukee County,2004,94.3±3.2
+   WI-Rest of State,2004,93.4±3.6
+Wyoming,2004,92.7±3.3
+US National,2003,93.0±0.6
+Alabama,2003,91.2±3.7
+   AL-Jefferson County,2003,94.1±3.4
+   AL-Rest of State,2003,90.7±4.3
+Alaska,2003,90.7±3.9
+Arizona,2003,91.5±2.7
+   AZ-Maricopa County,2003,92.0±3.4
+   AZ-Rest of State,2003,90.7±4.2
+Arkansas,2003,90.6±4.7
+California,2003,92.8±2.5
+   CA-Los Angeles County,2003,95.8±2.5
+   CA-San Diego County,2003,93.2±3.7
+   CA-Santa Clara County,2003,93.2±3.8
+   CA-Rest of State,2003,91.2±4.1
+Colorado,2003,85.6±5.1
+Connecticut,2003,98.4±1.4
+Delaware,2003,93.0±4.2
+District of Columbia,2003,92.8±4.1
+Florida,2003,95.2±2.3
+   FL-Miami-Dade County,2003,94.9±2.7
+   FL-Duval County,2003,95.5±3.1
+   FL-Rest of State,2003,95.3±3.0
+Georgia,2003,90.7±3.5
+   GA-Fulton/DeKalb Counties,2003,95.7±2.3
+   GA-Rest of State,2003,89.5±4.2
+Hawaii,2003,93.6±3.2
+Idaho,2003,92.9±3.7
+Illinois,2003,93.6±2.8
+   IL-City of Chicago,2003,91.3±6.2
+   IL-Rest of State,2003,94.5±3.0
+Indiana,2003,92.5±4.2
+   IN-Marion County,2003,93.4±3.1
+   IN-Rest of State,2003,92.4±5.1
+Iowa,2003,91.1±3.7
+Kansas,2003,89.4±4.6
+Kentucky,2003,95.5±2.8
+Louisiana,2003,88.4±4.1
+   LA-Orleans Parish,2003,86.4±6.0
+   LA-Rest of State,2003,88.6±4.5
+Maine,2003,94.1±3.3
+Maryland,2003,93.7±4.0
+   MD-City of Baltimore,2003,94.9±3.4
+   MD-Rest of State,2003,93.5±4.5
+Massachusetts,2003,97.7±1.5
+   MA-City of Boston,2003,95.3±3.5
+   MA-Rest of State,2003,98.0±1.6
+Michigan,2003,92.5±3.7
+   MI-City of Detroit,2003,86.4±6.2
+   MI-Rest of State,2003,93.3±4.1
+Minnesota,2003,92.6±3.8
+Mississippi,2003,94.7±3.1
+Missouri,2003,94.5±3.0
+Montana,2003,90.7±3.8
+Nebraska,2003,91.0±4.5
+Nevada,2003,89.2±4.2
+New Hampshire,2003,94.6±3.0
+New Jersey,2003,93.5±3.0
+New Mexico,2003,93.9±3.3
+New York,2003,95.1±2.1
+   NY-City of New York,2003,97.0±2.1
+   NY-Rest of State,2003,93.4±3.5
+North Carolina,2003,95.7±2.9
+North Dakota,2003,90.9±4.0
+Ohio,2003,95.6±2.3
+Oklahoma,2003,88.0±6.1
+Oregon,2003,92.4±3.6
+Pennsylvania,2003,94.1±3.4
+   PA-Philadelphia County,2003,92.5±4.0
+   PA-Rest of State,2003,94.4±3.9
+Rhode Island,2003,93.6±3.7
+South Carolina,2003,91.6±3.8
+South Dakota,2003,91.3±4.3
+Tennessee,2003,94.6±2.0
+Texas,2003,91.4±2.5
+   TX-Bexar County,2003,91.8±4.0
+   TX-City of Houston,2003,89.7±4.0
+   TX-Dallas County,2003,90.2±4.5
+   TX-El Paso County,2003,91.7±4.0
+   TX-Rest of State,2003,91.9±3.5
+Utah,2003,88.6±4.7
+Vermont,2003,96.4±2.4
+Virginia,2003,92.9±4.0
+Washington,2003,93.5±2.8
+West Virginia,2003,88.7±5.8
+Wisconsin,2003,94.2±2.8

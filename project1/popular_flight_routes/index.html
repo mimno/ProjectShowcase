@@ -1,0 +1,182 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+<!-- Load the d3 library. -->
+<title>Most Popular Flight Routes in the United States</title>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<style>
+/* put a border around the svg element so we can see the coordinate system better. */
+body { font-family: "Open Sans"; text-align: center; }
+h1 { font-family: "Open Sans Condensed"; text-transform: uppercase; font-weight: 200; font-size: 36pt; padding: 0; margin: 0; }
+
+#map { margin: 0 auto; display: inline-block; min-height: 650px; }
+#legend_wrapper{ position: absolute; }
+#legend { border: 1px solid #ccc; position: relative; width: 300px; top: 370px; left: 20px; font-size: 10pt; font-family: "Open Sans Condensed"; background: white; text-align: center; display: inline-block; padding: 10px 0; }
+#legend h2 { text-transform: uppercase; font-weight: bold; padding: 0; margin: 0; }
+#legend h3 { margin: 0; padding: 0; font-weight: 200; }
+#legend .float_legend { float: left; }
+#legend .legend_element { line-height: 10px; }
+#description { position: relative; left: 400px; top: 260px; width: 400px; font-family: "Open Sans Condensed"; font-size: 12pt; text-align: left; }
+
+.airport { fill: white; stroke: black; stroke-width: 1px; }
+</style>
+</head>
+<body>
+
+<!-- The SVG element will go in here -->
+<h1>Most Popular Flight Routes in the United States</h1>
+<div id="map" style="text-align: center;">
+    <div id="legend_wrapper">
+        <div id="legend">
+            <h2>Legend</h2>
+            <div class="legend_element">&nbsp;</div>
+            <h3>Airports</h3>
+            <div id="airport_legend"></div>
+            <div class="legend_element">&nbsp;</div>
+            <h3>Price per mile</h3>
+            <div style="clear: both;"></div>
+            <span id="cheap" class="float_legend" style="width: 15%; line-height: 20px; text-align: right; margin-right: 3%;">Cheap</span>
+            <div id="gradient" class="float_legend" style="background:linear-gradient(to right,darkgreen,red); height:20px; width:64%; border-radius:10px;"></div>
+            <span id="expensive" class="float_legend" style="width: 15%; line-height: 20px; margin-left: 3%; text-align: left;">Expensive</span>
+            <div class="legend_element">&nbsp;</div>
+            <h3>Routes</h3>
+            <div id="route_legend"></div>
+        </div>
+        <div id="description">
+            These are the 100 most-traveled domestic flight routes in the United States.
+            Each airport is sized based on passenger traffic (both incoming and outgoing) from only these 100 routes. 
+            <strong>LAX</strong> handles the most passenger traffic (over 77 million people) of these top routes, and the <strong>LAX/JFK</strong>
+            route is the most traveled (over 6.5 million passengers) route overall.
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+var width = 960,
+    height = 500;
+
+// Projections have a default width, which is 960 x 500, 
+// and a default center at 480,250. Play with the scale 
+// and translate functions to make bigger and smaller maps,
+// and zoomed-in maps. 
+
+var projection = d3.geo.albersUsa()
+	.scale(1000) // 1000 is full size
+	.translate([width / 2, height / 2]); // note the []s
+
+var path = d3.geo.path().projection(projection);
+	
+var states;
+
+var usdaAtlas;
+
+
+d3.json("us.json", function(error, shapes) {
+	// These functions give us long,lat coordinates
+	//counties = topojson.feature(shapes, shapes.objects.counties).features;
+	states = topojson.feature(shapes, shapes.objects.states).features;
+	
+	var svg = d3.select("#map").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+	// Add state borders to help us recognize metro areas
+	var statePaths = svg.append("g");
+	statePaths.selectAll("path").data(states).enter()
+	    .append("path").attr("d", path)
+        .style("fill", "#f3f3f3").style("stroke", "#ccc");
+	
+	d3.json("processed_routes.json", function(error, data) {
+    	var volume_opacity = d3.scale.linear().domain([data.min_vol, data.max_vol]).range([0.1, 0.5]);
+    	var price_color = d3.scale.linear().domain([data.min_price, data.max_price]).range(["darkgreen", "red"]);
+    	var volume_width = d3.scale.linear().domain([data.min_vol, data.max_vol]).range([2, 20]);
+    	var airport_volume = d3.scale.linear().domain([data.min_airport, data.max_airport]).range([2, 10]);
+    	
+    	var airports = data.airports;
+    	
+    	data.routes.forEach(function(route) {
+        	var routePath = svg.append("line")
+        	    .attr("style", "stroke: "+price_color(route.price_per_mile)+"; stroke-width: "+volume_width(route.vol)+"px; opacity: "+volume_opacity(route.vol)+";")
+                .attr("title", route["city1"]+" from/to "+route["city2"]+", distance: "+route["dist"]+" mi, average fare: $"+route["avg_fare"] +", average price per mile: $"+route["price_per_mile"]+", passenger volume: "+route["vol"]);
+            
+            for (var i = 1; i <= 2; i++) {
+                var airport = projection(airports[route['city'+i]].location);
+        	    routePath.attr("x"+i, airport[0]).attr("y"+i, airport[1]);
+            }
+        });
+        
+        data.sorted_airports.forEach(function(airport_name) {
+    	    var airport = airports[airport_name];
+    	    var loc = projection(airport.location);
+    	    svg.append("circle")
+    	        .attr("cx", loc[0])
+    	        .attr("cy", loc[1])
+    	        .attr("r", airport_volume(airport.passengers))
+    	        .attr("class", "airport");
+        });
+        
+        
+        
+        // legend
+        d3.select("#cheap").text("$"+data.min_price.toString().substr(0,4));
+    	d3.select("#expensive").text("$"+data.max_price.toString().substr(0,4));
+		var svgLegend = d3.select("#airport_legend").append("svg").attr("style", "height:35px");
+		svgLegend.append("circle")
+    	        .attr("cx", 138)
+    	        .attr("cy", 16)
+    	        .attr("r", 2)
+				.attr("class", "airport");
+		
+		svgLegend.append("text")
+				.attr("x", 40)
+    	        .attr("y", 20)
+				.html(Math.round(data.min_airport*1000).toLocaleString()+" travelers");
+		
+		svgLegend.append("circle")
+    	        .attr("cx", 160)
+    	        .attr("cy", 17)
+    	        .attr("r", 10)
+				.attr("class", "airport");
+        
+		svgLegend.append("text")
+				.attr("x", 180)
+    	        .attr("y", 20)
+				.html(Math.round(data.max_airport*1000).toLocaleString()+" travelers");
+		
+		var svgLegend = d3.select("#route_legend").append("svg").attr("style", "height:35px");
+		
+		svgLegend.append("line")
+        	    .attr("style", "stroke:black; stroke-width:2px; opacity:0.1")
+				.attr("x1", 120)
+    	        .attr("y1", 15)
+				.attr("x2", 148)
+    	        .attr("y2", 15);
+		
+		svgLegend.append("text")
+				.attr("x", 17)
+    	        .attr("y", 19)
+				.html(Math.round(data.min_vol*1000).toLocaleString()+" passengers");
+		
+		
+		svgLegend.append("line")
+        	    .attr("style", "stroke:black; stroke-width:20px; opacity:0.5")
+				.attr("x1", 152)
+    	        .attr("y1", 15)
+				.attr("x2", 180)
+    	        .attr("y2", 15);
+			
+		svgLegend.append("text")
+				.attr("x", 190)
+    	        .attr("y", 19)
+				.html(Math.round(data.max_vol*1000).toLocaleString()+" passengers");
+	});
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,280 @@
+<html>
+<head>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+<!-- Load the d3 library. -->
+<title>Which U.S. city should you live in?</title>
+<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="https://d3js.org/topojson.v1.min.js"></script>
+<style>
+/* put a border around the svg element so we can see the coordinate system better. */
+body { font-family: "Open Sans"; text-align: center; padding: 10px 0; }
+h1 { font-family: "Open Sans Condensed"; text-transform: uppercase; font-weight: 200; font-size: 36pt; padding: 0; margin: 0; }
+
+#wrapper { text-align: center; margin: 0 auto; width: 1040px; }
+#map { text-align: center; float: left; width: 720px; height: 375px; }
+#quiz { float: left; width: 370px; text-align: left; margin-left: -50px; margin-top: 30px; }
+
+#quiz #question { font-weight: bold; font-size: 16pt; margin-bottom: 10px; }
+#quiz .choice { display: block; width: 100%; text-align: left; border: none; background: none; padding: 10px 20px; font-family: "Open Sans"; font-size: 12pt; cursor: pointer; }
+#quiz .choice:hover { background: #f9f9f9; }
+#quiz .choice input { display: none; }
+
+.final_result h2 { margin: 0; padding: 0; font-size: 14pt; }
+.final_result h3 { color: green; font-size: 26pt; margin: 0 0 20px 0; padding: 0; }
+.final_result { text-align: center; font-size: 10pt; }
+.final_result a { color: black; font-family: "Open Sans Condensed"; text-decoration: none; font-size: 20pt; text-transform: uppercase; }
+
+.intro { text-align: center; font-size: 10pt; }
+.intro a { color: green; font-family: "Open Sans Condensed"; text-decoration: none; font-size: 20pt; text-transform: uppercase; font-weight: bold; display: block; margin-top: 20px; }
+
+#loading { font-family: "Open Sans Condensed"; text-transform: uppercase; }
+#container { display: none; }
+</style>
+</head>
+<body>
+
+<div id="wrapper">
+    <h1>Which U.S. city should you live in?</h1>
+    <div id="loading">Initializing...</div>
+    <div id="container">
+        <div id="map" style="text-align: center; float: left;">&nbsp;</div>
+        <div id="quiz">
+            <div class="intro">
+                Ever wondered which American city you should live in? Take this completely
+                unscientific quiz to find out!<br />
+                <a href="#" onclick="changeQuestion(0); return false;">Start the quiz!</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+var width = 720,
+    height = 375;
+
+// Projections have a default width, which is 960 x 500,
+// and a default center at 480,250. Play with the scale
+// and translate functions to make bigger and smaller maps,
+// and zoomed-in maps.
+
+var projection = d3.geo.albersUsa()
+	.scale(750) // 1000 is full size
+	.translate([width / 2, height / 2]); // note the []s
+
+var path = d3.geo.path().projection(projection);
+
+var states;
+var usdaAtlas;
+
+var cities;
+var questions;
+var variables = ["weather", "career", "nightlife", "transit", "democratic", "republican"];
+var weights = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+
+var min_font = 6;
+var max_font = 23;
+
+var resetQuiz = function() {
+    weights = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+    updateMap(weights);
+    changeQuestion(0);
+
+    d3.selectAll(".city_label, .city_point").attr("fill", "black");
+}
+
+var finalResults = function() {
+    var results = d3.entries(cities);
+
+    var comparator = function(x,y) {
+        var score1 = x["value"]["score"];
+        var score2 = y["value"]["score"];
+        return score2-score1;
+    };
+
+    results.sort(comparator);
+
+    //console.log(results);
+    return results;
+}
+
+var finishQuiz = function() {
+    var results = finalResults();
+
+    updateMap(weights); // final update
+
+    var city = results[0]["value"];
+
+    var alts = [results[1]["value"], results[2]["value"], results[3]["value"]];
+
+    var city_key = city["elems"]["label"].attr("id");
+    d3.selectAll(".city_label:not(#"+city_key+"), .city_point").transition().style("opacity", "0.2").style("font-size", min_font+"px");
+
+    city["elems"]["label"].transition().attr("fill", "green");
+    city["elems"]["circle"].transition().attr("fill", "green");
+
+    for (var alt in alts) {
+        alt = alts[alt];
+        alt["elems"]["label"].transition().style("opacity", "1").style("font-size", min_font+"px");
+        alt["elems"]["circle"].transition().style("opacity", "1");
+    }
+
+    var container = d3.select("#quiz").html("<div class=\"final_result\">" +
+            "<h2>You should live in:</h2>" +
+            "<h3>"+city["display_name"]+"!</h3>" +
+            "Other cities to consider:<br />" +
+            alts[0]["display_name"]+"<br />" +
+            alts[1]["display_name"]+"<br />" +
+            alts[2]["display_name"]+"<br /><br />" +
+            "<a href=\"#\" onclick=\"resetQuiz(); return false;\">Take the quiz again?</a>" +
+        "</div>");
+
+};
+
+var changeQuestion = function(num) {
+	updateMap(weights);
+
+	var container = d3.select("#quiz");
+	var question = questions[num];
+	var choices = question["choices"];
+	var values = question["values"];
+
+	container.html("");
+	container.append("div").attr("id", "question").html(question["question"]);
+
+	for (var i = 0; i < choices.length; i++) {
+    	var choice = choices[i];
+    	var value = values[i];
+
+    	var label = container.append("label").attr("class", "choice");
+
+    	var input = label.append("input").attr("type", "radio").attr("name", question["variable"]).attr("value", value);
+    	input.on("click", function(d, i) {
+        	var val = this.value*1.0;
+
+        	if (d3.select(this).attr("name") == "politics") {
+        	    weights[num+1] = val;
+        	    weights[num] = 1.0-val;
+            } else {
+        	    weights[num] = val;
+            }
+
+        	//updateMap(weights);
+        	//console.log(weights);
+
+            if (num < questions.length-1)
+    	        changeQuestion(num+1);
+    	    else
+    	        finishQuiz();
+    	});
+
+    	label.append("span").html(choice);
+    }
+};
+
+// "weights" MUST be same length of "variables"
+var calcScores = function(weights) {
+    for (var city_key in cities) {
+        var city = cities[city_key];
+        city["score"] = 0.0;
+
+        for (var i = 0; i < weights.length; i++) {
+            var raw_score;
+
+            if (weights[i] < 0.0)
+                raw_score = 1.0-city[variables[i]];
+            else
+                raw_score = city[variables[i]];
+
+            city["score"] += raw_score * Math.abs(weights[i]);
+        }
+        //console.log(city_key+": "+city["score"]);
+    }
+};
+
+var updateMap = function(weights) {
+    calcScores(weights);
+
+    var city_score = function(x) { return x["value"]["score"]; };
+    var min_score = d3.min(d3.entries(cities), city_score);
+    var max_score = d3.max(d3.entries(cities), city_score);
+
+    var size_scale = d3.scale.linear().domain([min_score, max_score]).range([min_font,max_font]);
+    var opac_scale = d3.scale.linear().domain([min_score, max_score]).range([0.2,1.0]);
+
+    //console.log(min_score);
+    //console.log(max_score);
+
+    for (var city_key in cities) {
+        var city = cities[city_key];
+        var size = size_scale(city["score"]);
+        var opacity = opac_scale(city["score"]);
+
+        var label = city["elems"]["label"];
+        var point = city["elems"]["circle"];
+
+        //console.log(city["score"]);
+
+        //if (city_key == "seattle") console.log(size);
+        label.transition().style("font-size", size+"px").style("opacity", opacity);
+        point.transition().style("opacity", opacity);
+    }
+};
+
+d3.json("us.json", function(error, shapes) {
+	// These functions give us long,lat coordinates
+	//counties = topojson.feature(shapes, shapes.objects.counties).features;
+	states = topojson.feature(shapes, shapes.objects.states).features;
+
+	var svg = d3.select("#map").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+	// Add state borders to help us recognize metro areas
+	var statePaths = svg.append("g");
+	statePaths.selectAll("path").data(states).enter()
+	    .append("path").attr("d", path)
+        .style("fill", "#f6f6f6").style("stroke", "#e5e5e5");
+
+	d3.json("city_data.json", function(error, data) {
+    	cities = data;
+
+    	for (var city_key in cities) {
+        	var city = cities[city_key];
+
+        	var coord = projection([city["long"], city["lat"]]);
+
+        	city["elems"] = {};
+        	city["score"] = 0.0;
+
+        	city["elems"]["circle"] = svg.append("circle")
+        	    .attr("cx", coord[0])
+        	    .attr("cy", coord[1])
+        	    .attr("r", "2")
+        	    .attr("class", "city_point");
+        	    //.style("opacity", "0.2");
+
+        	city["elems"]["label"] = svg.append("text")
+        	    .attr("x", coord[0])
+        	    .attr("y", coord[1]-5)
+        	    .attr("class", "city_label")
+        	    .attr("id", city_key.replace(" ", "_"))
+        	    .attr("text-anchor", "middle")
+        	    .style("font-size", "8px")
+        	    //.style("opacity", "0.2")
+        	    .text(city["display_name"]);
+    	}
+
+	});
+
+	d3.json("questions.json", function(error, data) {
+    	questions = data;
+	});
+
+	d3.select("#loading").style("display", "none");
+	d3.select("#container").style("display", "block");
+});
+
+</script>
+
+</body>
+</html>

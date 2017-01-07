@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Project 1</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Project 1">
+
+    <!-- Mobile Specific Meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:700,400' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Slabo+27px' rel='stylesheet' type='text/css'>
+
+    <!-- D3 -->
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+    <main class="container-fluid">
+        <div class="row">
+            <section class="col-sm-5">
+                <!-- TITLE -->
+                <h1>Satellite data visualization</h1>
+                <h6>Each line in the circle represents a connection between the country operating the satellite and its purpose.</h6><br>
+
+                <h3>Satellites by user</h3>
+
+                <!-- HISTOGRAM -->
+                <div id="histogram"></div><br>
+
+                <h3>Top 4 countries with the most satellites</h3>
+                <!-- HORIZONTAL BAR -->
+                <div id="countries"></div>
+                
+                <!-- TOTAL -->
+                <h2>TOTAL: 1235 satellites in orbit</h2>
+
+            </section> <!-- end col-sm-5 -->
+
+            <!-- CIRCLE -->
+            <section class="col-sm-7">
+                <div id="circle" class="text-center"></div>
+            </section> <!-- end col-lg-7 -->
+        </div> <!-- end row -->
+    </main>
+
+    <!-- JS -->
+    <script src="js/scripts.js"></script>
+</body>
+</html>

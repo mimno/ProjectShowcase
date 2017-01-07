@@ -1,0 +1,131 @@
+<html>
+<head>
+  <title> Project 2 (ema77, naf36, jlv78) </title>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="http://d3js.org/topojson.v1.min.js"></script>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+</head>
+<style>
+  h1 {
+    text-align: center;
+  }
+  body {
+    background-color: #F5F4F5;
+  }
+  #scoreboard {
+    border: 2px solid white;
+    margin-left: 425px;
+    background-color: #2E5CB8;
+    font-family: "Orbitron";
+    font-size: 18px;
+  }
+  #time {
+    stroke: white;
+    stroke-width: 2px;
+  }
+  #slider {
+    width: 600;
+    margin-left: 50;
+    margin-top: 25;
+    float: left;
+  }
+  #toolbar {
+    margin-left: 150;
+    margin-top: 20;
+    height: 25;
+    width: 190;
+    float: left;
+    padding-left: 10;
+    padding-right: 10;
+  }
+  .sliderButton {
+    height: 15;
+    margin-top: 4;
+  }
+  .playCounter {
+    margin-top: 25;
+    margin-left: 20;
+    float: left;
+  }
+  .field {
+    margin-left: 50;
+  }
+  .description {
+    width: 1200;
+    height: 50;
+    text-align: center;
+  }
+  .charts {
+    width: 300;
+    height: 500;
+    margin-left: 50;
+    margin-top: 0;
+    display: inline-block;
+  }
+  .container {
+    display: inline-block;
+  }
+</style>
+<link rel="stylesheet" href="jquery/jquery-ui.min.css">
+<script src="jquery/external/jquery/jquery.js"></script>
+<script src="jquery/jquery-ui.min.js"></script>
+
+
+<body>
+  <div id="board"></div>
+	<br>
+  <div class="container">
+    <div class="description"></div>
+    <div class="field"></div>
+    <div id="toolbar" class="ui-widget-header ui-corner-all">
+      <button id="beginning" class="sliderButton">go to beginning</button>
+      <button id="play" class="sliderButton">play</button>
+      <button id="forward" class="sliderButton">fast forward</button>
+      <button id="end" class="sliderButton">go to end</button>
+    </div>
+    <div id="slider"></div>
+    <div class="playCounter"></div>
+  </div>
+  <div class="charts"></div>
+
+  <script>
+    // console.clear()
+    var g = [];
+    d3.csv("data/superbowl.csv", function(data) {
+        g = data;
+    });
+  </script>
+
+  <script src="scripts/scoreboard.js"></script>
+  <script src="scripts/field.js"></script>
+  <script src="scripts/charts.js"></script>
+  <script src="scripts/footballLogic.js"></script>
+  <script src="scripts/ui.js"></script>
+  
+  <script>
+    var i = 1;
+    var executePlay = function(n,arr,svg) {
+      i = n
+      drawPlay(n,arr,svg)
+      updateChart1(arr[n-1])
+      updateChart2(arr[n-1])
+      var description = document.getElementsByClassName("description");
+      description[0].innerHTML = arr[n-1]["description"];
+      updateScoreboard(arr[n-1], arr[n])
+      var play = document.getElementsByClassName("playCounter");
+      play[0].innerHTML = i;
+      if (i >= 168) {
+        stopTimer();
+        i = 167
+      }
+    };
+
+    window.onload = function() {
+      setPlay(1);
+    }
+  </script>
+  <br><br><br>
+  <h1>Visualizing Super Bowl XLVII</h1> 
+
+</body>
+</html>

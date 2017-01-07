@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+  <head>
+    <style>
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.label{
+  font-family: Verdana;
+}
+
+div#BACchart{
+  text-align: center;
+}
+
+div#genderChart{
+  text-align: center;
+}
+
+.graphTitle{
+  font-family: Verdana;
+  width: 800px;
+  padding-left: 100px;
+  padding-top: 50px;
+
+}
+
+
+div#Title{
+  font-family: Verdana;
+  text-align: center;
+  color: #54278f;
+}
+
+p{
+  font-size: 14;
+}
+
+  .my-legend .legend-scale ul {
+    margin: 0;
+    padding: 0;
+    float: left;
+    list-style: none;
+    }
+  .my-legend .legend-scale ul li {
+    display: block;
+    float: left;
+    width: 50px;
+    margin-bottom: 6px;
+    text-align: center;
+    font-size: 80%;
+    list-style: none;
+    }
+  .my-legend ul.legend-labels li span {
+    outline-style: solid;
+    outline-width: 1px;
+    display: block;
+    float: left;
+    height: 15px;
+    width: 50px;
+    }
+  .my-legend .legend-source {
+    font-size: 70%;
+    color: #999;
+    clear: both;
+    }
+  .my-legend a {
+    color: #777;
+    }
+
+  .my-legend {
+  margin-top:30px;
+  margin-left: 600px;
+
+  }
+
+
+
+    </style>
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div id="Title">
+      <h1>Trends in Drunk Driving Fatalities</h1>
+    </div>
+    <div class='graphTitle'>
+      <h2> Average Fatal Car Accidents: Age vs BAC </h2>
+      <p> This graph shows the number of fatal car accidents per year caused by drivers of ages 16-55, with blood alcohol levels of 0.01%-0.25%.  The number of fatal accidents is averaged over five years, from 2009-2013. <p>
+    </div>
+    <div id="BACchart"></div>
+    <div class='graphTitle'>
+      <h2> Average Fatal Car Accidents: Age vs Gender </h2>
+      <p> This graph shows the number of fatal car accidents per year caused by drivers of ages 16-55, with blood alcohol levels over the legal limit of 0.08%.  Each bar is divided to show the number of accidents involving male and female drunk drivers for each age.  The number of accidents is averaged over five years, from 2009-2013.<p>
+    </div>
+    <div id="genderChart"></div>
+    <div class = 'graphTitle'>
+      <h2> Rate of Alcohol-Induced Fatal Car Accidents, 2013 </h2>
+      <p> This map shows the rate of alcohol-induced fatal car accidents per state, as a percentage of alcohol-induced accidents per state out of the total accidents per state, for the year 2013.<p>
+    </div>
+    <div class='my-legend'>
+    <div class='legend-scale'>
+      <ul class='legend-labels'>
+        <li><span style='background:rgb((254,237,222));'></span>0-15%</li>
+        <li><span style='background:rgb(253, 208, 162);'></span>15-22%</li>
+        <li><span style='background:rgb(253, 174, 107);'></span>22-27%</li>
+        <li><span style='background:rgb(253, 141, 60);'></span>27-33%</li>
+      <li><span style='background:rgb(230,85,13);'></span>33-39%</li>
+      <li><span style='background:rgb(166,54,3);'></span>39-45%</li>
+      </ul>
+    </div>
+    </div>
+
+    <div id="map"></div>
+    <div class='my-legend'>
+    <div class='legend-source'>Source: <a href="#link to source">http://www.nhtsa.gov/FARS</a></div>
+  </div>
+
+
+    <script type="text/javascript">
+
+    /*********Grid heat map**********/
+
+      var margin = { top: 20, right: 100, bottom: 100, left: 100 },
+          width = 1150 - margin.left - margin.right,
+          height = 600 - margin.top - margin.bottom,
+          gridSize = Math.floor(width / 44),
+          colors = ["#f2f0f7","#54278f"]
+
+          var colorScale;
+          var bacValues = Array(25);
+          var ageValues = Array(40);
+
+          for(var i=0; i<bacValues.length; i++){
+            bacValues[i] = (i+1) / 100;
+          }
+          for(var j=0; j<ageValues.length; j++){
+            ageValues[j] = j+16;
+          }
+
+          //create svg object based on height/width and margins
+          var svg = d3.select("#BACchart").append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          //crete y axis labels
+          var bacLabels = svg.selectAll("bacLabel")
+              .data(bacValues)
+              .enter().append("text")
+                .attr("class", "label")
+                .text(function (d) { return d; })
+                .attr("x", 0)
+                .attr("y", function (d, i) { return (bacValues.length - i) * gridSize; })
+                .style("text-anchor", "middle")
+                .style("dominant-baseline", "middle")
+                .style("font-size", "12")
+                .attr("transform", "translate(-20," + (gridSize / 2 * -1) + ")");
+
+          var yLabel = svg.append("text")
+              .attr("class", "label")
+              .text("% BAC")
+              .attr("x", -50)
+              .attr("y", bacValues.length/2 * gridSize)
+              .style("text-anchor", "middle")
+              .style("dominant-baseline", "middle")
+              .style("font-size", "20")
+              .attr("transform", "rotate(-90, -50," + bacValues.length/2 * gridSize +" )");
+
+          //create x axis labels
+          var xLabel = svg.append("text")
+              .attr("class", "label")
+              .text("Age of Driver")
+              .attr("x", ageValues.length/2 * gridSize)
+              .attr("y", bacValues.length * gridSize)
+              .style("text-anchor", "middle")
+              .style("dominant-baseline", "middle")
+              .style("font-size", "20")
+              .attr("transform", "translate(0,40)");
+
+          var ageLabels = svg.selectAll("ageLabel")
+              .data(ageValues)
+              .enter().append("text")
+                .attr("class", "label")
+                .text(function(d) { return d; })
+                .attr("x", function(d, i) { return i * gridSize; })
+                .attr("y", gridSize*25)
+                .style("text-anchor", "middle")
+                .style("font-size", "12")
+                .attr("transform", "translate(" + gridSize / 2 + ", +12)");
+
+      d3.csv("BAC_parsed.csv",
+        function(d) {
+          return {
+            bac: +d.bac,
+            age: +d.age,
+            value: +d.value
+          };
+        },
+        function(error, data) {
+
+          //create linear color scale based on the max number of crashes per year
+          colorScale = d3.scale.linear()
+              .domain([0, d3.max(data, function (d) { return d.value; })])
+              .range(colors);
+
+          //create heatMap by creating a rectangle for each data value
+           var heatMap = svg.selectAll("crashes")
+              .data(data)
+              .enter().append("rect")
+              .attr("x", function(d) { return (d.age - 16) * gridSize; })
+              .attr("y", function(d) { return (bacValues.length - (d.bac * 100)) * gridSize; })
+              .attr("rx", 4)
+              .attr("ry", 4)
+              .attr("stroke", "#E6E6E6")
+              .attr("width", gridSize)
+              .attr("height", gridSize)
+              .style("fill", function(d) { return colorScale(d.value); })
+
+
+          heatMap.append("title").text(function(d) { return d.value; });
+
+          //create scale, axis, and label for number of crashes legend
+          var crashesScale = d3.scale.linear().domain(colorScale.domain())
+              .range([bacValues.length * gridSize + 0, 0]);
+
+          var crashesAxis = d3.svg.axis()
+              .scale(crashesScale)
+              .orient("right");
+
+              svg.append("g")
+                  .attr("class", "axis")
+                  .attr("font-family", "Verdana")
+                  .attr("font-size", "14")
+                  .attr("transform", "translate(" + (width - 30) + ", 0)")
+                  .call(crashesAxis);
+
+          var crashLabel = svg.append("text")
+              .attr("class", "label")
+              .text("Number of Fatal Accidents")
+              .attr("x", width + 20)
+              .attr("y", bacValues.length/2 * gridSize)
+              .style("text-anchor", "middle")
+              .style("dominant-baseline", "middle")
+              .style("font-size", "20")
+              .attr("transform","rotate(90,"+ (width + 20) + "," + bacValues.length/2 * gridSize +" )");
+
+          //create gradient rectagle for crashes legend
+          var gradient = svg.append("defs")
+            .append("linearGradient")
+              .attr("id", "gradient")
+              .attr("x1", "0%")
+              .attr("y1", "0%")
+              .attr("x2", "0%")
+              .attr("y2", "100%")
+              .attr("spreadMethod", "pad");
+
+          gradient.append("stop")
+              .attr("offset", "0%")
+              .attr("stop-color", "#54278f")
+              .attr("stop-opacity", 1);
+
+          gradient.append("stop")
+              .attr("offset", "100%")
+              .attr("stop-color", "#f2f0f7")
+              .attr("stop-opacity", 1);
+
+          svg.append("rect")
+              .attr("x", width - 55)
+              .attr("y", 0)
+              .attr("width", gridSize)
+              .attr("height", bacValues.length * gridSize)
+              .style("fill", "url(#gradient)");
+
+      });
+
+    /*********Gender Bar Graph**********/
+
+     //set up variables for gender graph
+      var x = d3.scale.ordinal()
+          .rangeRoundBands([0, width], .1);
+
+      var y = d3.scale.linear()
+          .rangeRound([height, 0]);
+
+      var genderColor = d3.scale.ordinal()
+          .range(["#8073ac", "#e08214"]);
+
+      //create second svg object
+      var svg2 = d3.select("#genderChart").append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      //create axis labels
+          var xLabel = svg2.append("text")
+              .attr("class", "label")
+              .text("Age of Drunk Driver (BAC > 0.08%)")
+              .attr("x", ageValues.length/2 * gridSize)
+              .attr("y", bacValues.length * gridSize)
+              .style("text-anchor", "middle")
+              .style("dominant-baseline", "middle")
+              .style("font-size", "20")
+              .attr("transform", "translate(0,20)");
+
+       var yLabel = svg2.append("text")
+              .attr("class", "label")
+              .text("Number of Fatal Accidents")
+              .attr("x", -80)
+              .attr("y", bacValues.length/2 * gridSize)
+              .style("text-anchor", "middle")
+              .style("dominant-baseline", "middle")
+              .style("font-size", "20")
+              .attr("transform", "rotate(-90, -50," + bacValues.length/2 * gridSize +" )");
+
+      d3.csv("gender_parsed.csv",
+        function(d) {
+          return {
+            age: +d.age,
+            female: +d.female,
+            male: +d.male,
+            total: +d.total
+          };
+        },
+        function(error, data) {
+         //create color domain
+         genderColor.domain(d3.keys(data[0]).filter(function (key) {
+             return (key !== "age" && key !== "total");
+         }));
+
+         //give each data object an object containing a start and end value for each gender
+        data.forEach(function(d){
+          var start= 0;
+          var count =0;
+          d.genders = genderColor.domain().map(function(type){
+            return{
+            type: type,
+            start: start,
+            end: start += +d[type]
+          };
+          });
+        });
+
+
+        x.domain(data.map(function (d) {
+            return d.age;
+        }));
+
+        //set y domain to max total
+        y.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+        //create x and y axis
+        var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+
+        svg2.append("g")
+              .attr("class", "x axis")
+              .attr("font-family", "Verdana")
+              .attr("font-size", "14")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis);
+
+          svg2.append("g")
+              .attr("font-family", "Verdana")
+              .attr("class", "y axis")
+              .call(yAxis)
+
+        //create object for each age bar
+        var age = svg2.selectAll(".age")
+            .data(data)
+          .enter().append("g")
+            .attr("class", "g")
+            .attr("transform", function(d) {
+              return "translate(" + x(d.age) + ",0)";
+            });
+
+        //create two rectangles for each age, one for each gender(based on start and end)
+        age.selectAll("rect")
+            .data(function(d) { return d.genders; })
+          .enter().append("rect")
+            .attr("width", function(d) { return x.rangeBand()})
+            .attr("y", function(d) { return y(d.end); })
+            .attr("height", function(d) { return y(d.start) - y(d.end); })
+            .style("fill", function(d) { return genderColor(d.type); });
+
+        //create gender legend
+        var legend = svg2.selectAll(".legend")
+            .data(genderColor.domain())
+          .enter().append("g")
+            .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
+
+        legend.append("rect")
+            .attr("x", width - 55)
+            .attr("width", 18)
+            .attr("height", 18)
+            .style("fill", genderColor);
+
+        legend.append("text")
+            .attr("x", width - 65)
+            .attr("y", 15)
+            .style("text-anchor", "end")
+            .text(function(d) { return d; });
+
+      });
+
+    /*********Choropleth map**********/
+
+      //Width and height
+      var w = 1200;
+      var h = 600;
+
+      //Define map projection
+      var projection = d3.geo.albersUsa()
+                   .translate([w/2, h/2])
+                   .scale([1200]);
+
+      //Define path generator
+      var path = d3.geo.path()
+               .projection(projection);
+
+      //Define quantize scale to sort data values into buckets of color
+      var color = d3.scale.quantile().domain([10,45])
+                .range
+                (['rgb(254,237,222)','rgb(253,208,162)','rgb(253,174,107)','rgb(253,141,60)',
+                'rgb(230,85,13)','rgb(166,54,3)']);
+
+      //Create SVG element
+      var svg3 = d3.select("#map")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h);
+
+      //Load in agriculture data
+      d3.csv("rates.csv", function(data) {
+
+        //Set input domain for color scale
+
+
+        //Load in GeoJSON data
+        d3.json("us-states.json", function(json) {
+
+          //Merge the ag. data and GeoJSON
+          //Loop through once for each ag. data value
+          for (var i = 0; i < data.length; i++) {
+
+            //Grab state name
+            var dataState = data[i].state;
+
+            //Grab data value, and convert from string to float
+            var dataValue = parseFloat(data[i].value);
+
+            //Find the corresponding state inside the GeoJSON
+            for (var j = 0; j < json.features.length; j++) {
+
+              var jsonState = json.features[j].properties.name;
+
+              if (dataState == jsonState) {
+
+                //Copy the data value into the JSON
+                json.features[j].properties.value = dataValue;
+
+                //Stop looking through the JSON
+                break;
+
+              }
+            }
+          }
+
+          //Bind data and create one path per GeoJSON feature
+          svg3.selectAll("path")
+             .data(json.features)
+             .enter()
+             .append("path")
+             .attr("d", path)
+             .style("stroke", "#fff")
+             .style("fill", function(d) {
+                //Get data value
+                var value = d.properties.value;
+
+                if (value) {
+                  //If value exists…
+                  return color(value);
+                } else {
+                  //If value is undefined…
+                  return "#ccc";
+                }
+             });
+
+        });
+
+      });
+    </script>
+  </body>
+</html>

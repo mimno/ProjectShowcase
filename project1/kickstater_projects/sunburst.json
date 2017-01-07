@@ -1,0 +1,110 @@
+{
+    "name": "Kickstarter", 
+    "children": [ 
+        {
+        "name": "Games",
+        "children": [ 
+            {"name": "Successful", "size": 5144.0, "ratio": 33.9},
+            {"name": "Unsuccessful", "size": 10013.0, "ratio": 66.1}
+        ]
+    },
+         {
+        "name": "Film & Video",
+        "children": [ 
+            {"name": "Successful", "size": 17123.0, "ratio": 39.0},
+            {"name": "Unsuccessful", "size": 26816.0, "ratio": 61.0}
+        ]
+    },
+         {
+        "name": "Technology",
+        "children": [ 
+            {"name": "Successful", "size": 2650.0, "ratio": 23.3},
+            {"name": "Unsuccessful", "size": 8734.0, "ratio": 76.7}
+        ]
+    },
+         {
+        "name": "Design",
+        "children": [ 
+            {"name": "Successful", "size": 4409.0, "ratio": 35.0},
+            {"name": "Unsuccessful", "size": 8181.0, "ratio": 65.0}
+        ]
+    },
+         {
+        "name": "Music",
+        "children": [ 
+            {"name": "Successful", "size": 19428.0, "ratio": 53.4},
+            {"name": "Unsuccessful", "size": 16960.0, "ratio": 46.6}
+        ]
+    },
+         {
+        "name": "Publishing",
+        "children": [ 
+            {"name": "Successful", "size": 7033.0, "ratio": 30.6},
+            {"name": "Unsuccessful", "size": 15936.0, "ratio": 69.4}
+        ]
+    },
+         {
+        "name": "Food",
+        "children": [ 
+            {"name": "Successful", "size": 3698.0, "ratio": 29.2},
+            {"name": "Unsuccessful", "size": 8985.0, "ratio": 70.8}
+        ]
+    },
+         {
+        "name": "Fashion",
+        "children": [ 
+            {"name": "Successful", "size": 2610.0, "ratio": 25.8},
+            {"name": "Unsuccessful", "size": 7504.0, "ratio": 74.2}
+        ]
+    },
+         {
+        "name": "Journalism",
+        "children": [ 
+            {"name": "Successful", "size": 557.0, "ratio": 26.5},
+            {"name": "Unsuccessful", "size": 1546.0, "ratio": 73.5}
+        ]
+    },
+         {
+        "name": "Art",
+        "children": [ 
+            {"name": "Successful", "size": 7159.0, "ratio": 43.9},
+            {"name": "Unsuccessful", "size": 9148.0, "ratio": 56.1}
+        ]
+    },
+         {
+        "name": "Comics",
+        "children": [ 
+            {"name": "Successful", "size": 2632.0, "ratio": 49.8},
+            {"name": "Unsuccessful", "size": 2658.0, "ratio": 50.2}
+        ]
+    },
+         {
+        "name": "Crafts",
+        "children": [ 
+            {"name": "Successful", "size": 913.0, "ratio": 26.8},
+            {"name": "Unsuccessful", "size": 2493.0, "ratio": 73.2}
+        ]
+    },
+         {
+        "name": "Theater",
+        "children": [ 
+            {"name": "Successful", "size": 4661.0, "ratio": 62.0},
+            {"name": "Unsuccessful", "size": 2853.0, "ratio": 38.0}
+        ]
+    },
+         {
+        "name": "Photography",
+        "children": [ 
+            {"name": "Successful", "size": 2062.0, "ratio": 30.8},
+            {"name": "Unsuccessful", "size": 4641.0, "ratio": 69.2}
+        ]
+    },
+         {
+        "name": "Dance",
+        "children": [ 
+            {"name": "Successful", "size": 1643.0, "ratio": 66.6},
+            {"name": "Unsuccessful", "size": 823.0, "ratio": 33.4}
+        ]
+    }
+] 
+} 

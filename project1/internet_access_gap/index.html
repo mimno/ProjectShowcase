@@ -1,0 +1,884 @@
+<html>
+	<head>
+        <!-- LOAD ADOBE TYPE KIT -->
+        <script src="//use.typekit.net/pbn8riq.js"></script>
+        <script>try{Typekit.load();}catch(e){}</script>
+        
+        <!-- LOAD D3 LIBRARY -->
+        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <script src="http://d3js.org/topojson.v1.min.js"></script>
+                
+		<title>The Internet Access Gap</title>
+		
+	<style>
+			body { font-family: "jaf-bernino-sans-condensed",sans-serif; font-style: normal; font-weight: 300; margin: 40px 50px 50px 50px; } 
+			h1 { font-family: "jaf-bernino-sans-condensed",sans-serif; font-style: normal; font-weight: 300; font-size: 1.8em; 
+				margin: 0; padding: 0; position: relative; color: /*red: #99000d*/ /* blue: #084594*/ black;}
+			h2 { font-weight: 400; font-style: normal; margin: 0 0 20px 0; padding: 0; position: relative; font-size: 1.2em; color: #999; }
+			h3 { padding: 50px 0 0 65px; margin: 0; color: #084594; text-transform: capitalize; clear: both;}
+			h4 { padding: 0 0 15px 0; margin: 0; font-weight: 600; font-size: 1.1em; color: #084594;}
+			.titleVariant { font-weight: 600; color: #555; }
+			.textSemi { font-weight: 600; }
+			.textBold { font-weight: 700; }
+			.textExtra { font-weight: 800; }
+			div#map1, div#map2, div#map3, div#map4 { margin: 0 0 15px 0;/*border: 1px solid;*/}
+			div.mapContainer {margin: 0 15px; width: 242px; display: inline-block; }
+			.meanStyle { font-weight: 600; color: #084594; font-size: 2.5em; line-height: .7em; }
+			.circle { float: left; width: 14px; height: 14px; -moz-border-radius: 7px; -webkit-border-radius: 7px;border-radius: 7px; margin-right: 7px; margin-top: 3px; }
+			.circle#color11 { background: #bdd7e7; }
+			.circle#color10 { background: #3182bd; }
+			.circle#color01 { background: #6baed6; }
+			.circle#color00 { background: #08519c; }
+			.circleText { float: left; padding-right: 8px; font-size: .9em; font-weight: 400; }
+			svg { border: /*1px solid*/ none; }
+			.mapLegendGradient {
+				height: 8px; width: 980px; display: inline-block;  margin-top: 6px;
+				background: #f7fbff; /* Old browsers */
+background: -moz-linear-gradient(left,  #f7fbff 0%, #084594 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, right top, color-stop(0%,#f7fbff), color-stop(100%,#084594)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(left,  #f7fbff 0%,#084594 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(left,  #f7fbff 0%,#084594 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(left,  #f7fbff 0%,#084594 100%); /* IE10+ */
+background: linear-gradient(to right,  #f7fbff 0%,#084594 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f7fbff', endColorstr='#084594',GradientType=1 ); /* IE6-9 */
+			}
+			.axis path { fill: none; stroke: #777; }
+			.axis line { stroke: #777; }
+		</style>
+		<!-- SVG BORDER FOR DEBUGGING PURPOSES. DELETE AFTERWARDS. -->
+	</head>
+	
+	
+	<body>
+        
+        <!-- ==================
+        		TITLE & TEXT
+             ==================	--> 
+        <h1>2013&nbsp;&nbsp;&nbsp;<span class="textExtra">THE INTERNET ACCESS GAP</span></h1>
+        <h2 style="padding-left: 65px;">Internet access in the United States by <span class="titleVariant">DISABILITY</span> and <span class="titleVariant">POVERTY</span></h2>
+        
+        <p style="padding: 10px 0 0 65px; width: 550px;">
+When it comes to internet access, working-age individuals <span style="font-weight: 600;">with a disability</span> and <span style="font-weight: 600;">living in poverty</span> are doubly disadvantaged. Only <span style="font-weight: 600;">56%</span> of this group has access to the internet at home compared to <span style="font-weight: 600;">89%</span> individuals without a disability who live above the poverty line. This is a gap of <span style="font-weight: 600; color: #99000d;">33%</span>. See how these numbers vary by state below.
+        </p>
+        
+        
+        <!-- ==================
+        			MAPS 
+             ==================	-->        
+        <div style="margin: 40px 0 0 50px; white-space: nowrap;">
+            <div class="mapContainer">
+            	<h4>Disability & Poverty</h4>
+                <div id="map1"></div>              
+            </div>
+            <div class="mapContainer">
+                <h4>Poverty & No Disability</h4>
+            	<div id="map2"></div>
+            </div>
+            <div class="mapContainer">
+                <h4>Disability & No Poverty</h4>
+            	<div id="map3"></div>
+            </div>
+            <div class="mapContainer">
+                <h4>No Disability & No Poverty</h4>
+            	<div id="map4"></div>
+            </div>
+        </div>
+        <!-- MAP LEGEND -->
+        <div style="margin: 0 0 20px 65px; clear: both; white-space: nowrap;">
+        	<div style="display: inline-block; margin-right: 15px; font-weight: 600; font-size: .9em;">40%</div> 
+        	<div class="mapLegendGradient"></div>
+            <div style="display: inline-block; margin-left: 15px; font-weight: 600; font-size: .9em;">95%</div>
+        </div>
+        <!-- MAP STATISTICS -->
+        <div style="margin: 0 0 0 50px; white-space: nowrap;">
+            <div class="mapContainer"><span class="meanStyle">56%</span> of people with disabilities in<br>poverty have internet access in the<br>United States.</div>
+            <div class="mapContainer"><span class="meanStyle">69%</span> of people in poverty without<br>disabilities have internet access in the<br>United States.</div>
+            <div class="mapContainer"><span class="meanStyle">80%</span> of people with disabilities<br>not in poverty have internet access in the<br>United States.</div>
+            <div class="mapContainer"><span class="meanStyle">89%</span> of people without disabilities<br>and not in poverty have internet access in<br>the United States.</div>
+        </div>
+
+        
+        <!-- ==================
+        			CHART 
+             ==================	-->  
+        <div style="margin: 0 0 0 65px; clear: both;">
+        	<h4 style="padding: 55px 0 10px 0; margin: 0;">Internet Access and Gap by Region and State</h4>
+            <div class="circle" id="color11"></div> 
+            <div class="circleText">= disability & poverty</div>
+            <div class="circle" id="color01"></div> 
+            <div class="circleText">= poverty & no disability</div>
+            <div class="circle" id="color10"></div> 
+            <div class="circleText">= disability & no poverty</div>
+            <div class="circle" id="color00"></div> 
+            <div class="circleText">= no disability & no poverty</div>
+         	<div id="canvas"></div>
+        <!-- DATA ATTRIBUTION -->
+        <div style="font-size: .9em; margin: 50px 0 0 250px;">Estimates based on analysis of the U.S. Census Bureau's 2013 American Community Survey (ACS) Public Use Micro Data Sample (PUMS)</div>
+        </div>
+        
+        
+        
+
+		<script>
+		
+// =====================
+//		  MAPS
+// =====================
+
+var width = 242,
+    height = 160;
+	
+// albersUsa projection
+var projection = d3.geo.albersUsa();
+
+var path = d3.geo.path().projection(projection);
+	
+var svg11 = d3.select("#map1")
+	.append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var svg01 = d3.select("#map2")
+	.append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var svg10 = d3.select("#map3")
+	.append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var svg00 = d3.select("#map4")
+	.append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+
+var states;
+var acsInternet;
+
+// range
+var populationScale = d3.scale.linear().domain([.4, .94]).range(["#f7fbff", "#084594"]);
+
+
+d3.json("us.json", function(error, shapes) {
+		
+	states = topojson.feature(shapes, shapes.objects.states).features;
+	
+	d3.csv("ACS2013_Internet.csv", function (error, rows) {
+		// what should we do with the CSV data?
+		acsInternet = d3.map(rows, 
+			// returns an object with on the rows in the massive county array
+			function (row) { return Number(row.FIPS); }	
+		);
+		
+		// MAP 1: STATE DATA for 11 (disability, poverty)
+		var statePaths11 = svg11.append("g");
+		
+		statePaths11.selectAll("path").data(states).enter()
+		.append("path").attr("d", path)
+		.attr("transform", "scale(.31) translate(-90, 0)")
+		.style("fill", function (state) {
+			
+			var stateData = acsInternet.get(state.id);
+			
+			if (stateData) {
+				return populationScale(stateData.Percent11);
+			}
+				else { return "red"; }
+			
+			return populationScale(acsInternet.get(state.id).Percent11)
+			
+		})
+		.style("stroke", "#fff");
+	
+		
+		// MAP 2: STATE DATA for 01 (no disability, poverty)
+		var statePaths01 = svg01.append("g");
+		
+		statePaths01.selectAll("path").data(states).enter()
+		.append("path").attr("d", path)
+		.attr("transform", "scale(.31) translate(-90, 0)")
+		.style("fill", function (state) {
+			
+			var stateData = acsInternet.get(state.id);
+			
+			if (stateData) {
+				return populationScale(stateData.Percent01);
+			}
+				else { return "red"; }
+			
+			return populationScale(acsInternet.get(state.id).Percent01)
+			
+		})
+		.style("stroke", "#fff");
+		
+		
+		// MAP 3: STATE DATA for 10 (disability, no poverty)
+		var statePaths10 = svg10.append("g");
+		
+		statePaths10.selectAll("path").data(states).enter()
+		.append("path").attr("d", path)
+		.attr("transform", "scale(.31) translate(-90, 0)")
+		.style("fill", function (state) {
+			
+			var stateData = acsInternet.get(state.id);
+			
+			if (stateData) {
+				return populationScale(stateData.Percent10);
+			}
+				else { return "red"; }
+			
+			return populationScale(acsInternet.get(state.id).Percent10)
+			
+		})
+		.style("stroke", "#fff");
+		
+		
+		// MAP 4: STATE DATA for 00 (no disability, no poverty)
+		var statePaths00 = svg00.append("g");
+		
+		statePaths00.selectAll("path").data(states).enter()
+		.append("path").attr("d", path)
+		.attr("transform", "scale(.31) translate(-90, 0)")
+		.style("fill", function (state) {
+			
+			var stateData = acsInternet.get(state.id);
+			
+			if (stateData) {
+				return populationScale(stateData.Percent00);
+			}
+				else { return "red"; }
+			
+			return populationScale(acsInternet.get(state.id).Percent00)
+			
+		})
+		.style("stroke", "#fff");
+		
+	}); //END d3.csv
+	
+}); // END d3.json
+
+
+
+
+// =====================
+//		  CHART
+// =====================
+
+
+// populate regions / divisions arrays, sorted by gap with US on top
+		
+			var NUM_REGIONS = 5; //including total US as region
+			var NUM_DIVISIONS = 10;
+			
+			/** initialize area array by populating it with n empty area objects **/
+			var initializeAreas = function (areasArray, n) {
+				for (var i = 0; i < n; i++) {
+				areasArray[i] = {
+				name : '',
+				members : [], //array of states in this area, sorted by gap.
+				gap : 0, //average gap for all members
+				percent11 : 0} 
+				};
+			}
+			
+			/** an instantiated state object with empty values **/
+			var emptyStateInDivision = function (regN, divN) {
+				return {
+					stateAB: '', stateFull: '',
+					regionNum: regN, divisionNum: divN,
+					Percent11: 0, Percent00: 0, Percent01: 0, Percent10: 0,
+					gapPercent: 0
+				}
+			};
+	 
+			/** Returns true if x is an empty placeholder state 
+			(e.g. x has a state abbreviation or a state name) **/
+			var isEmptyState = function (x) {
+				return x.stateAB === '' || x.stateFull === '';
+			};
+
+			var regions = []; var divisions = [];
+			initializeAreas(regions, NUM_REGIONS);
+			initializeAreas(divisions, NUM_DIVISIONS);
+			
+     	   var divisionsFlat= [];
+		
+		
+		
+			
+			d3.csv("ACS2013_Internet.csv", function (error, states) {
+/** Register states as members of their respective regions and divisions **/
+				states.forEach ( function (state) {
+					/** adds a state s to an area object (e.g. a region or a division array)**/
+					var addMember = function (s, area) {
+						area.members.push(s);
+					}
+					addMember(state, regions[state.regionNum] );
+					addMember(state, divisions[state.divisionNum]);
+				})
+			
+				/** Given an array of areas, sort the areas by gap, with the US on top **/
+				var sortAreasByPercent11 = function (array) {
+					array.sort(
+						function (a, b) { 
+							if (a.name == 'United States') { return -1; };
+							if (b.name == 'United States') { return 1; };
+							return a.percent11 - b.percent11;
+						});
+				};
+				/** Given an array of states, sort the states by gap **/
+				var sortMemsByPercent11 = function (array) {
+					array.sort(
+						function (a, b) { return a.Percent11 - b.Percent11;} );
+				}
+			
+				var fillInGapInfo = function (area) {
+					/**area's gap is average of member gaps
+					i.e. sum of all member's gaps over number of members.**/
+					var gapSum = 0;
+					var percent11Sum = 0;
+					area.members.forEach ( function (member) { 
+						gapSum = gapSum + parseFloat(member.gapPercent); 
+						percent11Sum = percent11Sum + parseFloat(member.Percent11);
+					});
+					area.gap = gapSum / area.members.length;
+					area.percent11 = percent11Sum / area.members.length;
+					sortMemsByPercent11(area.members);
+				}
+				regions.forEach (function (reg) {
+					reg.name = reg.members[0].region;
+					fillInGapInfo(reg);
+				});
+				divisions.forEach (function (div) {
+					div.name = div.members[0].division;
+					fillInGapInfo(div);
+				});
+			
+				sortAreasByPercent11(regions);
+				sortAreasByPercent11(divisions);
+
+
+				//flatten array. Ends up in reverse order.
+            	divisions.forEach (function (division, index) {                    
+ 
+ 
+               	division.members.forEach(function (member) {
+                divisionsFlat.push(member);
+				
+				})
+               divisionsFlat.push(emptyStateInDivision(index));
+ 
+				})
+				divisionsFlat.reverse();
+ 
+	
+
+			
+//constants
+			
+			var SVG_HEIGHT = 1700;
+			var SVG_WIDTH = 1100;
+			var SVG_CENTER_X = SVG_WIDTH / 2;
+			var SVG_CENTER_Y = SVG_HEIGHT / 2;
+			var TOP_PADDING = 75; //padding between edge of SVG and graph
+			var LEFT_PADDING = 250;
+			var RIGHT_PADDING = 100;
+			var BOTTOM_PADDING = 100;
+			
+			var TITLE_Y_POS = 60;
+			var SUBTITLE_Y_POS = 90;
+			
+			var LEGEND_BOX_HEIGHT = 100;
+			var LEGEND_BOX_WIDTH = 200;
+			var LEGEND_BOX_PADDING = 30; //padding between edge of SVG and legend box
+			var LEGEND_INNER_PADDING = 5 //padding between legend text and box
+			
+			var legendBoxLeft = SVG_WIDTH - LEGEND_BOX_PADDING - LEGEND_BOX_WIDTH; //x position of box's left side
+			var legendBoxTop = LEGEND_BOX_PADDING; //y position of box's top side
+			var legendBoxRight = SVG_WIDTH - LEGEND_BOX_PADDING; //x position of box's right side
+			var legendBoxBottom = legendBoxTop + LEGEND_BOX_HEIGHT;
+			
+			
+			/** Axis constants. **/
+			var originXPos = LEFT_PADDING;
+			var originYPos = SVG_HEIGHT - BOTTOM_PADDING;
+			var origin = [originXPos, originYPos];
+			var xAxisEndptXPos = SVG_WIDTH - RIGHT_PADDING;
+			var xAxisEndptYPos = originYPos;
+			var xAxisEndpt = [xAxisEndptXPos, xAxisEndptYPos];
+			var yAxisEndptXPos =  originXPos;
+			var yAxisEndptYPos = TOP_PADDING;
+			var yAxisEndpt = [yAxisEndptXPos, yAxisEndptYPos];
+			var gapLineEndpt = [xAxisEndptXPos, yAxisEndptYPos];
+
+			// graph constants
+			var graphWidth = SVG_WIDTH-LEFT_PADDING-RIGHT_PADDING;
+
+			var X_VALUE_MIN = 40; //minimum % shown on graph
+			var X_VALUE_MAX = 100; //maximum % shown on graph
+			var X_VALUE_LABEL_MIN = 50; //minimum % labelled
+			var X_VALUE_LABEL_MAX = 90; //max % labelled
+			var X_VALUE_LABEL_INTERVAL = 10; //every nth interval should be labeled
+			var X_AXIS_LABEL_PADDING = 15;		
+
+
+//Scaling functions
+            /** Given an index, return the Y position that index corresponds to on the graph. **/
+            var yScaleToGraphForIndex = function (i) {
+                return originYPos-(i)*NODE_HEIGHT
+            };
+
+            /** Given a percentage corresponding to % internet access, return apprpriate X position
+            corresponding to where this % is on the graph. 
+            Note number is in percentage, not decimal. **/
+            var xScaleToGraphForPercent = d3.scale.linear()
+						 .domain([X_VALUE_MIN, X_VALUE_MAX])
+						 .range([originXPos, xAxisEndptXPos]);		
+ 
+ 			/** Given a percentage, return the width that this percentage correponds to
+ 			in the graph **/
+ 			var widthScaleForGap = d3.scale.linear()
+ 						.domain([0, 100])
+ 						.range([0, graphWidth*(X_VALUE_MAX - X_VALUE_MIN)/100]);
+
+
+
+
+
+			
+			/** SVG Element
+			NOTE: potentially set svg element to resize with window **/
+			var svg = d3.select("#canvas").append("svg")
+			 .attr("height", SVG_HEIGHT)
+			 .attr("width", SVG_WIDTH);
+					
+			
+			/** Draw text that is centered.
+			@param coords. Coordinates for center of text in the form [x,y]
+       	 	@param txt. Text to be divisionsFlated
+			@param id. Id for this text. Useful for selecting this text later and modifying it. **/
+			var writeTextCentered = function (coords, txt, id) {
+				svg.append("text")
+				.attr("x", coords[0])
+				.attr("y", coords[1])
+				.style("text-anchor", "middle")
+				.style("alignment-baseline", "middle")
+				.text(txt)
+				.attr("id", id);
+			};
+			
+//axes
+
+			/** Given coordinates, stroke width and color, draws a line from point (x1,y1) to point (x2, y2)
+			@param coords. a 2 x 2 array of form [[x1,y1],[x2,y2]]
+			@param sw. stroke-width of line.
+			@param color. stroke color. **/
+			var drawLine = function (coords, sw, color) {
+				svg.append("line")
+					.attr("x1", coords[0][0]).attr("y1", coords[0][1])
+					.attr("x2", coords[1][0]).attr("y2", coords[1][1])
+					.attr("stroke-width", sw)
+					.attr("stroke", color);
+			}
+			/** Given coordinates, draws a black axis line. **/
+			var drawAxis = function (coords) {
+				drawLine (coords, 1, "black");
+			}
+			/** Given coordinates, draws a light gray line. **/ 
+			var drawLightLine = function (coords) {
+				drawLine (coords, 1, "#d3d3d3");
+			}
+			
+			/** Given x and y coordinates of upper left corner, and width and height of rect. **/
+			var drawRect = function (coord, w, h, id) {
+				svg.append('rect')
+					.attr('x', coord[0]).attr('y', coord[1])
+					.attr('width', w).attr('height', h)
+					.attr('id', id);
+			}
+			
+			/** Title & subtitle. 
+			var title = writeTextCentered ( [SVG_CENTER_X, TITLE_Y_POS],
+				'Internet access in the United States by poverty and disability',
+				'title');
+			
+			var subtitle = writeTextCentered ( [SVG_CENTER_X, SUBTITLE_Y_POS],
+				'Source: 2013 American Community Survey',
+				'subtitle' );
+			d3.selectAll("#subtitle").style("font-size", "10px");
+			**/
+			
+			/** X axis name **/
+			var X_AXIS_NAME_OFFSET = 40; //offset from bottom of SVG element
+			var xAxisNamePos = SVG_HEIGHT - X_AXIS_NAME_OFFSET;
+			var xAxisName = writeTextCentered ( [SVG_CENTER_X, xAxisNamePos],
+				'% of population with internet access',
+				'x-axis-name');
+				
+				
+//legend
+			
+			/** Legend box 
+			var legendBox = drawRect ([legendBoxLeft, legendBoxTop], 
+				LEGEND_BOX_WIDTH, LEGEND_BOX_HEIGHT, 'legend');
+			d3.select('#legend')
+				.style('fill', 'none')**/
+				//.style('stroke', 'black')
+				//.style('stroke-width', 1);
+			
+			
+			 //var SAMPLE_SQ_SIZE = 10; size of the colored squares in the legend
+			 //var TEXT_SQ_PADDING = 5; padding between text and colored squares of legend
+			
+			/** creates a legend. Requires an array containing the lines to be placed in the legend.
+			@param data. Array in the form [["id1", "text1"], ["id2", "text2"]]
+			If the id is 00, 01, 10, or 11, a colored square will be produced accordingly. 
+			var createLegend = function (data) {
+				var numLines = data.length;
+			
+				var minY = legendBoxTop + LEGEND_INNER_PADDING;
+				var maxY = legendBoxBottom - LEGEND_INNER_PADDING;
+				var minX = legendBoxLeft + LEGEND_INNER_PADDING;
+				var textX = minX + SAMPLE_SQ_SIZE + TEXT_SQ_PADDING;**/
+			
+				/** Y scale to place objects in the legend box.
+				Takes in a number corresponding to the line number of the item, starting with 0. 
+				var legendBoxYScale = d3.scale.linear()
+					.domain([0,numLines]).range([minY, maxY]);**/
+				
+				/** create a colored square and text for each line 
+				for (line = 0; line < numLines; line++) {
+					var id = data[line][0];
+					var txt = data[line][1];
+			
+					var centerYPos = (legendBoxYScale(line) + legendBoxYScale(line+1)) / 2;
+					var rectYPos = centerYPos - SAMPLE_SQ_SIZE / 2;
+			
+					drawRect([minX, rectYPos], SAMPLE_SQ_SIZE, SAMPLE_SQ_SIZE, 'rect' + id);		
+					writeTextCentered( [textX, centerYPos], txt, 'legend-text');
+				}
+			
+				d3.selectAll('#legend-text')
+					.style("font-size", '12px')
+					.style("text-anchor", "start"); 
+			
+			}**/
+			
+			/** Information to put in the legend. Add more as necessary.
+			var legendData = [
+				["00", "without disability and not in poverty"],
+				["10", "with disability and not in poverty"],
+				["01", "without disability and in poverty"],
+				["11", "with disability and in poverty"]];
+			createLegend(legendData); **/
+
+// draw dashed vertical lines at each x-axis percentage
+ 			var VERTICAL_LINE_INTERVAL = 10;
+ 			var VERTICAL_LINE_COLOR = "#ccc";
+
+
+			for (var n = X_VALUE_MIN; n < X_VALUE_MAX; n+= VERTICAL_LINE_INTERVAL) {
+				var x = xScaleToGraphForPercent(n);
+
+				svg.append('line')
+					.attr('x1', x).attr('x2', x)
+					.attr('y1', originYPos).attr('y2', yAxisEndptYPos)
+					.attr('stroke-width', 1).attr('stroke', VERTICAL_LINE_COLOR)
+					//"3,3" means 3 pixels on, 3 pixels off for dashed line
+					.style("stroke-dasharray", ("3, 9"))
+			}; 
+				
+//axes
+			
+			/**Draw axes**/
+			var xAxis = drawAxis ([origin, xAxisEndpt]);
+			var yAxis = drawAxis ([origin, yAxisEndpt]);
+			var gapLine = drawAxis ([xAxisEndpt, gapLineEndpt]);
+						
+			
+			/** Draw x-axis labels (e.g. 40%, 60%, etc.) given a center y position cy for the labels. **/
+			var drawXAxisLabels = function (cy) {
+			for (var n = X_VALUE_LABEL_MIN; n <= X_VALUE_LABEL_MAX; n+= X_VALUE_LABEL_INTERVAL) {
+				writeTextCentered ( [ xScaleToGraphForPercent(n), cy ],
+					n + '%', 'x-axis-label');
+			};          
+			}
+	 
+			/**Draw x-axis labels at bottom of graph.**/
+			drawXAxisLabels( originYPos + X_AXIS_LABEL_PADDING );
+			
+			
+			/** Color in rectangles **/
+			
+			// blue
+			var COLOR00 = '#08519c';
+			var COLOR10 = '#3182bd';
+			var COLOR01 = '#6baed6';
+			var COLOR11 = '#bdd7e7';
+			var COLORGAP = '#fcbba1';
+			var COLORGAPTEXT = '#cb181d';
+			
+			/*red
+			var COLOR00 = '#99000d';
+			var COLOR10 = '#cb181d';
+			var COLOR01 = '#ef3b2c';
+			var COLOR11 = '#fc9272';
+			var COLORGAP = '#fcbba1';*/
+			
+			d3.select('#rect00').style("fill", COLOR00);
+			d3.select('#rect01').style("fill", COLOR01);
+			d3.select('#rect10').style("fill", COLOR10);
+			d3.select('#rect11').style("fill", COLOR11);
+
+		
+// draw gaps
+            var GAP_RECT_HEIGHT = 14;
+            var NODE_HEIGHT = 25; //a node corresponds a line of data
+            var CIRCLE_RADIUS = 7;
+ 
+ 
+            var rectangle = svg.selectAll("rect.gap")
+                .data(divisionsFlat).enter()
+                .append("rect")
+                        .attr("x", function(d) {
+                            return xScaleToGraphForPercent(d.Percent11*100);
+                        })
+                        .attr("y", function(d,i) {
+                            return yScaleToGraphForIndex(i)-(GAP_RECT_HEIGHT / 2);
+                        })
+                        .attr("width", function(d) {
+                            return xScaleToGraphForPercent(d.Percent00*100) 
+                            - xScaleToGraphForPercent(d.Percent11*100);
+                        })
+                        .attr("height", GAP_RECT_HEIGHT)
+                        .attr("opacity", 0.3)
+                        .attr("fill", COLORGAP);
+// draw circles
+            var circles00 = svg.selectAll("circle.set00").data(divisionsFlat)
+                .enter().append("circle");
+            var circles01 = svg.selectAll("circle.set01").data(divisionsFlat)
+                .enter().append("circle");
+            var circles10 = svg.selectAll("circle.set10").data(divisionsFlat)
+                .enter().append("circle");
+            var circles11 = svg.selectAll("circle.set11").data(divisionsFlat)
+                .enter().append("circle");
+ 
+ 
+//style circles
+        function styleCircles(divisionsFlat, circles00, circles01, circles10, circles11) {
+            /** Returns CIRCLE_RADIUS if x is a real state,
+            returns 0 if x is an empty placeholder state **/
+            var circleRadiusOf = function (x) {
+                if ( isEmptyState(x) ) { return 0; }
+                return CIRCLE_RADIUS;
+            };
+ 
+            circles00
+                .attr("cx", function(d) {
+                    return xScaleToGraphForPercent(d.Percent00*100);
+                })
+                .attr("cy", function(d,i) {
+                    return yScaleToGraphForIndex(i)
+                })
+                .attr("r", function(d) { return circleRadiusOf(d) })
+                .attr("fill", COLOR00);
+            circles01.attr("cx", function(d) {
+                    return xScaleToGraphForPercent(d.Percent01*100);
+                })
+                .attr("cy", function(d,i) {
+                    return yScaleToGraphForIndex(i)
+                })
+                .attr("r", function(d) { return circleRadiusOf(d) })
+                .attr("fill", COLOR01);
+            circles10.attr("cx", function(d) {
+                    return xScaleToGraphForPercent(d.Percent10*100);
+                })
+                .attr("cy", function(d,i) {
+                    return yScaleToGraphForIndex(i)
+                })
+                .attr("r", function(d) { return circleRadiusOf(d) })
+                .attr("fill", COLOR10);
+            circles11.attr("cx", function(d) {
+                    return xScaleToGraphForPercent(d.Percent11*100);
+                })
+                .attr("cy", function(d,i) {
+                    return yScaleToGraphForIndex(i)
+                })
+                .attr("r", function(d) { return circleRadiusOf(d) })
+                .attr("fill", COLOR11);
+            };
+        styleCircles(divisionsFlat, circles00, circles01, circles10, circles11);
+ 
+ 
+// draw state labels on y-axis
+        var stateLabels = svg.selectAll("text.state")
+            .data(divisionsFlat).enter()
+            .append("text")
+                    .attr("x", function(d) {
+                        return LEFT_PADDING-25
+                    })
+                    .attr("y", function(d,i) {
+                        return yScaleToGraphForIndex(i)
+                    })
+                    .text(function(d) { return d.stateAB })
+                    .attr("width", function(d) {
+                        return d.gapPercent*graphWidth
+                    })
+                    .style("text-anchor", "middle")
+                    .style("alignment-baseline", "middle");
+ 
+ 
+ //draw division labels on y-axis
+ 		var DIVISION_LABEL_X_POS = 100;
+ 		var DIVISION_BRACKET_X_POS = 160;
+ 		var DIVISION_TICK_WIDTH = 10;
+
+ 		//array of division labels to generate
+ 		//each element is of form [divisionName, YPosOfLabel]
+ 		var divisionLabels = []; 
+ 		//array of bracket lines to generate
+ 		//each element is of form [y1, y2]
+ 		var bracketLines = [];
+ 		//array of bracket tickets to generate
+ 		//each element of form y
+ 		var bracketTicks = [];
+ 		var bracketColor = "gray";
+
+ 		//fill in arrays
+ 		divisions.forEach( function(division, index) {
+ 			var firstMem = division.members[0];
+ 			var lastMem = division.members[division.members.length-1];
+ 			var yPosOfMem = function (member) {
+ 				return yScaleToGraphForIndex(divisionsFlat.indexOf(member))
+ 			}
+ 			var firstYPos = yPosOfMem(firstMem);
+ 			var lastYPos = yPosOfMem(lastMem);
+ 			var avgYPos = (firstYPos + lastYPos) / 2;
+
+ 			divisionLabels.push([division.name, avgYPos]);
+ 			bracketLines.push([firstYPos, lastYPos]);
+ 			bracketTicks.push(firstYPos);
+ 			bracketTicks.push(lastYPos);
+ 		} )
+
+		//generate labels
+		var divisionLabels = svg.selectAll("text.division-label")
+			.data(divisionLabels).enter().append("text")
+			.attr('x', DIVISION_LABEL_X_POS)
+			.attr('y', function(d) { return d[1] })
+			.text( function(d) { return d[0] })
+			.style("text-anchor", "middle")
+			.style("alignment-baseline", "middle");
+
+		var divisionLines = svg.selectAll("line.division-label")
+			.data(bracketLines).enter().append("line")
+			.attr('x1', DIVISION_BRACKET_X_POS).attr('x2', DIVISION_BRACKET_X_POS)
+			.attr('y1', function (d) { return d[0] })
+			.attr('y2', function (d) { return d[1] })
+			.attr('stroke-width', 1)
+			.attr('stroke', bracketColor)
+
+		var divisionTicks = svg.selectAll("line.division-label-tick")
+			.data(bracketTicks).enter().append("line")
+			.attr('x1', DIVISION_BRACKET_X_POS)
+			.attr('x2', DIVISION_BRACKET_X_POS + DIVISION_TICK_WIDTH)
+			.attr('y1', function(d) { return d} )
+			.attr('y2', function(d) { return d} )
+			.attr('stroke-width', 1)
+			.attr('stroke', bracketColor)
+
+ 
+// draw horizontal state lines
+            var horizontalLines = svg.selectAll("line.states")
+                .data(divisionsFlat).enter()
+                .append("line")
+                        .attr("x1", LEFT_PADDING)
+                        .attr("y1", function(d,i) {
+                            return yScaleToGraphForIndex(i)
+                        })
+                        .attr("x2", SVG_WIDTH-RIGHT_PADDING)
+                        .attr("y2", function(d,i) {
+                            return yScaleToGraphForIndex(i)
+                        })
+                        .attr("stroke-width", 0.25)
+                        .attr("stroke", function(d) {
+                            if (isEmptyState(d)) return "white";
+                            else return "black"
+                        });         
+			
+			
+// draw legend gap line
+			var LEGEND_GAP_LINE_HOVER = 30;
+			var LEGEND_GAP_TEXT_HOVER = 40;
+			var legendGapLineYPos = TOP_PADDING - LEGEND_GAP_LINE_HOVER;
+			var legendGapTextYPos = TOP_PADDING - LEGEND_GAP_TEXT_HOVER;
+
+			var legendGapX1 = xScaleToGraphForPercent(56);
+			var legendGapX2 = xScaleToGraphForPercent(89);
+
+			svg.append('line')
+				.attr('x1', legendGapX1).attr('x2', legendGapX2)
+				.attr('y1', legendGapLineYPos).attr('y2', legendGapLineYPos)
+				.attr('stroke-width', 1).attr('stroke', COLORGAPTEXT)
+			svg.append('text')
+				.attr('x', (legendGapX2 + legendGapX1) / 2)
+				.attr('y', legendGapTextYPos)
+				.text('U.S. Internet Access Gap = 33%')
+				.style("text-anchor", "middle")
+                .style("alignment-baseline", "middle")
+				.style("font-weight", "600")
+				.style("font-size","1.2em")
+                .attr("fill", COLORGAPTEXT);
+				
+				
+// draw legend gap label
+	svg.append('text')
+		.attr('x', SVG_WIDTH-RIGHT_PADDING+25)
+		.attr('y', legendGapTextYPos+5)
+		.text('GAP')
+		.style("text-anchor", "middle")
+		.style("alignment-baseline", "middle")
+		.style("font-weight", "600")
+		.attr("fill", COLORGAPTEXT);
+
+
+// draw gap labels down right side
+            var gapLabels = svg.selectAll("text.gap")
+                .data(divisionsFlat).enter()
+                .append("text")
+                        .attr("x", function(d) {
+                            return SVG_WIDTH-RIGHT_PADDING+25
+                        })
+                        .attr("y", function(d,i) {
+                            return yScaleToGraphForIndex(i)
+                        })
+                        .text(function(d) { 
+                            if (!isEmptyState(d)) 
+                                return Math.round(Number(d.gapPercent*100)) + '%'
+                        })
+                        .attr("width", function(d) {
+                            return d.gapPercent*graphWidth
+                        })
+                        .attr("fill", COLORGAPTEXT)
+                        .style("text-anchor", "middle")
+                        .style("alignment-baseline", "middle")
+						.style("font-weight","600");
+ 
+ 
+//Draw x-axis labels at end of every region
+        divisionsFlat.forEach( function (state, i) {
+            if (isEmptyState(state) && (state.regionNum < 9)) {
+                drawXAxisLabels( yScaleToGraphForIndex(i) );
+            }
+        }); 
+			});
+								
+		</script>
+	
+	</body>
+
+
+
+</html>

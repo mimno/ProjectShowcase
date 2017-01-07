@@ -1,0 +1,1207 @@
+<html>
+<head>
+	<!-- LOAD D3 LIBRARY -->
+	<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+
+    <!-- LOAD FONTS -->
+    <link type="text/css" rel="stylesheet" href="https://fast.fonts.net/cssapi/c1ece602-4b8f-4767-a71f-aa828be38869.css"/>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
+   <!-- STYLES -->
+    <style>
+		body { font-family: "LinotypeUniversW01-Ligh_723625"; font-size: 17px; line-height: 22px; margin: 40px 50px 50px 50px; }
+		svg { /*border: 1px solid red; */}
+		text { color: #686868; }
+		.tooltip{ background-color: rgba(255,247,188,0.8); height: 50px; width: 100px; padding: 10px; text-align: left;z-index: 9999; }
+		h1 { font-family: "LinotypeUniversW01-Cn"; color: #000; font-size: 3em; line-height: 1.2em; margin: 0 0 5px 0; }
+		h1.year { font-family: "LinotypeUniversW01-UltL_723583"; color: #aaa; font-size: 2.5em; line-height: 1.2em; margin: 0; }
+		h2 { font-family: "LinotypeUniversW01-Medi_723673";padding: 30px 0 6px 0; margin: 0; color: #2166ac; font-size: 1.3em; line-height: 1.1em; }
+		h3 { margin: 0 0 45px 0; padding: 8px 0 0 0; font-size: 2em; color: #686868; }
+		h4 { margin: 0; padding: 12px 0 2px 0; font-size: 1.1em;  font-family: "LinotypeUniversW01-Cn"; }
+		p { font-size: 1em; margin: 0; padding: 0; line-height: 1.4em; }
+		div.instructions { font-family: "LinotypeUniversW01-Cn"; color: #2166ac; margin: 0 40px 0 0; padding: 0 0 8px 0; }
+		div.sort { float: right; color: #2166ac; margin-right: 5px; font-family:"LinotypeUniversW01-Cn";}
+		span.bold { font-family: "LinotypeUniversW01-Medi_723673"; }
+		span.boldRed { font-family: "LinotypeUniversW01-Medi_723673"; color: #ce1256; }
+		form { margin: 0; padding: 0; }
+		button.typeButton { border:1px solid #2166ac; padding: 10px; font-size: 18px; font-family: "LinotypeUniversW01-Medi_723673"; background-color: white; color: #2166ac; width: 130px; margin: 10px 15px 0 0; }
+		button.typeButton:hover { background-color: #4992c4; color: #fff; }
+		button.typeButtonOver { background-color: #4992c4; color: #fff; }
+		div.circle { width: 60px; height: 60px; background: #2166ac; -moz-border-radius: 50px; -webkit-border-radius: 50px;border-radius: 50px; color: white; text-align: center; font-size: 32px; margin: 23px 20px 0 0; float: left; font-family: "LinotypeUniversW01-Bold_723691"; }
+		div.circleText { padding-top: 17px; }
+		div.blueBox { float:left; margin: 1px 0 3px 0; width: 15px; height: 15px; background-color: #2166ac; }
+		div.pinkBox { float:left; margin: 1px 5px 0 0; width: 15px; height: 15px; background-color: #F7D2E1; }
+	</style>
+
+</head>
+
+
+<body>
+
+<!-- ================
+	   INTRODUCTION
+     ================	-->
+<h1 class="year">2013</h1>
+<h1>Workforce Representation of People with Disabilities</h1>
+<h3>By Industry, Occupation and Sector</h3>
+
+<!-- COLUMN 1-->
+<div style="display: inline-block; width: 540px; margin: 10px 50px 0 0; vertical-align: top;">
+    <p style="font-size: 1.3em; line-height: 1.41em;">
+    Data on the available workforce of people with disabilities is vital to implementing policy initiatives, complying with affirmative action requirements, and evaluating the outcomes of programs designed to increase workforce participation among people with disabilities. This data is especially useful to <span class="boldRed">employers with federal contracts</span>, who may want to benchmark their efforts to attain a workforce which is comprised of <span class="boldRed">7% individuals with disabilities</span> as outlined in the regulations under <span class="boldRed">Section 503 of the Rehabilitation Act</span>.
+    </p>
+</div>
+
+<!-- COLUMN 2-->
+<div style="display: inline-block; width: 400px; vertical-align: top;">
+    <h4>Section 503 of the Rehabilitation Act</h4>
+    <p>
+    This regulation requires employers with federal contracts or subcontracts that exceed $10,000 to take affirmative steps and refrain from discrimination when hiring, retaining, and promoting qualified individuals with disabilities. <a href="http://www.dol.gov/compliance/laws/comp-rehab.htm" target="_blank">About Section 503</a></p>
+    <h4>Prevalence of Disability in the US = 12%</h4>
+    <p>
+    National and local disability prevalence rates of disability among working age people (ages 21 - 64) help employers benchmark their efforts to include people with disabilities in their workforce against the prevalence of the available workforce.
+    </p>
+</div>
+
+<!-- ================
+		 BUTTONS
+     ================	-->
+<div style="margin-top: 45px;">
+    <div class="circle"><div class="circleText">1</div></div>
+    <h2>SELECT A CATEGORY</h2>
+    <div class="instructions">Click a button below to view workforce percentages by category.</div>
+    <form style="margin: 5px 0 0 80px;">
+        <button id = "industry" type="button" class="typeButton">INDUSTRY</button>
+        <button id = "occupation" type="button" class="typeButton">OCCUPATION</button>
+        <button id = "sector" type="button" class="typeButton">SECTOR</button>
+    </form>
+</div>
+
+<!-- WRAPPER DIV -->
+<div style="white-space: nowrap;">
+
+    <!-- ================
+             BAR CHART
+         ================	-->
+    <div style="width: 630px; display:inline-block; vertical-align: top;  margin-top: 50px;">
+
+        <div class="circle"><div class="circleText">2</div></div>
+        <h2>SELECT <span id="categoryName">AN INDUSTRY</span></h2>
+        <div class="instructions">
+             Click blue bars below to view state percentages.
+            <div class="sort">SORT DESCENDING</div>
+            <form id = "checkbox" style="float: right; margin: 1px 0 0 0; padding: 0 5px 0 0; ">
+                <input id = "sort1" type="checkbox" value="High-Low">
+            </form>
+        </div>
+
+        <!-- BAR CHART LABELS -->
+        <div style="padding: 20px 0 0 80px; margin: 0; float: left; margin: 0; height: 55px; font-size: 14px; line-height:1.3em;">
+
+            <div style="float: left; width: 20px; ">
+                <div class="blueBox"></div>
+                <div class="pinkBox"></div>
+            </div>
+
+            <div style="float:left; margin: 0 0 200px 0; width: 220px; white-space: normal;"><span style="color: #2166AC;">Percentage of workforce with disabilities</span><br><span style="color: #ce1256;">Gap between workforce and 7% goal</span></div>
+            <div style="float:left; margin: 0 0 0 80px; width: 70px; white-space: normal; text-align: center; color: #ce1256;font-family: LinotypeUniversW01-Medi_723673;">Goal set by Section 503 of Rehab Act</div>
+            <div style="float:left; margin: 0 0 0 37px; width: 60px; white-space: normal; text-align: center;">Prevalence of disability in the US</div>
+
+        </div>
+
+        <!--- BAR CHART -->
+        <div id="barChart" style="clear: both; padding-top: 15px;"></div>
+
+    </div> <!-- END: BAR CHART -->
+
+    <!-- ================
+                MAP
+         ================-->
+    <div style="width: 550px; display:inline-block;vertical-align: top;  margin-top: 200px;">
+
+        <!--MAP-->
+        <div id="map"></div>
+
+    </div> <!-- END: MAP -->
+
+
+<!-- ================
+		  SOURCE
+     ================	-->
+<!-- DATA ATTRIBUTION -->
+<div style="font-size: .9em; margin: 50px 0 0 250px;">Estimates based on analysis of the U.S. Census Bureau's 2013 American Community Survey (ACS) Public Use Micro Data Sample (PUMS)</div>
+</div>
+
+
+<script>
+
+// ==========================================
+
+//  BAR CHARTS: Industry, Occupation, Sector
+
+// ==========================================
+
+// 	--------------------------
+//	  BAR CHART: INDUSTRY
+// 	--------------------------
+	var sortedIndustry = function(json, div_id) {
+
+	    var height = 720;
+		var width = 580;
+	    var svg = d3.select(div_id).append("svg")
+			.attr("width", width)
+			.attr("height", height);
+		var categoryType = "INDUSTRY";
+
+
+		d3.json(json, function(error, data) {
+
+			// set font size variables
+			var BarLegendFontSize = "18px";
+			var BarLegendFontSize2 = "24px";
+			var BarlabelFontSize = "15px";
+			var BarPercentFontSize = "13px";
+
+
+			// ADDING CATEGORY LABEL
+			svg.append("text")
+			   .text(categoryType)
+			   .attr("x", 205)
+			   .attr("y", 20)
+			   .style("fill", "#000")
+			   .style("font-size", BarLegendFontSize)
+			   .style("font-family", "LinotypeUniversW01-Medi_723673" );
+
+			// ADDING 7% & 12% LABELS
+			svg.append("text")
+			   .text("7%")
+			   .attr("x", 425)
+			   .attr("y", 20)
+			   .style("fill", "#ce1256")
+			   .style("font-size", BarLegendFontSize2)
+			   .style("font-family", "LinotypeUniversW01-Bold_723691" );
+
+			svg.append("text")
+			   .text("12%")
+			   .attr("x", 520)
+			   .attr("y", 20)
+			   .style("fill", "#686868")
+			   .style("font-size", BarLegendFontSize)
+			   .style("font-family", "LinotypeUniversW01-Medi_723673" );
+
+
+			//ADDING BARS & LINES
+			for (var i = 0; i < data.length; i++){
+				//industry labels
+				svg.append("text")
+				    .text(data[i].industry)
+				    .attr("x", 280 )
+				    .attr("y", 45 + 30 * i)
+				    .style("text-anchor","end")
+					.style("color", "#2166ac")
+				    .style("font-size", BarlabelFontSize)
+			   		.style("font-family", "LinotypeUniversW01-Cn" );
+
+				//grey bars
+				svg.append("rect")
+				    .attr("class", (data[i].industry.replace(/,/g, "")).replace(/\s/g, '').concat(" one"))
+				    .attr("fill", "#e6e6e6")
+				    .attr("width", 250)
+				    .attr("height", 22 )
+				    .attr("x", 290 )
+				    .attr("y", 30 + 30 * i);
+
+				//pink bars (gap)
+				svg.append("rect")
+				 	.attr("class", (data[i].industry.replace(/,/g, "")).replace(/\s/g, '').concat(" two"))
+				    .attr("fill", "#F7D2E1")
+				    .attr("width", 7 * 20.833)
+				    .attr("height", 22 )
+				    .attr("x", 290)
+				    .attr("y", 30 + 30 * i);
+
+				//adding white lines
+				for (var j = 0; j < (Math.floor(250/20.833) - data[i].percent); j++){
+					svg.append("line")
+					   .attr("x1", 290 + data[i].percent * 20.833 + 20.833 * j)
+					   .attr("y1", 30 + 30 * i)
+					   .attr("x2", 290 + data[i].percent * 20.833 + 20.833 * j)
+					   .attr("y2", 57 + 30 * i)
+					   .style("stroke", "white");
+				}
+				//blue bars
+				svg.append("rect")
+				    .attr("class", (data[i].industry.replace(/,/g, "")).replace(/\s/g, "").concat(" three"))
+				    .attr("fill", "#2166ac")
+				    .attr("width", data[i].percent * 20.833)
+				    .attr("height", 22 )
+				    .attr("x", 290 )
+				    .attr("y", 30 + 30 * i);
+
+				//bar percent data
+				svg.append("text")
+				    .text(data[i].percent + "%")
+				    .attr("x", 290 + data[i].percent * 20.833 - 23)
+				    .attr("y", 46 + 30 * i)
+				    .style("font-size", BarPercentFontSize)
+				    .style("fill", "white");
+
+				//adding 7% lines
+				svg.append("line")
+				   .attr("x1", 436)
+				   .attr("y1", 30 + 30 * i)
+				   .attr("x2", 436)
+				   .attr("y2", 52 + 30 * i)
+				   .style("stroke", "#ce1256")
+				   .style("stroke-width", 3);
+
+				//adding 12% lines
+				svg.append("line")
+				   .attr("x1", 539)
+				   .attr("y1", 30 + 30 * i)
+				   .attr("x2", 539)
+				   .attr("y2", 52 + 30 * i)
+				   .style("stroke", "#686868")
+				   .style("stroke-width", 3);
+
+			}
+
+			var prev = ".AccommodationandFoodServices"
+
+			var click = function (id) {
+				d3.selectAll(".".concat((id.replace(/,/g, "")).replace(/\s/g, '')))
+				  .on("click", function(){
+				  	d3.selectAll(prev).filter(".three").style("fill", "#2166ac");
+				  	d3.selectAll(".".concat((id.replace(/,/g, "")).replace(/\s/g, ''))).filter(".three").style("fill", "#e7298a");
+				  	industryMap(id, "#map");
+				  	prev = ".".concat((id.replace(/,/g, "")).replace(/\s/g, ''))
+				});
+			};
+
+			for (var i = 0; i < data.length; i++){
+				click(data[i].industry);
+			};
+		});
+	}
+// END: BAR CHART: INDUSTRY
+
+
+// 	--------------------------
+//	  BAR CHART: OCCUPATION
+// 	--------------------------
+	var sortedOccupation = function(json, div_id) {
+
+	    var height = 720;
+		var width = 580;
+	    var svg = d3.select(div_id).append("svg")
+			.attr("width", width)
+			.attr("height", height);
+		var categoryType = "OCCUPATION";
+
+
+		d3.json(json, function(error, data) {
+
+			// set font size variables
+			var BarLegendFontSize = "18px";
+			var BarLegendFontSize2 = "24px";
+			var BarlabelFontSize = "15px";
+			var BarPercentFontSize = "13px";
+
+
+			// ADDING CATEGORY LABEL
+			svg.append("text")
+			   .text(categoryType)
+			   .attr("x", 186)
+			   .attr("y", 20)
+			   .style("fill", "#000")
+			   .style("font-size", BarLegendFontSize)
+			   .style("font-family", "LinotypeUniversW01-Medi_723673" );
+
+			// ADDING 7% & 12% LABELS
+			svg.append("text")
+			   .text("7%")
+			   .attr("x", 425)
+			   .attr("y", 20)
+			   .style("fill", "#ce1256")
+			   .style("font-size", BarLegendFontSize2)
+			   .style("font-family", "LinotypeUniversW01-Bold_723691" );
+
+			svg.append("text")
+			   .text("12%")
+			   .attr("x", 520)
+			   .attr("y", 20)
+			   .style("fill", "#686868")
+			   .style("font-size", BarLegendFontSize)
+			   .style("font-family", "LinotypeUniversW01-Medi_723673" );
+
+
+			//ADDING BARS & LINES
+			for (var i = 0; i < data.length; i++){
+				//industry labels
+				svg.append("text")
+				    .text(data[i].occupation)
+				    .attr("x", 280 )
+				    .attr("y", 45 + 30 * i)
+				    .style("text-anchor","end")
+					.style("color", "#2166ac")
+				    .style("font-size", BarlabelFontSize)
+			   		.style("font-family", "LinotypeUniversW01-Cn" );
+
+				//grey bars
+				svg.append("rect")
+				    .attr("class", (data[i].occupation.replace(/,/g, "")).replace(/\s/g, '').concat(" one"))
+				    .attr("fill", "#e6e6e6")
+				    .attr("width", 250)
+				    .attr("height", 22 )
+				    .attr("x", 290 )
+				    .attr("y", 30 + 30 * i);
+
+				//pink bars (gap)
+				svg.append("rect")
+				 	.attr("class", (data[i].occupation.replace(/,/g, "")).replace(/\s/g, '').concat(" two"))
+				    .attr("fill", "#F7D2E1")
+				    .attr("width", 7 * 20.833)
+				    .attr("height", 22 )
+				    .attr("x", 290)
+				    .attr("y", 30 + 30 * i);
+
+				//adding white lines
+				for (var j = 0; j < (Math.floor(250/20.833) - data[i].percent); j++){
+					svg.append("line")
+					   .attr("x1", 290 + data[i].percent * 20.833 + 20.833 * j)
+					   .attr("y1", 30 + 30 * i)
+					   .attr("x2", 290 + data[i].percent * 20.833 + 20.833 * j)
+					   .attr("y2", 57 + 30 * i)
+					   .style("stroke", "white");
+				}
+
+				//blue bars
+				svg.append("rect")
+				    .attr("class", (data[i].occupation.replace(/,/g, "")).replace(/\s/g, "").concat(" three"))
+				    .attr("fill", "#2166ac")
+				    .attr("width", data[i].percent * 20.833)
+				    .attr("height", 22 )
+				    .attr("x", 290 )
+				    .attr("y", 30 + 30 * i);
+
+				//bar percent data
+				svg.append("text")
+				    .text(data[i].percent + "%")
+				    .attr("x", 290 + data[i].percent * 20.833 - 23)
+				    .attr("y", 46 + 30 * i)
+				    .style("font-size", BarPercentFontSize)
+				    .style("fill", "white");
+
+				//adding 7% lines
+				svg.append("line")
+				   .attr("x1", 436)
+				   .attr("y1", 30 + 30 * i)
+				   .attr("x2", 436)
+				   .attr("y2", 52 + 30 * i)
+				   .style("stroke", "#ce1256")
+				   .style("stroke-width", 3);
+
+				//adding 12% lines
+				svg.append("line")
+				   .attr("x1", 539)
+				   .attr("y1", 30 + 30 * i)
+				   .attr("x2", 539)
+				   .attr("y2", 52 + 30 * i)
+				   .style("stroke", "#686868")
+				   .style("stroke-width", 3);
+			}
+
+			var prev = ".AccommodationandFoodServices"
+
+			var click = function (id) {
+				d3.selectAll(".".concat((id.replace(/,/g, "")).replace(/\s/g, '')))
+				  .on("click", function(){
+				  	d3.selectAll(prev).filter(".three").style("fill", "#2166ac");
+				  	d3.selectAll(".".concat((id.replace(/,/g, "")).replace(/\s/g, ''))).filter(".three").style("fill", "#e7298a");
+				  	occupationMap(id, "#map");
+				  	prev = ".".concat((id.replace(/,/g, "")).replace(/\s/g, ''))
+				});
+			};
+
+			for (var i = 0; i < data.length; i++){
+				click(data[i].occupation);
+			};
+		});
+	}
+// END: BAR CHART: OCCUPATION
+
+
+
+// 	--------------------------
+//	  BAR CHART: SECTOR
+// 	--------------------------
+	var sortedSector = function(json, div_id) {
+
+	    var height = 720;
+		var width = 580;
+	    var svg = d3.select(div_id).append("svg")
+			.attr("width", width)
+			.attr("height", height);
+		var categoryType = "SECTOR";
+
+
+		d3.json(json, function(error, data) {
+
+			// set font size variables
+			var BarLegendFontSize = "18px";
+			var BarLegendFontSize2 = "24px";
+			var BarlabelFontSize = "15px";
+			var BarPercentFontSize = "13px";
+
+
+			// ADDING CATEGORY LABEL
+			svg.append("text")
+			   .text(categoryType)
+			   .attr("x", 225)
+			   .attr("y", 20)
+			   .style("fill", "#000")
+			   .style("font-size", BarLegendFontSize)
+			   .style("font-family", "LinotypeUniversW01-Medi_723673" );
+
+			// ADDING 7% & 12% LABELS
+			svg.append("text")
+			   .text("7%")
+			   .attr("x", 425)
+			   .attr("y", 20)
+			   .style("fill", "#ce1256")
+			   .style("font-size", BarLegendFontSize2)
+			   .style("font-family", "LinotypeUniversW01-Bold_723691" );
+
+			svg.append("text")
+			   .text("12%")
+			   .attr("x", 520)
+			   .attr("y", 20)
+			   .style("fill", "#686868")
+			   .style("font-size", BarLegendFontSize)
+			   .style("font-family", "LinotypeUniversW01-Medi_723673" );
+
+
+			//ADDING BARS & LINES
+			for (var i = 0; i < data.length; i++){
+				//industry labels
+				svg.append("text")
+				    .text(data[i].sector)
+				    .attr("x", 280 )
+				    .attr("y", 45 + 30 * i)
+				    .style("text-anchor","end")
+					.style("color", "#2166ac")
+				    .style("font-size", BarlabelFontSize)
+			   		.style("font-family", "LinotypeUniversW01-Cn" );
+
+				//grey bars
+				svg.append("rect")
+				    .attr("class", (data[i].sector.replace(/,/g, "")).replace(/\s/g, '').concat(" one"))
+				    .attr("fill", "#e6e6e6")
+				    .attr("width", 250)
+				    .attr("height", 22 )
+				    .attr("x", 290 )
+				    .attr("y", 30 + 30 * i);
+
+				//pink bars (gap)
+				svg.append("rect")
+				 	.attr("class", (data[i].sector.replace(/,/g, "")).replace(/\s/g, '').concat(" two"))
+				    .attr("fill", "#F7D2E1")
+				    .attr("width", 7 * 20.833)
+				    .attr("height", 22 )
+				    .attr("x", 290)
+				    .attr("y", 30 + 30 * i);
+
+				//adding white lines
+				for (var j = 0; j < (Math.floor(250/20.833) - data[i].percent); j++){
+					svg.append("line")
+					   .attr("x1", 290 + data[i].percent * 20.833 + 20.833 * j)
+					   .attr("y1", 30 + 30 * i)
+					   .attr("x2", 290 + data[i].percent * 20.833 + 20.833 * j)
+					   .attr("y2", 57 + 30 * i)
+					   .style("stroke", "white");
+				}
+
+				//blue bars
+				svg.append("rect")
+				    .attr("class", (data[i].sector.replace(/,/g, "")).replace(/\s/g, "").concat(" three"))
+				    .attr("fill", "#2166ac")
+				    .attr("width", data[i].percent * 20.833)
+				    .attr("height", 22 )
+				    .attr("x", 290 )
+				    .attr("y", 30 + 30 * i);
+
+				//bar percent data
+				svg.append("text")
+				    .text(data[i].percent + "%")
+				    .attr("x", 290 + data[i].percent * 20.833 - 23)
+				    .attr("y", 46 + 30 * i)
+				    .style("font-size", BarPercentFontSize)
+				    .style("fill", "white");
+
+				//adding 7% lines
+				svg.append("line")
+				   .attr("x1", 436)
+				   .attr("y1", 30 + 30 * i)
+				   .attr("x2", 436)
+				   .attr("y2", 52 + 30 * i)
+				   .style("stroke", "#ce1256")
+				   .style("stroke-width", 3);
+
+				//adding 12% lines
+				svg.append("line")
+				   .attr("x1", 539)
+				   .attr("y1", 30 + 30 * i)
+				   .attr("x2", 539)
+				   .attr("y2", 52 + 30 * i)
+				   .style("stroke", "#686868")
+				   .style("stroke-width", 3);
+
+			}
+
+			var prev = ".AccommodationandFoodServices"
+
+			var click = function (id) {
+				d3.selectAll(".".concat((id.replace(/,/g, "")).replace(/\s/g, '')))
+				  .on("click", function(){
+				  	d3.selectAll(prev).filter(".three").style("fill", "#2166ac");
+				  	d3.selectAll(".".concat((id.replace(/,/g, "")).replace(/\s/g, ''))).filter(".three").style("fill", "#e7298a");
+				  	sectorMap(id, "#map");
+				  	prev = ".".concat((id.replace(/,/g, "")).replace(/\s/g, ''))
+				});
+			};
+
+			for (var i = 0; i < data.length; i++){
+				click(data[i].sector);
+			};
+		});
+	}
+// END: BAR CHART: SECTOR
+
+
+
+
+// 	=======================================
+
+//	 BUTTONS: Industry, Occupation, Sector
+
+// 	=======================================
+
+	//sets default
+	window.onload = function() {
+		sortedIndustry("json/industry_alpha.json", "#barChart");
+		defaultMap();
+		document.getElementById("checkbox").onclick = function() {
+			var checked = document.getElementById("sort1").checked;
+			if(checked){
+				document.getElementById("barChart").innerHTML="";
+			    sortedIndustry("json/industry_high_low.json", "#barChart");
+			}
+			else{
+				document.getElementById("barChart").innerHTML="";
+			    sortedIndustry("json/industry_alpha.json", "#barChart");
+			}
+		}
+	}
+
+	//industry
+	document.getElementById("industry").onclick = function() {
+		document.getElementById("sort1").checked = false;
+		document.getElementById("occupation").className = "typeButton";
+		document.getElementById("sector").className = "typeButton";
+		document.getElementById("industry").className = "typeButton typeButtonOver";
+		document.getElementById("categoryName").innerHTML = "AN INDUSTRY";
+		document.getElementById("checkbox").onclick = function() {
+			var checked = document.getElementById("sort1").checked;
+			if(checked){
+				document.getElementById("barChart").innerHTML="";
+			    sortedIndustry("json/industry_high_low.json", "#barChart");
+			}
+			else{
+				document.getElementById("barChart").innerHTML="";
+			    sortedIndustry("json/industry_alpha.json", "#barChart");
+			}
+		}
+		defaultMap();
+		document.getElementById("barChart").innerHTML="";
+		sortedIndustry("json/industry_alpha.json", "#barChart");
+	}
+
+	//occupation
+	document.getElementById("occupation").onclick = function() {
+		document.getElementById("sort1").checked = false;
+		document.getElementById("industry").className = "typeButton";
+		document.getElementById("sector").className = "typeButton";
+		document.getElementById("occupation").className = "typeButton typeButtonOver";
+		document.getElementById("categoryName").innerHTML = "AN OCCUPATION";
+		document.getElementById("checkbox").onclick = function() {
+			var checked = document.getElementById("sort1").checked;
+			if(checked){
+				document.getElementById("barChart").innerHTML="";
+			    sortedOccupation("json/occupation_high_low.json", "#barChart");
+			}
+			else{
+				document.getElementById("barChart").innerHTML="";
+			    sortedOccupation("json/occupation_alpha.json", "#barChart");
+			}
+		}
+		defaultMap();
+		document.getElementById("barChart").innerHTML="";
+		sortedOccupation("json/occupation_alpha.json", "#barChart");
+	}
+
+	//sector
+	document.getElementById("sector").onclick = function() {
+		document.getElementById("sort1").checked = false;
+		document.getElementById("occupation").className = "typeButton";
+		document.getElementById("industry").className = "typeButton";
+		document.getElementById("sector").className = "typeButton typeButtonOver";
+		document.getElementById("categoryName").innerHTML = "A SECTOR";
+		document.getElementById("checkbox").onclick = function() {
+			var checked = document.getElementById("sort1").checked;
+			if(checked){
+				document.getElementById("barChart").innerHTML="";
+			    sortedSector("json/sector_high_low.json", "#barChart");
+			}
+			else{
+				document.getElementById("barChart").innerHTML="";
+			    sortedSector("json/sector_alpha.json", "#barChart");
+			}
+		}
+		defaultMapSector();
+		document.getElementById("barChart").innerHTML="";
+		sortedSector("json/sector_alpha.json", "#barChart");
+	}
+// END: BUTTONS
+
+
+
+
+// =============================================
+
+//  MAPS: Default, Industry, Occupation, Sector
+
+// =============================================
+
+// 	------------------------
+//	   DEFAULT (EMPTY) MAP
+// 	------------------------
+	var defaultMap = function(divid){
+
+		var height = 720;
+		var width = 550;
+		var margin = {left: 0, right: 0, bottom: 50, top : 0}
+
+		document.getElementById("map").innerHTML = "";
+
+		var projection = d3.geo.albersUsa()
+		.scale(765)
+		.translate([(width - margin.left - margin.right)/2, (height - margin.top - margin.bottom)/2 ]);
+
+		var path = d3.geo.path().projection(projection);
+
+		d3.json("json/us.json",function(error,shapes){
+
+			var states = topojson.feature(shapes, shapes.objects.states).features;
+
+			var svg = d3.select("#map")
+				.append("svg")
+				.attr("height", height)
+				.attr("width", width);
+
+			var statePaths = svg.append("g");
+
+			statePaths.selectAll("path").data(states).enter()
+			.append("path").attr("d", path)
+			.style("fill", function (state) {
+				return "#e6e6e6";
+			})
+			.style("stroke-width","0.8px")
+			.style("stroke","white");
+
+		})
+	}
+// END: DEFAULT (EMPTY) MAP
+
+	var defaultMapSector = function(divid){
+
+		var height = 720;
+		var width = 550;
+		var margin = {left: 0, right: 0, bottom: 50, top : 0}
+
+		document.getElementById("map").innerHTML = "";
+
+		var projection = d3.geo.albersUsa()
+		.scale(765)
+		.translate([(width - margin.left - margin.right)/2, (height - margin.top - margin.bottom)/2 -60]);
+
+		var path = d3.geo.path().projection(projection);
+
+		d3.json("json/us.json",function(error,shapes){
+
+			var states = topojson.feature(shapes, shapes.objects.states).features;
+
+			var svg = d3.select("#map")
+				.append("svg")
+				.attr("height", height)
+				.attr("width", width);
+
+			var statePaths = svg.append("g");
+
+			statePaths.selectAll("path").data(states).enter()
+			.append("path").attr("d", path)
+			.style("fill", function (state) {
+				return "#e6e6e6";
+			})
+			.style("stroke-width","0.8px")
+			.style("stroke","white");
+
+		})
+	}
+
+// 	------------------------
+//	      INDUSTRY MAP
+// 	------------------------
+	var industryMap = function(industryName, divid){
+
+		var height = 720;
+		var width = 550;
+		var margin = {left: 0, right: 0, bottom: 50, top : 0}
+		var legendWidth = 37;
+		var legendHeight = 18;
+		var categoryType = "INDUSTRY";
+
+		var projection = d3.geo.albersUsa()
+		.scale(765)
+		.translate([(width - margin.left - margin.right)/ 2 , (height - margin.top - margin.bottom)/2]);
+
+		var path = d3.geo.path().projection(projection);
+
+		// Labels and Colors
+		var legendLabels = ["0%", "2%", "4%", "6%", "8%", "10%", "12%", "14%", "16%", "18%", "20%", "22%", "24%", "small sample"];
+ 		var percentageDomain = [0, 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24];
+ 		var percentageDomain2 = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24];
+ 		var colorDomain = ["#053061", "#2166ac","#4ea0d8", "#8ccdf9","#f9c5f7", "#f2a0e7", "#ef7dd1", "#ea53ad", "#e7298a", "#ce1256", "#980043", "#67001f","#49001c"];
+ 		var legendDomain = ["#053061", "#2166ac","#4ea0d8", "#8ccdf9","#f9c5f7", "#f2a0e7", "#ef7dd1", "#ea53ad", "#e7298a", "#ce1256", "#980043", "#67001f","#49001c","#808080"];
+
+		var percentageScale = d3.scale.linear().domain(percentageDomain2).range(colorDomain);
+
+		d3.json("json/us.json",function(error,shapes){
+
+			var states = topojson.feature(shapes, shapes.objects.states).features;
+
+			d3.csv("csv/byIndustrynew.csv",function(error,rows){
+
+				document.getElementById("map").innerHTML = "";
+
+				var svg = d3.select(divid).append("svg")
+					.attr("width", width)
+					.attr("height", height);
+
+		    	var industryFlexible  = rows.filter(function(d) { return d.Industry21 == industryName &&  d.FIPS != ""; });
+
+		    	var statebyIndustryMap = d3.map(industryFlexible, function (row) {
+					return Number(row.FIPS);
+						}
+					);
+
+				var tooltip;
+				d3.helper ={};
+				d3.helper.tooltip = function(text) {
+			    return function(selected){
+			        var box = d3.select("body").node();
+			        selected.on("mouseover", function(d, i){
+			            d3.select("body").selectAll(".tooltip").remove();
+			            var mousePosition = d3.mouse(box);
+			           	tooltip = d3.select("body").append("div").attr("class", "tooltip");
+			            tooltip.style("left", mousePosition[0])
+			                .style("top", mousePosition[1])
+			                .style("position", "absolute")
+			                .style("pointer-events","none")
+			                .html(text(d, i));
+			        	})
+			        .on("mouseout", function(d, i){
+			            tooltip.remove();
+			        	});
+
+			   	 	};
+				};
+
+				var statePaths = svg.append("g");
+				statePaths.selectAll("path").data(states).enter()
+				.append("path").attr("d", path)
+				.style("fill", function (state) {
+
+				var stateData = statebyIndustryMap.get(state.id);
+
+				if (stateData) {
+						//Small sample size
+						if (stateData.Sample > 20) return percentageScale(stateData.pEstimate.replace("%", ""));
+						else return "#878787";
+				}
+				else return "#808080";
+				})
+				.style("stroke-width","0.8px")
+				.style("stroke","#fff")
+				.call(d3.helper.tooltip(
+        			function(d){
+			          return "<b>State: "+statebyIndustryMap.get(d.id).StateAB + "</b><br/>Percent: "
+			          		+statebyIndustryMap.get(d.id).pEstimate;
+			        }));
+
+				// Append LEGEND
+				var legend = svg.selectAll("g.legend")
+	  			.data(legendDomain)
+	  			.enter().append("g")
+	  			.attr("class", "legend")
+	  			.attr("transform", "translate("+ (0) + "," +
+	  				(height - 3 * margin.bottom ) + ")" );
+
+	  			legend.append("rect")
+	  			.attr("x", function(d, i){ return i*legendWidth ;})
+				.attr("y", 5)
+				.attr("width", legendWidth)
+				.attr("height", legendHeight)
+				.style("fill", function(d, i) { return legendDomain[i]; });
+
+				legend.append("text")
+				.attr("x", function(d, i){ return i* legendWidth; })
+				.attr("y", 0)
+				.text(function(d, i){ return legendLabels[i]; })
+				.style("font-size", "14px");
+
+				// Append INDUSTRY
+				svg.append("text")
+				.attr("x", 30)
+				.attr("y", 80)
+			   	.style("fill", "#888")
+				.style("font-size", "16px")
+				.style("font-family", "LinotypeUniversW01-Cn")
+				.text(categoryType);
+
+				// Append MAP TITLE
+				svg.append("text")
+				.attr("class","graphTitle")
+				.attr("x", 30)
+				.attr("y", 135)
+				.style("font-size", "18px")
+				.text("Percentage of the workforce who have disabilities by STATE and " + categoryType + ".");
+
+				// Append SPECIFIC INDUSTRY
+				svg.append("text")
+				.attr("class","graphTitle")
+				.attr("x", 30)
+				.attr("y", 110)
+				.style("font-size", "26px")
+				.style("font-family", "LinotypeUniversW01-Medi_723673")
+				.text(function(d){
+					return industryName;
+
+
+				});
+
+			})
+		})
+
+    }
+// END: INDUSTRY MAP
+
+
+
+// 	------------------------
+//	     OCCUPATION MAP
+// 	------------------------
+    var occupationMap = function(occupationName, divid){
+
+		var height = 720;
+		var width = 550;
+		var margin = {left: 0, right: 0, bottom: 50, top : 0}
+		var legendWidth = 37;
+		var legendHeight = 18;
+		var categoryType = "OCCUPATION";
+
+		var projection = d3.geo.albersUsa()
+		.scale(765)
+		.translate([(width - margin.left - margin.right)/ 2 , (height - margin.top - margin.bottom)/2]);
+
+		var path = d3.geo.path().projection(projection);
+
+		// Labels and Colors
+		var legendLabels = ["0%", "2%", "4%", "6%", "8%", "10%", "12%", "14%", "16%", "18%", "20%", "small sample"];
+ 		var percentageDomain = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20];
+ 		var colorDomain = ["#053061", "#2166ac","#4ea0d8", "#8ccdf9","#f9c5f7", "#f2a0e7", "#ef7dd1", "#ea53ad", "#e7298a", "#ce1256", "#980043"];
+ 		var legendDomain = ["#053061", "#2166ac","#4ea0d8", "#8ccdf9","#f9c5f7", "#f2a0e7", "#ef7dd1", "#ea53ad", "#e7298a", "#ce1256", "#980043","#808080"];
+
+		var percentageScale = d3.scale.linear().domain(percentageDomain).range(colorDomain);
+
+		d3.json("json/us.json",function(error,shapes){
+
+			var states = topojson.feature(shapes, shapes.objects.states).features;
+
+			d3.csv("csv/byOccupationnew.csv",function(error,rows){
+
+				document.getElementById("map").innerHTML = "";
+
+				var svg = d3.select(divid).append("svg")
+					.attr("width", width)
+					.attr("height", height);
+
+		    	var occupationFlexible  = rows.filter(function(d) {
+		    		return d.MajorOcc == occupationName &&  d.FIPS != "";
+		    	});
+
+		    	var statebyOccMap = d3.map(occupationFlexible, function (row) {
+					return Number(row.FIPS);
+						}
+					);
+
+		    	var tooltip;
+				d3.helper ={};
+				d3.helper.tooltip = function(text) {
+			    return function(selected){
+			        var box = d3.select("body").node();
+			        selected.on("mouseover", function(d, i){
+			            d3.select("body").selectAll(".tooltip").remove();
+			            var mousePosition = d3.mouse(box);
+			           	tooltip = d3.select("body").append("div").attr("class", "tooltip");
+			            tooltip.style("left", mousePosition[0])
+			                .style("top", mousePosition[1])
+			                .style("position", "absolute")
+			                .style("pointer-events","none")
+			                .html(text(d, i));
+			        	})
+			        .on("mouseout", function(d, i){
+			            tooltip.remove();
+			        	});
+
+			   	 	};
+				};
+
+				var statePaths = svg.append("g");
+				statePaths.selectAll("path").data(states).enter()
+				.append("path").attr("d", path)
+				.style("fill", function (state) {
+
+				var stateData = statebyOccMap.get(state.id);
+
+				if (stateData) {
+						//Small sample size
+						if (stateData.Sample > 20) return percentageScale(stateData.pEstimate.replace("%", ""));
+						else return "#808080" ;
+					}
+				else return "black";
+				})
+				.style("stroke-width","0.8px")
+				.style("stroke","#fff")
+				.call(d3.helper.tooltip(
+        			function(d){
+			          return "<b>State: "+statebyOccMap.get(d.id).StateAB + "</b><br/>Percent: "
+			          		+statebyOccMap.get(d.id).pEstimate;
+			    }));
+
+				// Append LEGEND
+				var legend = svg.selectAll("g.legend")
+	  			.data(legendDomain)
+	  			.enter().append("g")
+	  			.attr("class", "legend")
+	  			.attr("transform", "translate("+ (0.07*width) + "," +
+	  				(height - 3 * margin.bottom ) + ")" );
+
+	  			legend.append("rect")
+	  			.attr("x", function(d, i){ return i*legendWidth ;})
+				.attr("y", 5)
+				.attr("width", legendWidth)
+				.attr("height", legendHeight)
+				.style("fill", function(d, i) { return legendDomain[i]; });
+
+				legend.append("text")
+				.attr("x", function(d, i){ return i* legendWidth; })
+				.attr("y", 0)
+				.text(function(d, i){ return legendLabels[i]; })
+				.style("font-size", "14px");
+
+				// Append OCCUPATION
+				svg.append("text")
+				.attr("x", 30)
+				.attr("y", 80)
+				.style("font-size", "16px")
+				.style("fill", "#888")
+				.style("font-family", "LinotypeUniversW01-Cn")
+				.text(categoryType);
+
+				// Append MAP TITLE
+				svg.append("text")
+				.attr("class","graphTitle")
+				.attr("x", 30)
+				.attr("y", 135)
+				.style("font-size", "18px")
+				.text("Percentage of the workforce who have disabilities by STATE and " + categoryType + ".");
+
+				// Append SPECIFIC OCCUPATION
+				svg.append("text")
+				.attr("class","graphTitle")
+				.attr("x", 30)
+				.attr("y", 110)
+				.style("font-size", "26px")
+				.style("font-family", "LinotypeUniversW01-Medi_723673")
+				.text(function(d){
+					return occupationName;
+				});
+
+			})
+		})
+
+    }
+// END: OCCUPATION MAP
+
+
+
+// 	------------------------
+//	       SECTOR MAP
+// 	------------------------
+    var sectorMap = function(sectorName, divid){
+
+		var height = 720;
+		var width = 550;
+		var margin = {left: 0, right: 0, bottom: 50, top : 0}
+		var legendWidth = 32;
+		var legendHeight = 18;
+		var categoryType = "SECTOR";
+
+		var projection = d3.geo.albersUsa()
+		.scale(765)
+		.translate([(width - margin.left - margin.right)/ 2 , (height - margin.top - margin.bottom)/2 - 60]);
+
+		var path = d3.geo.path().projection(projection);
+
+		// Labels and Colors
+		var legendLabels = ["0%", "2%", "4%", "6%", "8%", "10%", "12%", "14%", "16%", "18%", "20%", "22%", "24%", "26%", "28%", "small sample"];
+ 		var percentageDomain = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28];
+ 		var colorDomain = ["#053061", "#2166ac","#4ea0d8", "#8ccdf9","#f9c5f7", "#f2a0e7", "#ef7dd1", "#ea53ad", "#e7298a", "#ce1256", "#980043", "#67001f","#49001c","#330015", "#21000f"];
+ 		var legendDomain = ["#053061", "#2166ac","#4ea0d8", "#8ccdf9","#f9c5f7", "#f2a0e7", "#ef7dd1", "#ea53ad", "#e7298a", "#ce1256", "#980043", "#67001f","#49001c","#330015", "#21000f","#808080"];
+
+		var percentageScale = d3.scale.linear().domain(percentageDomain).range(colorDomain);
+
+		d3.json("json/us.json",function(error,shapes){
+
+			var states = topojson.feature(shapes, shapes.objects.states).features;
+
+			d3.csv("csv/bySectornew.csv",function(error,rows){
+
+				document.getElementById("map").innerHTML = "";
+
+				var svg = d3.select(divid).append("svg")
+					.attr("width", width)
+					.attr("height", height);
+
+		    	var sectorFlexible  = rows.filter(function(d) { return d.Sector7 == sectorName &&  d.FIPS != ""; });
+
+		    	var statebySectorMap = d3.map(sectorFlexible, function (row) {
+					return Number(row.FIPS);
+						}
+					);
+
+				var tooltip;
+				d3.helper ={};
+				d3.helper.tooltip = function(text) {
+			    return function(selected){
+			        var box = d3.select("body").node();
+			        selected.on("mouseover", function(d, i){
+			            d3.select("body").selectAll(".tooltip").remove();
+			            var mousePosition = d3.mouse(box);
+			           	tooltip = d3.select("body").append("div").attr("class", "tooltip");
+			            tooltip.style("left", mousePosition[0])
+			                .style("top", mousePosition[1])
+			                .style("position", "absolute")
+			                .style("pointer-events","none")
+			                .html(text(d, i));
+			        	})
+			        .on("mouseout", function(d, i){
+			            tooltip.remove();
+			        	});
+
+			   	 	};
+				};
+
+				var statePaths = svg.append("g");
+				statePaths.selectAll("path").data(states).enter()
+				.append("path").attr("d", path)
+				.style("fill", function (state) {
+
+				var stateData = statebySectorMap.get(state.id);
+
+				if (stateData) {
+						//Small sample size
+						if (stateData.Sample > 20) return percentageScale(stateData.pEstimate.replace("%", ""));
+						else return "#808080";
+				}
+				else return "black";
+				})
+				.style("stroke-width","0.8px")
+				.style("stroke","#fff")
+				.call(d3.helper.tooltip(
+        			function(d){
+			          return "<b>State: "+ statebySectorMap.get(d.id).StateAB + "</b><br/>Percent: "
+			          		+ statebySectorMap.get(d.id).pEstimate;
+			    }));
+
+				// Append LEGEND
+				var legend = svg.selectAll("g.legend")
+	  			.data(legendDomain)
+	  			.enter().append("g")
+	  			.attr("class", "legend")
+	  			.attr("transform", "translate("+ (0) + "," +
+	  				(height - 3 * margin.bottom - 60) + ")" );
+
+	  			legend.append("rect")
+	  			.attr("x", function(d, i){ return i*legendWidth ;})
+				.attr("y", 5)
+				.attr("width", legendWidth)
+				.attr("height", legendHeight)
+				.style("fill", function(d, i) { return legendDomain[i]; });
+
+				legend.append("text")
+				.attr("x", function(d, i){ return i* legendWidth; })
+				.attr("y", 0)
+				.text(function(d, i){ return legendLabels[i]; })
+				.style("font-size", "14px");
+
+				// Append SECTOR
+				svg.append("text")
+				.attr("x", 30)
+				.attr("y", 15)
+				.style("font-size", "16px")
+				.style("fill", "#888")
+				.style("font-family", "LinotypeUniversW01-Cn")
+				.text(categoryType);
+
+				// Append MAP TITLE
+				svg.append("text")
+				.attr("class","graphTitle")
+				.attr("x", 30)
+				.attr("y", 70)
+				.style("font-size", "18px")
+				.text("Percentage of the workforce who have disabilities by STATE and " + categoryType + ".");
+
+				// Append SPECIFIC SECTOR
+				svg.append("text")
+				.attr("class","graphTitle")
+				.attr("x", 30)
+				.attr("y", 45)
+				.style("font-size", "26px")
+				.style("font-family", "LinotypeUniversW01-Medi_723673")
+				.text(function(d){
+					return sectorName;
+				});
+
+			})
+		})
+
+    }
+// END: SECTOR MAP
+
+
+</script>
+
+</body>
+</html>
